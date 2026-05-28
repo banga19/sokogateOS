@@ -31,6 +31,21 @@ const startServer = async () => {
       'customer.feedback.received'
     ]);
 
+    // Start ingestion adapters
+    const { startSapProductAdapter } = require('./ingestion/adapters/sapProductAdapter');
+    const { startSalesforceCrmAdapter } = require('./ingestion/adapters/salesforceCrmAdapter');
+
+    // Start adapters in background
+    startSapProductAdapter().catch(err => {
+      logger.error('SAP Product Adapter failed to start:', err);
+      process.exit(1);
+    });
+
+    startSalesforceCrmAdapter().catch(err => {
+      logger.error('Salesforce CRM Adapter failed to start:', err);
+      process.exit(1);
+    });
+
     // Start server
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
