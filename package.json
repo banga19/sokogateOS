@@ -8,7 +8,9 @@
     "dev": "nodemon src/index.js",
     "test": "jest",
     "build": "tsc",
-    "migrate": "node src/migrations/setup.js"
+    "migrate": "node src/migrations/setup.js",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   },
   "dependencies": {
     "@claude-flow/cli": "^3.10.3",
