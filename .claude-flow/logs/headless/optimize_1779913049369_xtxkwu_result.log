@@ -1,0 +1,16 @@
+[2026-05-27T20:24:39.846Z] RESULT
+============================================================
+{
+  "success": true,
+  "output": "Provider API request failed. (request_id=req_ac599858851e)\n",
+  "parsedOutput": {
+    "sections": [],
+    "codeBlocks": []
+  },
+  "durationMs": 430477,
+  "model": "sonnet",
+  "sandboxMode": "permissive",
+  "workerType": "optimize",
+  "timestamp": "2026-05-27T20:24:39.846Z",
+  "executionId": "optimize_1779913049369_xtxkwu"
+}

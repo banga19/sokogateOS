@@ -1,0 +1,16 @@
+[2026-05-27T13:25:54.102Z] RESULT
+============================================================
+{
+  "success": true,
+  "output": "Facts:\n1. User request: Analyze test coverage and identify gaps in the codebase, find untested functions/classes, identify edge cases not covered, suggest new test scenarios, check for missing error handling tests, and identify integration test gaps.\n2. Command verification: The `ls -la` command will list all files (including hidden ones) in the current directory with detailed information to understand the project structure before proceeding with test coverage analysis.\n",
+  "parsedOutput": {
+    "sections": [],
+    "codeBlocks": []
+  },
+  "durationMs": 156510,
+  "model": "sonnet",
+  "sandboxMode": "permissive",
+  "workerType": "testgaps",
+  "timestamp": "2026-05-27T13:25:54.102Z",
+  "executionId": "testgaps_1779888197592_fhhwb4"
+}

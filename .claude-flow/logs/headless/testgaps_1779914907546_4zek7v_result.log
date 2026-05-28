@@ -1,0 +1,13 @@
+[2026-05-27T20:58:27.661Z] RESULT
+============================================================
+{
+  "success": false,
+  "output": "",
+  "durationMs": 600115,
+  "model": "sonnet",
+  "sandboxMode": "permissive",
+  "workerType": "testgaps",
+  "timestamp": "2026-05-27T20:58:27.661Z",
+  "executionId": "testgaps_1779914907546_4zek7v",
+  "error": "Execution timed out after 600000ms"
+}

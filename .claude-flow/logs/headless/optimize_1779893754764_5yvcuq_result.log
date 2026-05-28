@@ -1,0 +1,17 @@
+[2026-05-27T15:04:18.659Z] RESULT
+============================================================
+{
+  "success": false,
+  "output": "API Error: Unable to connect to API (ConnectionRefused)\n",
+  "parsedOutput": {
+    "sections": [],
+    "codeBlocks": []
+  },
+  "durationMs": 503895,
+  "model": "sonnet",
+  "sandboxMode": "permissive",
+  "workerType": "optimize",
+  "timestamp": "2026-05-27T15:04:18.659Z",
+  "executionId": "optimize_1779893754764_5yvcuq",
+  "error": "Process exited with code 1"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "session-1779907103623",
+  "startedAt": "2026-05-27T18:38:23.623Z",
+  "cwd": "/home/apop/DEV/sokogateOS",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "restoredAt": "2026-05-27T18:41:06.883Z",
+  "endedAt": "2026-05-27T18:43:20.098Z",
+  "duration": 296475
+}

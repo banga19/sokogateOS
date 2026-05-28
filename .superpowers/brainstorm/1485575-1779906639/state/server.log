@@ -1,0 +1,2 @@
+{"type":"server-started","port":50072,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:50072","screen_dir":"/home/apop/DEV/sokogateOS/.superpowers/brainstorm/1485575-1779906639/content","state_dir":"/home/apop/DEV/sokogateOS/.superpowers/brainstorm/1485575-1779906639/state"}
+{"type":"server-stopped","reason":"idle timeout"}

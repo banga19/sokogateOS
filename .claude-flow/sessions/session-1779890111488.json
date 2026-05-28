@@ -1,0 +1,14 @@
+{
+  "id": "session-1779890111488",
+  "startedAt": "2026-05-27T13:55:11.488Z",
+  "cwd": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\apop\\DEV\\sokogateOS",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-05-27T13:55:54.332Z",
+  "duration": 42844
+}

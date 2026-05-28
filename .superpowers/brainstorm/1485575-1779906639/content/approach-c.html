@@ -1,0 +1,38 @@
+<h2>Approach C: Hybrid Event-Driven Architecture</h2>
+<p class="subtitle">Combines microservices flexibility with platform simplicity</p>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>Pros</h4>
+    <ul>
+      <li>Good balance of scalability and simplicity</li>
+      <li>Real-time processing capabilities through event streams</li>
+      <li>Loose coupling between components</li>
+      <li>Can start simple and evolve to more distributed architecture</li>
+      <li>Fault tolerance through event sourcing and replay capabilities</li>
+      <li>Clear separation of concerns while maintaining reasonable operational simplicity</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>Cons</h4>
+    <ul>
+      <li>Requires understanding of event-driven patterns</li>
+      <li>Eventual consistency model may need adjustment for some use cases</li>
+      <li>Need to manage event schema evolution</li>
+      <li>Infrastructure complexity for event streaming platform</li>
+      <li>Debugging can be more complex due to asynchronous nature</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Architecture Layers:</h3>
+<ul>
+  <li><strong>Event Ingestion Layer</strong> - Connectors for all company artifact sources publishing to event topics</li>
+  <li><strong>Event Processing Layer</strong> - Stream processors that transform, enrich, and route events</li>
+  <li><strong>AI/ML Services</strong> - Specialized services consuming events for insights, automation triggers, and learning</li>
+  <li><strong>Storage Layer</strong> - Data lakes, warehouses, and databases for different data types</li>
+  <li><strong>API/Presentation Layer</strong> - Role-based interfaces and APIs for users and external systems</li>
+  <li><strong>Orchestration Layer</strong> - Workflow automation triggered by events</li>
+</ul>
+
+<p><em>Uses technologies like Apache Kafka/Pulsar for event streaming, with stream processing (Flink/Streams/KSQL) and microservices for specialized AI functions. Events serve as the primary integration mechanism.</em></p>

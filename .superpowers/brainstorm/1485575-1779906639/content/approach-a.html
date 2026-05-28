@@ -1,0 +1,36 @@
+<h2>Approach A: Modular Microservices Architecture</h2>
+<p class="subtitle">Specialized services for each capability with clear boundaries</p>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>Pros</h4>
+    <ul>
+      <li>High scalability - each service can scale independently</li>
+      <li>Technology flexibility - different services can use different tech stacks</li>
+      <li>Fault isolation - failure in one service doesn't bring down others</li>
+      <li>Team autonomy - different teams can work on different services</li>
+      <li>Easy to deploy/update individual services</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>Cons</h4>
+    <ul>
+      <li>Increased complexity in service communication and orchestration</li>
+      <li>Network latency between services</li>
+      <li>Data consistency challenges across services</li>
+      <li>More infrastructure overhead (service discovery, load balancing, etc.)</li>
+      <li>Testing complexity due to distributed nature</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Core Services:</h3>
+<ul>
+  <li><strong>Data Ingestion Service</strong> - Handles all company artifact processing via API integrations</li>
+  <li><strong>AI Intelligence Service</strong> - Provides BI insights, automation recommendations, and learning capabilities</li>
+  <li><strong>Workflow Automation Service</strong> - Executes automated processes across sourcing/customization/logistics</li>
+  <li><strong>User Interface Service</strong> - Role-based dashboards and interfaces for different user types</li>
+  <li><strong>Learning & Adaptation Service</strong> - Manages continuous learning from company artifacts and user feedback</li>
+</ul>
+
+<p><em>Services communicate via asynchronous messaging (queues/events) and share data through a central data lake or distributed database.</em></p>

@@ -1,0 +1,38 @@
+<h2>Approach B: Unified AI Platform with Specialized Modules</h2>
+<p class="subtitle">Single integrated platform with pluggable modules for different functions</p>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>Pros</h4>
+    <ul>
+      <li>Simpler architecture - single deployable unit</li>
+      <li>Easier data sharing and consistency</li>
+      <li>Lower latency between components</li>
+      <li>Simplified deployment and DevOps</li>
+      <li>Atomic updates and rollbacks</li>
+      <li>Easier to maintain and monitor</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>Cons</h4>
+    <ul>
+      <li>Scaling requires scaling the entire platform</li>
+      <li>Technology stack lock-in</li>
+      <li>Potential for larger blast radius on failures</li>
+      <li>Longer build/deploy times as platform grows</li>
+      <li>Harder for multiple teams to work simultaneously</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Platform Components:</h3>
+<ul>
+  <li><strong>Core AI Engine</strong> - Central LLM/vector database for reasoning and embeddings</li>
+  <li><strong>Data Ingestion Modules</strong> - Pluggable connectors for PDF, Word, Excel, email, APIs, databases</li>
+  <li><strong>Business Intelligence Module</strong> - Analytics, reporting, and insight generation for sourcing/customization/logistics</li>
+  <li><strong>Automation Orchestrator</strong> - Workflow engine for automating cross-functional processes</li>
+  <li><strong>Learning & Adaptation Layer</strong> - Continuous learning system that improves from company artifacts and user interactions</li>
+  <li><strong>Role-Based Interface Layer</strong> - Customizable UIs for procurement, logistics, sales, and executive users</li>
+</ul>
+
+<p><em>Modules communicate through well-defined APIs and share data through a common data layer. The platform can be deployed as a single container or set of containers.</em></p>

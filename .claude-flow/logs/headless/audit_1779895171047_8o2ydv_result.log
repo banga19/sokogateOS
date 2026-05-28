@@ -1,0 +1,17 @@
+[2026-05-27T15:23:17.844Z] RESULT
+============================================================
+{
+  "success": false,
+  "output": "API Error: Unable to connect to API (ConnectionRefused)\n",
+  "parsedOutput": {
+    "parseError": true,
+    "rawOutput": "API Error: Unable to connect to API (ConnectionRefused)\n"
+  },
+  "durationMs": 226797,
+  "model": "haiku",
+  "sandboxMode": "strict",
+  "workerType": "audit",
+  "timestamp": "2026-05-27T15:23:17.844Z",
+  "executionId": "audit_1779895171047_8o2ydv",
+  "error": "Process exited with code 1"
+}
