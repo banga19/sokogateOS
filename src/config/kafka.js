@@ -24,7 +24,7 @@ const initKafkaProducer = () => {
 // Initialize Kafka consumer
 const initKafkaConsumer = (topics) => {
   return new Promise((resolve, reject) => {
-    client = new kafka.KafkaClient({ kafkaHost: process.env.KAFKA_BROKERS });
+    const client = new kafka.KafkaClient({ kafkaHost: process.env.KAFKA_BROKERS });
     consumer = new kafka.Consumer(client, topics.map(topic => ({ topic, partition: 0 })), {
       autoCommit: false
     });

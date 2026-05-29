@@ -305,11 +305,11 @@ sourcingSchema.methods.calculateAIConfidence = function() {
 
 // Static method to get sourcing analytics for a company
 sourcingSchema.statics.getCompanyAnalytics = async function(companyId, options = {}) {
-  const match = { companyId: mongoose.Types.ObjectId(companyId) };
-  if options.startDate {
+  const match = { companyId: new mongoose.Types.ObjectId(companyId) };
+  if (options.startDate) {
     match.createdAt = { $gte: options.startDate };
   }
-  if options.endDate {
+  if (options.endDate) {
     if (!match.createdAt) match.createdAt = {};
     match.createdAt.$lte = options.endDate;
   }

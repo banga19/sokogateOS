@@ -6,34 +6,40 @@ const logger = require('../../src/utils/logger');
 
 // Mock the Kafka consumer
 jest.mock('../../src/config/kafka', () => {
-  // Create a mock for the kafka module
   const mockKafka = {
     messageCallback: null,
     initKafkaConsumer: jest.fn().mockResolvedValue({
       on: jest.fn((event, callback) => {
         if (event === 'message') {
-          // Store the callback to simulate message arrival later
           mockKafka.messageCallback = callback;
         }
-        return { on: jest.fn() }; // Return object to allow chaining
       }),
       close: jest.fn((callback) => callback())
     })
   };
-
-  // Return the mock module
   return mockKafka;
 });
 
-// Get the mocked kafka module for use in tests
+// Mock Feedback model to prevent MongoDB connection attempts
+// Must support .sort().limit().lean() chaining (Mongoose query syntax)
+jest.mock('../../src/models/feedback', () => {
+  const mockQuery = {
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockResolvedValue([]),
+    lean: jest.fn().mockReturnThis()
+  };
+  return {
+    find: jest.fn().mockReturnValue(mockQuery),
+    findByIdAndUpdate: jest.fn().mockResolvedValue(null),
+    updateMany: jest.fn().mockResolvedValue({ modifiedCount: 0 })
+  };
+});
+
 const kafkaMock = require('../../src/config/kafka');
 
 describe('AI Intelligence Service', () => {
   beforeEach(() => {
-    // Mock timers
     jest.useFakeTimers();
-
-    // Clear all instances and calls to constructor and all methods:
     kafkaMock.initKafkaConsumer.mockClear();
     jest.clearAllMocks();
   });

@@ -1,0 +1,97 @@
+import React, { Suspense, lazy } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
+import Layout from './components/Layout'
+import ErrorBoundary from './components/ErrorBoundary'
+
+// Lazy-loaded pages for code splitting
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ProcurementDashboard = lazy(() => import('./pages/ProcurementDashboard'))
+const LogisticsDashboard = lazy(() => import('./pages/LogisticsDashboard'))
+const ExecutiveDashboard = lazy(() => import('./pages/ExecutiveDashboard'))
+const QMeDashboard = lazy(() => import('./pages/QMeDashboard'))
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+        <p className="text-gray-500 text-sm">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+function PageSuspense({ children }) {
+  return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+}
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth()
+  if (loading) return <LoadingFallback />
+  if (!user) return <Navigate to="/login" replace />
+  return children
+}
+
+export default function App() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return <LoadingFallback />
+  }
+
+  return (
+    <Routes>
+      <Route path="/login" element={
+        <PageSuspense>{user ? <Navigate to="/" replace /> : <LoginPage />}</PageSuspense>
+      } />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the main dashboard.">
+              <PageSuspense><DashboardPage /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/procurement" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the procurement dashboard.">
+              <PageSuspense><ProcurementDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/logistics" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the logistics dashboard.">
+              <PageSuspense><LogisticsDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/executive" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the executive dashboard.">
+              <PageSuspense><ExecutiveDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/qme" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the QMe dashboard.">
+              <PageSuspense><QMeDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
