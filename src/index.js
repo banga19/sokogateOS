@@ -7,6 +7,14 @@ const logger = require('./utils/logger');
 const qme = require('./qme/wrapper');
 const selfImprovingLoop = require('./engine/selfImprovingLoop');
 
+// Phase 1 Services
+const { startWhatsAppService } = require('./services/whatsappService');
+const { startSupplierTrustService } = require('./services/supplierTrustService');
+const { startMpesaService } = require('./services/mpesaService');
+
+// Phase 2 Services
+const { startCustomsEngineService } = require('./services/customsEngineService');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -122,6 +130,7 @@ const startServer = async () => {
     const { startLogisticsService } = require('./services/logisticsService');
     const { startSourcingService } = require('./services/sourcingService');
 
+    // Phase 1 Services
     const serviceStarts = [
       startSapProductAdapter(),
       startSalesforceCrmAdapter(),
@@ -135,7 +144,13 @@ const startServer = async () => {
       startWorkflowAutomationService(),
       startCustomizationService(),
       startLogisticsService(),
-      startSourcingService()
+      startSourcingService(),
+      // Phase 1: WhatsApp Commerce Co-pilot, Supplier Trust Network, M-Pesa
+      startWhatsAppService(),
+      startSupplierTrustService(),
+      startMpesaService(),
+      // Phase 2: Cross-Border Customs Engine
+      startCustomsEngineService()
     ];
 
     for (const startPromise of serviceStarts) {
@@ -162,6 +177,17 @@ const startServer = async () => {
     app.use('/api/auth', authRoutes);
     app.use('/api/v1', apiRoutes);
     app.use('/api', apiRoutes);
+
+    // Phase 1 Routes: WhatsApp Commerce Co-pilot & Supplier Trust Network
+    const whatsappRoutes = require('./routes/whatsapp');
+    const supplierTrustRoutes = require('./routes/supplierTrust');
+
+    app.use('/api/whatsapp', whatsappRoutes);
+    app.use('/api/trust', supplierTrustRoutes);
+
+    // Phase 2 Routes: Cross-Border Customs Engine
+    const customsEngineRoutes = require('./routes/customsEngine');
+    app.use('/api/customs', customsEngineRoutes);
 
     // QMe dashboard endpoint
     app.get('/api/qme/status', async (req, res) => {
@@ -207,6 +233,10 @@ const startServer = async () => {
       logger.info(`SokogateOS: Health check at http://localhost:${PORT}/health`);
       logger.info(`SokogateOS: Auth API at http://localhost:${PORT}/api/auth`);
       logger.info(`SokogateOS: REST API at http://localhost:${PORT}/api/v1`);
+      logger.info(`SokogateOS: WhatsApp Service at http://localhost:${PORT}/api/whatsapp`);
+      logger.info(`SokogateOS: Supplier Trust Network at http://localhost:${PORT}/api/trust`);
+      logger.info(`SokogateOS: Customs Engine at http://localhost:${PORT}/api/customs`);
+      logger.info(`SokogateOS: Health check at /health`);
     });
   } catch (error) {
     logger.error('SokogateOS: Failed to start server:', error);

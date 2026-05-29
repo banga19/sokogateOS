@@ -11,6 +11,9 @@ const ProcurementDashboard = lazy(() => import('./pages/ProcurementDashboard'))
 const LogisticsDashboard = lazy(() => import('./pages/LogisticsDashboard'))
 const ExecutiveDashboard = lazy(() => import('./pages/ExecutiveDashboard'))
 const QMeDashboard = lazy(() => import('./pages/QMeDashboard'))
+const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'))
+const SupplierTrustDashboard = lazy(() => import('./pages/SupplierTrustDashboard'))
+const CustomsDashboard = lazy(() => import('./pages/CustomsDashboard'))
 
 function LoadingFallback() {
   return (
@@ -87,6 +90,33 @@ export default function App() {
           <Layout>
             <ErrorBoundary fallbackMessage="Failed to load the QMe dashboard.">
               <PageSuspense><QMeDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/whatsapp" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the WhatsApp dashboard.">
+              <PageSuspense><WhatsAppDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/supplier-trust" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the Supplier Trust Network.">
+              <PageSuspense><SupplierTrustDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/customs" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the Customs Engine.">
+              <PageSuspense><CustomsDashboard /></PageSuspense>
             </ErrorBoundary>
           </Layout>
         </ProtectedRoute>

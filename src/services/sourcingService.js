@@ -632,5 +632,6 @@ module.exports = {
   matchSuppliersToQuery,
   generateQuote,
   generateMarketIntelligence,
-  getSupplierKnowledgeBase
+  getSupplierKnowledgeBase,
+  handleProductQueryReceived
 };

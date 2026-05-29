@@ -8,6 +8,9 @@ const navItems = [
   { to: '/logistics', label: 'Logistics', icon: '🚢' },
   { to: '/executive', label: 'Executive', icon: '📈' },
   { to: '/qme', label: 'QMe Tasks', icon: '⚡' },
+  { to: '/whatsapp', label: 'WhatsApp', icon: '💬' },
+  { to: '/supplier-trust', label: 'Trust Network', icon: '🤝' },
+  { to: '/customs', label: 'Customs', icon: '🛃' },
 ]
 
 export default function Layout({ children }) {
