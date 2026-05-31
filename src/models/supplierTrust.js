@@ -60,7 +60,10 @@ const supplierTrustSchema = new Schema({
     description: String,
     foundedYear: Number,
     employeeCount: Number,
-    annualRevenue: { amount: Number, currency: { type: String, default: 'USD' } },
+    annualRevenue: {
+      amount: { type: Number, default: 0 },
+      currency: { type: String, default: 'USD' }
+    },
     country: String,
     city: String,
     categories: [String],
@@ -85,7 +88,10 @@ const supplierTrustSchema = new Schema({
     completedOrders: { type: Number, default: 0 },
     cancelledOrders: { type: Number, default: 0 },
     disputedOrders: { type: Number, default: 0 },
-    totalValue: { amount: Number, default: 0, currency: { type: String, default: 'USD' } },
+    totalValue: {
+      amount: { type: Number, default: 0 },
+      currency: { type: String, default: 'USD' }
+    },
     avgResponseTimeHours: { type: Number, default: 0 },
     avgDeliveryDays: { type: Number, default: 0 },
     onTimeDeliveryRate: { type: Number, default: 0, min: 0, max: 1 },

@@ -5,6 +5,7 @@ const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
 
 let producer = null;
+let kafkaConnected = false;
 
 // Mock feedback data generation for HubSpot CRM
 function generateMockHubSpotFeedback() {
@@ -28,23 +29,33 @@ async function startHubspotCrmAdapter() {
 
     // Initialize Kafka producer
     producer = await initKafkaProducer();
+    kafkaConnected = true;
     logger.info('HubSpot CRM Adapter: Kafka producer connected');
 
     // Send customer feedback every 18 seconds (different interval to stagger)
     setInterval(async () => {
       try {
-        const feedback = generateMockHubSpotFeedback();
-        const payload = JSON.stringify(feedback);
+        // Only try to send if Kafka is connected
+        if (kafkaConnected && producer) {
+          const feedback = generateMockHubSpotFeedback();
+          const payload = JSON.stringify(feedback);
 
-        producer.send([
-          { topic: 'customer.feedback.received', messages: payload, partition: 0 }
-        ], (err, data) => {
-          if (err) {
-            logger.error('HubSpot CRM Adapter: Failed to send message:', err);
-          } else {
-            logger.debug(`HubSpot CRM Adapter: Sent feedback:`, feedback.feedbackId);
-          }
-        });
+          producer.send([
+            { topic: 'customer.feedback.received', messages: payload, partition: 0 }
+          ], (err, data) => {
+            if (err) {
+              logger.error('HubSpot CRM Adapter: Failed to send message:', err);
+              // Optionally, we could mark kafka as disconnected here
+              // kafkaConnected = false;
+            } else {
+              logger.debug(`HubSpot CRM Adapter: Sent feedback:`, feedback.feedbackId);
+            }
+          });
+        } else {
+          // Log to console or file instead of sending to Kafka
+          const feedback = generateMockHubSpotFeedback();
+          logger.debug(`HubSpot CRM Adapter: Would send feedback (Kafka unavailable):`, feedback.feedbackId);
+        }
       } catch (sendError) {
         logger.error('HubSpot CRM Adapter: Error in send interval:', sendError);
       }
@@ -52,8 +63,17 @@ async function startHubspotCrmAdapter() {
 
     logger.info('HubSpot CRM Adapter started successfully');
   } catch (error) {
-    logger.error('HubSpot CRM Adapter: Failed to start:', error);
-    process.exit(1);
+    logger.error('HubSpot CRM Adapter: Failed to start Kakfa:', error);
+    logger.info('HubSpot CRM Adapter: Running in degraded mode (without Kafka)');
+    // Start the interval anyway to simulate working
+    setInterval(async () => {
+      try {
+        const feedback = generateMockHubSpotFeedback();
+        logger.debug(`HubSpot CRM Adapter: Generated feedback (Kafka unavailable):`, feedback.feedbackId);
+      } catch (sendError) {
+        logger.error('HubSpot CRM Adapter: Error in generate interval:', sendError);
+      }
+    }, 18000); // 18 seconds
   }
 }
 
@@ -62,14 +82,14 @@ function shutdown() {
   if (producer) {
     producer.close(() => {
       logger.info('HubSpot CRM Adapter: Kafka producer closed');
-      process.exit(0);
+      // Do not exit the process, just cleanup
     });
-  } else {
-    process.exit(0);
   }
+  // Do not exit the process
 }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+// Remove the process exit on SIGINT/SIGTERM to avoid exiting the whole application
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
 
 module.exports = { startHubspotCrmAdapter };

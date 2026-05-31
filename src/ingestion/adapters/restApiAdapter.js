@@ -5,6 +5,7 @@ const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
 
 let producer = null;
+let kafkaConnected = false;
 
 // Mock REST API data generation
 function generateMockProductCatalog() {
@@ -56,23 +57,33 @@ async function startRestApiAdapter() {
 
     // Initialize Kafka producer
     producer = await initKafkaProducer();
+    kafkaConnected = true;
     logger.info('REST API Adapter: Kafka producer connected');
 
     // Fetch product catalog data every 30 seconds
     setInterval(async () => {
       try {
-        const productCatalog = generateMockProductCatalog();
-        const payload = JSON.stringify(productCatalog);
+        // Only try to send if Kafka is connected
+        if (kafkaConnected && producer) {
+          const productCatalog = generateMockProductCatalog();
+          const payload = JSON.stringify(productCatalog);
 
-        producer.send([
-          { topic: 'product.catalog.updated', messages: payload, partition: 0 }
-        ], (err, data) => {
-          if (err) {
-            logger.error('REST API Adapter: Failed to send product catalog:', err);
-          } else {
-            logger.debug(`REST API Adapter: Sent product catalog:`, productCatalog.productId);
+          producer.send([
+            { topic: 'product.catalog.updated', messages: payload, partition: 0 }
+          ], (err, data) => {
+            if (err) {
+              logger.error('REST API Adapter: Failed to send product catalog:', err);
+              // Optionally, we could mark kafka as disconnected here
+              // kafkaConnected = false;
+            } else {
+              logger.debug(`REST API Adapter: Sent product catalog:`, productCatalog.productId);
+            }
           }
-        });
+        } else {
+          // Log to console or file instead of sending to Kafka
+          const productCatalog = generateMockProductCatalog();
+          logger.debug(`REST API Adapter: Would send product catalog (Kafka unavailable):`, productCatalog.productId);
+        }
       } catch (sendError) {
         logger.error('REST API Adapter: Error in send interval (product catalog):', sendError);
       }
@@ -81,18 +92,27 @@ async function startRestApiAdapter() {
     // Fetch customer profile data every 45 seconds
     setInterval(async () => {
       try {
-        const customerProfile = generateMockCustomerProfile();
-        const payload = JSON.stringify(customerProfile);
+        // Only try to send if Kafka is connected
+        if (kafkaConnected && producer) {
+          const customerProfile = generateMockCustomerProfile();
+          const payload = JSON.stringify(customerProfile);
 
-        producer.send([
-          { topic: 'customer.profile.updated', messages: payload, partition: 0 }
-        ], (err, data) => {
-          if (err) {
-            logger.error('REST API Adapter: Failed to send customer profile:', err);
-          } else {
-            logger.debug(`REST API Adapter: Sent customer profile:`, customerProfile.customerId);
-          }
-        });
+          producer.send([
+            { topic: 'customer.profile.updated', messages: payload, partition: 0 }
+          ], (err, data) => {
+            if (err) {
+              logger.error('REST API Adapter: Failed to send customer profile:', err);
+              // Optionally, we could mark kafka as disconnected here
+              // kafkaConnected = false;
+            } else {
+              logger.debug(`REST API Adapter: Sent customer profile:`, customerProfile.customerId);
+            }
+          });
+        } else {
+          // Log to console or file instead of sending to Kafka
+          const customerProfile = generateMockCustomerProfile();
+          logger.debug(`REST API Adapter: Would send customer profile (Kafka unavailable):`, customerProfile.customerId);
+        }
       } catch (sendError) {
         logger.error('REST API Adapter: Error in send interval (customer profile):', sendError);
       }
@@ -100,8 +120,26 @@ async function startRestApiAdapter() {
 
     logger.info('REST API Adapter started successfully');
   } catch (error) {
-    logger.error('REST API Adapter: Failed to start:', error);
-    process.exit(1);
+    logger.error('REST API Adapter: Failed to start Kakfa:', error);
+    logger.info('REST API Adapter: Running in degraded mode (without Kafka)');
+    // Start the intervals anyway to simulate working
+    setInterval(async () => {
+      try {
+        const productCatalog = generateMockProductCatalog();
+        logger.debug(`REST API Adapter: Generated product catalog (Kafka unavailable):`, productCatalog.productId);
+      } catch (sendError) {
+        logger.error('REST API Adapter: Error in generate interval (product catalog):', sendError);
+      }
+    }, 30000); // 30 seconds
+
+    setInterval(async () => {
+      try {
+        const customerProfile = generateMockCustomerProfile();
+        logger.debug(`REST API Adapter: Generated customer profile (Kafka unavailable):`, customerProfile.customerId);
+      } catch (sendError) {
+        logger.error('REST API Adapter: Error in generate interval (customer profile):', sendError);
+      }
+    }, 45000); // 45 seconds
   }
 }
 
@@ -110,14 +148,14 @@ function shutdown() {
   if (producer) {
     producer.close(() => {
       logger.info('REST API Adapter: Kafka producer closed');
-      process.exit(0);
+      // Do not exit the process, just cleanup
     });
-  } else {
-    process.exit(0);
   }
+  // Do not exit the process
 }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+// Remove the process exit on SIGINT/SIGTERM to avoid exiting the whole application
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
 
 module.exports = { startRestApiAdapter };

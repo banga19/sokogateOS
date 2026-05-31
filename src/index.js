@@ -1,4 +1,8 @@
 const express = require('express');
+// Load environment variables from .env and then .env.development (override)
+require('dotenv').config();
+require('dotenv').config({ path: '.env.development', override: true });
+console.log('Dotenv loaded, KAFKA_BROKERS:', process.env.KAFKA_BROKERS); // DEBUG
 const helmet = require('helmet');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const connectDB = require('./config/database');
@@ -93,29 +97,49 @@ const startServer = async () => {
     logger.info('SokogateOS: Starting server...');
 
     // Connect to database
-    await connectDB();
+    try {
+      await connectDB();
+      logger.info('SokogateOS: Database connection initialized');
+    } catch (dbError) {
+      logger.warn('SokogateOS: Database connection failed (continuing without DB):', dbError.message);
+      // Continue without database in development
+    }
 
     // Initialize QMe task runner
-    const qmeInitialized = await qme.initialize();
-    if (qmeInitialized) {
-      logger.info('SokogateOS: QMe task runner initialized');
-      qme.startDashboard().catch(err => {
-        logger.warn('SokogateOS: QMe dashboard start (non-critical):', err.message);
-      });
+    try {
+      const qmeInitialized = await qme.initialize();
+      if (qmeInitialized) {
+        logger.info('SokogateOS: QMe task runner initialized');
+        qme.startDashboard().catch(err => {
+          logger.warn('SokogateOS: QMe dashboard start (non-critical):', err.message);
+        });
+      } else {
+        logger.info('SokogateOS: QMe task runner initialization skipped');
+      }
+    } catch (qmeError) {
+      logger.warn('SokogateOS: QMe initialization failed (continuing without QMe):', qmeError.message);
+      // Continue without QMe
     }
 
     // Initialize Kafka
-    await initKafkaProducer();
-    await initKafkaConsumer([
-      'product.updated',
-      'order.created',
-      'inventory.changed',
-      'supplier.risk.updated',
-      'customer.feedback.received',
-      'document.processed'
-    ]);
+    try {
+      await initKafkaProducer();
+      await initKafkaConsumer([
+        'product.updated',
+        'order.created',
+        'inventory.changed',
+        'supplier.risk.updated',
+        'customer.feedback.received',
+        'document.processed'
+      ]);
+      logger.info('SokogateOS: Kafka initialized');
+    } catch (kafkaError) {
+      logger.warn('SokogateOS: Kafka initialization failed (continuing without Kafka):', kafkaError.message);
+      // Continue without Kafka
+    }
 
     // Start all background services
+    logger.info('SokogateOS: Starting background services...');
     const { startSapProductAdapter } = require('./ingestion/adapters/sapProductAdapter');
     const { startSalesforceCrmAdapter } = require('./ingestion/adapters/salesforceCrmAdapter');
     const { startOracleProductAdapter } = require('./ingestion/adapters/oracleProductAdapter');
@@ -153,41 +177,55 @@ const startServer = async () => {
       startCustomsEngineService()
     ];
 
+    // Start all services and log individual successes/failures
     for (const startPromise of serviceStarts) {
-      startPromise.catch(err => {
+      startPromise.then(() => {
+        // Service started successfully
+      }).catch(err => {
         logger.error('SokogateOS: Service failed to start:', err.message);
       });
     }
 
     // ===== START SELF-IMPROVING LOOP ENGINE =====
     // This is the core differentiator — turns company artifacts into a self-improving loop
-    selfImprovingLoop.startLoopEngine({
-      intervalMs: 5 * 60 * 1000,
-      batchSize: 100
-    }).then(metrics => {
-      logger.info(`SokogateOS: Self-Improving Loop started - processing feedback every 5 minutes`);
-    }).catch(err => {
-      logger.error('SokogateOS: Failed to start Self-Improving Loop:', err.message);
-    });
+    try {
+      selfImprovingLoop.startLoopEngine({
+        intervalMs: 5 * 60 * 1000,
+        batchSize: 100
+      }).then(metrics => {
+        logger.info(`SokogateOS: Self-Improving Loop started - processing feedback every 5 minutes`);
+      }).catch(err => {
+        logger.error('SokogateOS: Failed to start Self-Improving Loop:', err.message);
+      });
+    } catch (loopError) {
+      logger.error('SokogateOS: Failed to start Self-Improving Loop engine:', loopError.message);
+    }
 
     // Setup API routes
-    const authRoutes = require('./routes/auth');
-    const apiRoutes = require('./api/v1/routes');
+    try {
+      const authRoutes = require('./routes/auth');
+      const apiRoutes = require('./api/v1/routes');
 
-    app.use('/api/auth', authRoutes);
-    app.use('/api/v1', apiRoutes);
-    app.use('/api', apiRoutes);
+      app.use('/api/auth', authRoutes);
+      app.use('/api/v1', apiRoutes);
+      app.use('/api', apiRoutes);
 
-    // Phase 1 Routes: WhatsApp Commerce Co-pilot & Supplier Trust Network
-    const whatsappRoutes = require('./routes/whatsapp');
-    const supplierTrustRoutes = require('./routes/supplierTrust');
+      // Phase 1 Routes: WhatsApp Commerce Co-pilot & Supplier Trust Network
+      const whatsappRoutes = require('./routes/whatsapp');
+      const supplierTrustRoutes = require('./routes/supplierTrust');
 
-    app.use('/api/whatsapp', whatsappRoutes);
-    app.use('/api/trust', supplierTrustRoutes);
+      app.use('/api/whatsapp', whatsappRoutes);
+      app.use('/api/trust', supplierTrustRoutes);
 
-    // Phase 2 Routes: Cross-Border Customs Engine
-    const customsEngineRoutes = require('./routes/customsEngine');
-    app.use('/api/customs', customsEngineRoutes);
+      // Phase 2 Routes: Cross-Border Customs Engine
+      const customsEngineRoutes = require('./routes/customsEngine');
+      app.use('/api/customs', customsEngineRoutes);
+
+      logger.info('SokogateOS: API routes configured');
+    } catch (routesError) {
+      logger.error('SokogateOS: Failed to setup API routes:', routesError.message);
+      throw routesError; // Re-throw as this is critical
+    }
 
     // QMe dashboard endpoint
     app.get('/api/qme/status', async (req, res) => {
@@ -240,6 +278,7 @@ const startServer = async () => {
     });
   } catch (error) {
     logger.error('SokogateOS: Failed to start server:', error);
+    logger.error('Error stack:', error.stack);
     process.exit(1);
   }
 };

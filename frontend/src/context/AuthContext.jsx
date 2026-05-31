@@ -23,7 +23,9 @@ export function AuthProvider({ children }) {
     setError(null)
     try {
       const res = await authAPI.login(email, password)
-      const { token, refreshToken, user: userData } = res.data.data
+      const { tokens, user: userData } = res.data.data
+      const token = tokens.accessToken
+      const refreshToken = tokens.refreshToken
       localStorage.setItem('sokogate_token', token)
       localStorage.setItem('sokogate_refresh', refreshToken)
       localStorage.setItem('sokogate_user', JSON.stringify(userData))
@@ -40,7 +42,9 @@ export function AuthProvider({ children }) {
     setError(null)
     try {
       const res = await authAPI.register(data)
-      const { token, refreshToken, user: userData } = res.data.data
+      const { tokens, user: userData } = res.data.data
+      const token = tokens.accessToken
+      const refreshToken = tokens.refreshToken
       localStorage.setItem('sokogate_token', token)
       localStorage.setItem('sokogate_refresh', refreshToken)
       localStorage.setItem('sokogate_user', JSON.stringify(userData))

@@ -5,6 +5,7 @@ const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
 
 let producer = null;
+let kafkaConnected = false;
 
 // Mock product data generation for Oracle ERP
 function generateMockOracleProductUpdate() {
@@ -28,23 +29,33 @@ async function startOracleProductAdapter() {
 
     // Initialize Kafka producer
     producer = await initKafkaProducer();
+    kafkaConnected = true;
     logger.info('Oracle Product Adapter: Kafka producer connected');
 
     // Send product updates every 12 seconds (different interval to stagger)
     setInterval(async () => {
       try {
-        const productUpdate = generateMockOracleProductUpdate();
-        const payload = JSON.stringify(productUpdate);
+        // Only try to send if Kafka is connected
+        if (kafkaConnected && producer) {
+          const productUpdate = generateMockOracleProductUpdate();
+          const payload = JSON.stringify(productUpdate);
 
-        producer.send([
-          { topic: 'product.updated', messages: payload, partition: 0 }
-        ], (err, data) => {
-          if (err) {
-            logger.error('Oracle Product Adapter: Failed to send message:', err);
-          } else {
-            logger.debug(`Oracle Product Adapter: Sent product update:`, productUpdate.productId);
-          }
-        });
+          producer.send([
+            { topic: 'product.updated', messages: payload, partition: 0 }
+          ], (err, data) => {
+            if (err) {
+              logger.error('Oracle Product Adapter: Failed to send message:', err);
+              // Optionally, we could mark kafka as disconnected here
+              // kafkaConnected = false;
+            } else {
+              logger.debug(`Oracle Product Adapter: Sent product update:`, productUpdate.productId);
+            }
+          });
+        } else {
+          // Log to console or file instead of sending to Kafka
+          const productUpdate = generateMockOracleProductUpdate();
+          logger.debug(`Oracle Product Adapter: Would send product update (Kafka unavailable):`, productUpdate.productId);
+        }
       } catch (sendError) {
         logger.error('Oracle Product Adapter: Error in send interval:', sendError);
       }
@@ -52,8 +63,17 @@ async function startOracleProductAdapter() {
 
     logger.info('Oracle Product Adapter started successfully');
   } catch (error) {
-    logger.error('Oracle Product Adapter: Failed to start:', error);
-    process.exit(1);
+    logger.error('Oracle Product Adapter: Failed to start Kakfa:', error);
+    logger.info('Oracle Product Adapter: Running in degraded mode (without Kafka)');
+    // Start the interval anyway to simulate working
+    setInterval(async () => {
+      try {
+        const productUpdate = generateMockOracleProductUpdate();
+        logger.debug(`Oracle Product Adapter: Generated product update (Kafka unavailable):`, productUpdate.productId);
+      } catch (sendError) {
+        logger.error('Oracle Product Adapter: Error in generate interval:', sendError);
+      }
+    }, 12000); // 12 seconds
   }
 }
 
@@ -62,14 +82,14 @@ function shutdown() {
   if (producer) {
     producer.close(() => {
       logger.info('Oracle Product Adapter: Kafka producer closed');
-      process.exit(0);
+      // Do not exit the process, just cleanup
     });
-  } else {
-    process.exit(0);
   }
+  // Do not exit the process
 }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+// Remove the process exit on SIGINT/SIGTERM to avoid exiting the whole application
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
 
 module.exports = { startOracleProductAdapter };

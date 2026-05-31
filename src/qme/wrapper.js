@@ -14,13 +14,31 @@ const QME_VENV_PATH = path.resolve(__dirname, '../../.qme-venv');
 const QME_BIN = path.join(QME_VENV_PATH, 'bin', 'qme');
 const QME_DB_PATH = process.env.QME_DB_PATH || path.resolve(__dirname, '../../data/qme.db');
 
+// Flag to track if QMe is available
+let qmeAvailable = false;
+
+/**
+ * Check if QMe is available by checking if the binary exists
+ */
+async function checkQMeAvailability() {
+  try {
+    await execAsync(`${QME_BIN} --version`, { encoding: 'utf-8', timeout: 5000 });
+    qmeAvailable = true;
+    return true;
+  } catch (error) {
+    qmeAvailable = false;
+    logger.debug('QMe Integration: QMe not available:', error.message);
+    return false;
+  }
+}
+
 /**
  * QMe Integration for SokogateOS
- * 
+ *
  * QMe acts as the task execution layer for AI-generated code/scripts.
  * All long-running tasks (sourcing matching, logistics routing, customization production)
  * are executed through QMe for tracking, queuing, and dashboard visibility.
- * 
+ *
  * Usage:
  *   const qme = require('./qme/wrapper');
  *   await qme.runTask('sourcing-match', { requestId: 'SRC-123' });
@@ -30,12 +48,21 @@ const QME_DB_PATH = process.env.QME_DB_PATH || path.resolve(__dirname, '../../da
 
 /**
  * Initialize QMe database and configuration
+ * Returns true even if QMe is not available (graceful degradation)
  */
 async function initialize() {
   try {
     logger.info('QMe Integration: Initializing...');
 
-    // Initialize QMe database
+    // Check if QMe is available
+    const isAvailable = await checkQMeAvailability();
+    if (!isAvailable) {
+      logger.info('QMe Integration: QMe not available, running in degraded mode');
+      logger.info('QMe Integration: Initialized successfully (degraded mode)');
+      return true; // Still return true so server continues
+    }
+
+    // Initialize QMe database only if QMe is available
     const { stdout: initOutput } = await execAsync(
       `${QME_BIN} init --database sqlite:///${QME_DB_PATH}`,
       { encoding: 'utf-8', timeout: 10000 }
@@ -60,7 +87,8 @@ async function initialize() {
   } catch (error) {
     logger.error('QMe Integration: Initialization failed:', error.message);
     // QMe is optional - don't crash the app
-    return false;
+    // Still return true so server can start in degraded mode
+    return true;
   }
 }
 
@@ -68,6 +96,12 @@ async function initialize() {
  * Create default QMe views for SokogateOS task categories
  */
 async function createDefaultViews() {
+  // Only create views if QMe is available
+  if (!qmeAvailable) {
+    logger.debug('QMe Integration: Skipping view creation (QMe not available)');
+    return;
+  }
+
   const views = [
     {
       name: 'sourcing-tasks',
@@ -110,7 +144,7 @@ async function createDefaultViews() {
 
 /**
  * Run a task through QMe with tracking
- * 
+ *
  * @param {string} taskName - Name of the task (e.g., 'sourcing-match', 'logistics-route')
  * @param {Object} taskData - JSON data to pass to the task
  * @param {Object} [options] - Task options
@@ -119,6 +153,17 @@ async function createDefaultViews() {
  * @returns {Promise<Object>} Task result with QMe task ID
  */
 async function runTask(taskName, taskData = {}, options = {}) {
+  // If QMe is not available, return a fallback response
+  if (!qmeAvailable) {
+    logger.warn(`QMe Integration: QMe not available, task "${taskName}" not executed`);
+    return {
+      success: false,
+      taskName,
+      error: 'QMe not available - running in degraded mode',
+      fallback: true
+    };
+  }
+
   const executor = options.executor || 'shell';
   const timeout = options.timeout || 300000;
 
@@ -132,12 +177,12 @@ async function runTask(taskName, taskData = {}, options = {}) {
     // Run through QMe with metadata
     const qmeCommand = `node ${scriptPath} ${dataArg}`;
     const { stdout } = await execAsync(
-      `${QME_BIN} run ${qmeCommand} --name "sokogate-${taskName}" --executor ${executor}`,
+      `${QME_BIN} run ${qmeCommand} --name "sogogate-${taskName}" --executor ${executor}`,
       { encoding: 'utf-8', timeout }
     );
 
     // Extract QMe task ID from output
-    const taskIdMatch = stdout.match(/Task\s+(\S+)\s+created/i) || 
+    const taskIdMatch = stdout.match(/Task\s+(\S+)\s+created/i) ||
                         stdout.match(/id[\s:]+(\S+)/i);
     const taskId = taskIdMatch ? taskIdMatch[1] : null;
 
@@ -162,13 +207,19 @@ async function runTask(taskName, taskData = {}, options = {}) {
 
 /**
  * List recent tasks from QMe
- * 
+ *
  * @param {Object} [options]
  * @param {string} [options.filter] - Name filter (e.g., 'sourcing')
  * @param {number} [options.limit=20] - Max results
  * @returns {Promise<Array>} List of tasks
  */
 async function listTasks(options = {}) {
+  // If QMe is not available, return empty list
+  if (!qmeAvailable) {
+    logger.debug('QMe Integration: QMe not available, returning empty task list');
+    return [];
+  }
+
   const filter = options.filter || '';
   const limit = options.limit || 20;
 
@@ -189,11 +240,17 @@ async function listTasks(options = {}) {
 
 /**
  * Get detailed task info from QMe
- * 
+ *
  * @param {string} taskId - QMe task ID
  * @returns {Promise<Object>} Task details
  */
 async function getTask(taskId) {
+  // If QMe is not available, return null
+  if (!qmeAvailable) {
+    logger.debug(`QMe Integration: QMe not available, cannot get task ${taskId}`);
+    return null;
+  }
+
   try {
     const { stdout } = await execAsync(
       `${QME_BIN} get ${taskId} --format json`,
@@ -216,6 +273,15 @@ async function getTask(taskId) {
  * Dashboard runs on QME_DASHBOARD_PORT (default: 8080)
  */
 async function startDashboard() {
+  // If QMe is not available, return a fallback response
+  if (!qmeAvailable) {
+    logger.warn('QMe Integration: QMe not available, dashboard not started');
+    return {
+      success: false,
+      error: 'QMe not available - running in degraded mode'
+    };
+  }
+
   const port = process.env.QME_DASHBOARD_PORT || 8080;
 
   try {
@@ -251,6 +317,11 @@ async function startDashboard() {
  * Get QMe dashboard status
  */
 async function getDashboardStatus() {
+  // If QMe is not available, return inactive status
+  if (!qmeAvailable) {
+    return { status: 'inactive', reason: 'QMe not available' };
+  }
+
   try {
     const { stdout } = await execAsync(
       `${QME_BIN} status --format json`,
@@ -270,7 +341,7 @@ async function getDashboardStatus() {
 /**
  * Create a QMe task runner script for a SokogateOS operation
  * This creates executable task scripts in the qme/tasks directory
- * 
+ *
  * @param {string} taskName - Name of the task
  * @param {string} scriptContent - The Node.js script content
  */

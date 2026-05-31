@@ -39,7 +39,7 @@ export const authAPI = {
   refreshToken: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
   getProfile: () => api.get('/auth/profile'),
   updateProfile: (data) => api.put('/auth/profile', data),
-  changePassword: (currentPassword, newPassword) => api.put('/auth/change-password', { currentPassword, newPassword })
+  changePassword: (currentPassword, newPassword) => api.post('/auth/change-password', { currentPassword, newPassword })
 }
 
 // ============ SOURCING API ============
