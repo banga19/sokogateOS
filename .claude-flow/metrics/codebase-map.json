@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-30T23:17:31.722Z",
+  "timestamp": "2026-06-01T18:42:01.540Z",
   "projectRoot": "/home/apop/DEV/sokogateOS",
   "structure": {
     "hasPackageJson": true,
@@ -7,5 +7,5 @@
     "hasClaudeConfig": true,
     "hasClaudeFlow": true
   },
-  "scannedAt": 1780183051722
+  "scannedAt": 1780339321540
 }

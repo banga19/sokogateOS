@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: '📊' },
+  { to: '/dashboard', label: 'Dashboard', icon: '📊' },
   { to: '/procurement', label: 'Procurement', icon: '🔍' },
   { to: '/logistics', label: 'Logistics', icon: '🚢' },
   { to: '/executive', label: 'Executive', icon: '📈' },
@@ -35,7 +35,7 @@ export default function Layout({ children }) {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
+              end={item.to === '/dashboard'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                   isActive

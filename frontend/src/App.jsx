@@ -14,6 +14,7 @@ const QMeDashboard = lazy(() => import('./pages/QMeDashboard'))
 const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'))
 const SupplierTrustDashboard = lazy(() => import('./pages/SupplierTrustDashboard'))
 const CustomsDashboard = lazy(() => import('./pages/CustomsDashboard'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
 
 function LoadingFallback() {
   return (
@@ -46,14 +47,24 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<PageSuspense><LandingPage /></PageSuspense>} />
       <Route path="/login" element={
         <PageSuspense>{user ? <Navigate to="/" replace /> : <LoginPage />}</PageSuspense>
       } />
-      <Route path="/" element={
+      <Route path="/dashboard" element={
         <ProtectedRoute>
           <Layout>
             <ErrorBoundary fallbackMessage="Failed to load the main dashboard.">
               <PageSuspense><DashboardPage /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/terms-acceptance" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load terms acceptance page.">
+              <PageSuspense><TermsAcceptancePage /></PageSuspense>
             </ErrorBoundary>
           </Layout>
         </ProtectedRoute>

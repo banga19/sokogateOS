@@ -64,7 +64,7 @@ async function startFlexportLogisticsAdapter() {
             } else {
               logger.debug(`Flexport Logistics Adapter: Sent inventory change:`, inventoryChange.inventoryId);
             }
-          }
+          });
         } else {
           // Log to console or file instead of sending to Kafka
           const inventoryChange = generateMockInventoryChange();

@@ -15,7 +15,20 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'sokogate-os-refres
 // Register a new user
 async function register(userData) {
   try {
-    const { name, email, password, companyId, role, phone } = userData;
+    const { name, email, password, companyId, role, phone, termsAccepted } = userData;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      throw Object.assign(new Error('Name, email, and password are required'), { statusCode: 400 });
+    }
+
+    // Validate terms acceptance
+    if (!termsAccepted) {
+      throw Object.assign(
+        new Error('You must accept the Terms & Conditions to create an account'),
+        { statusCode: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -30,7 +43,10 @@ async function register(userData) {
       password, // Will be hashed by pre-save hook
       companyId,
       role: role || 'procurement_manager',
-      phone
+      phone,
+      termsAccepted: true,
+      termsAcceptedAt: new Date(),
+      termsVersion: '1.0'
     });
 
     await user.save();
@@ -279,6 +295,27 @@ async function updateProfile(userId, updates) {
   }
 }
 
+// Accept Terms & Conditions (new or updated version)
+async function acceptTerms(userId, mandatedVersion = '1.0') {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw Object.assign(new Error('User not found'), { statusCode: 404 });
+    }
+
+    user.termsAccepted = true;
+    user.termsAcceptedAt = new Date();
+    user.termsVersion = mandatedVersion;
+    await user.save({ validateBeforeSave: false });
+
+    logger.info(`Auth Service: User accepted terms: ${user.email} (v${mandatedVersion})`);
+    return { termsAccepted: true, termsAcceptedAt: user.termsAcceptedAt, termsVersion: user.termsVersion };
+  } catch (error) {
+    logger.error('Auth Service: Accept terms failed:', error);
+    throw error;
+  }
+}
+
 // Generate JWT tokens
 function generateTokens(user) {
   const payload = {
@@ -332,6 +369,7 @@ module.exports = {
   login,
   refreshToken,
   logout,
+  acceptTerms,
   changePassword,
   requestPasswordReset,
   resetPassword,

@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -19,9 +20,8 @@ export default function LoginPage() {
       if (mode === 'login') {
         await login(email, password)
       } else {
-        const { default: api } = await import('../services/api')
         const { authAPI } = await import('../services/api')
-        await authAPI.register({ name, email, password, role: 'admin' })
+        await authAPI.register({ name, email, password, role: 'admin', termsAccepted: termsAccepted })
         await login(email, password)
       }
       navigate('/')

@@ -10,6 +10,7 @@ const { initKafkaProducer, initKafkaConsumer } = require('./config/kafka');
 const logger = require('./utils/logger');
 const qme = require('./qme/wrapper');
 const selfImprovingLoop = require('./engine/selfImprovingLoop');
+const langchainOrchestrator = require('./services/langchainOrchestrator');
 
 // Phase 1 Services
 const { startWhatsAppService } = require('./services/whatsappService');
@@ -18,6 +19,9 @@ const { startMpesaService } = require('./services/mpesaService');
 
 // Phase 2 Services
 const { startCustomsEngineService } = require('./services/customsEngineService');
+
+// Payment Adapters
+const { startKRWPaymentAdapter } = require('./ingestion/adapters/krwPaymentAdapter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -121,6 +125,14 @@ const startServer = async () => {
       // Continue without QMe
     }
 
+    // Initialize LangChain orchestrator
+    try {
+      await langchainOrchestrator.initializeLangChain();
+      logger.info('SokogateOS: LangChain orchestrator initialized');
+    } catch (langchainError) {
+      logger.warn('SokogateOS: LangChain initialization failed (continuing without LangChain):', langchainError.message);
+    }
+
     // Initialize Kafka
     try {
       await initKafkaProducer();
@@ -163,6 +175,7 @@ const startServer = async () => {
       startFlexportLogisticsAdapter(),
       startShipBobLogisticsAdapter(),
       startRestApiAdapter(),
+      startKRWPaymentAdapter(),
       startDocumentProcessingPipeline(),
       startAiIntelligenceService(),
       startWorkflowAutomationService(),

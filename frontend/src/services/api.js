@@ -72,7 +72,21 @@ export const qmeAPI = {
   runTask: (taskName, data) => api.post(`/v1/qme/run/${taskName}`, data),
   listTasks: (params) => api.get('/v1/qme/tasks', { params }),
   getTask: (id) => api.get(`/v1/qme/task/${id}`),
-  getStatus: () => api.get('/qme/status')
+  getStatus: () => api.get('/qme/status'),
+  // LangChain Orchestration
+  runOrchestratedTask: (taskName, data) => api.post(`/v1/qme/orchestrate/${taskName}`, data),
+  getWorkflowStatus: () => api.get('/v1/qme/workflow/status'),
+  getWorkflow: (taskId) => api.get(`/v1/qme/workflow/${taskId}`),
+  getSuggestions: (taskId) => api.get(`/v1/qme/workflow/${taskId}/suggestions`),
+  getContext: (query) => api.get(`/v1/qme/context/${encodeURIComponent(query)}`)
+}
+
+// LangChain Orchestrator API
+export const orchestratorAPI = {
+  runTask: (taskName, data) => api.post(`/v1/qme/orchestrate/${taskName}`, data),
+  getStatus: () => api.get('/v1/qme/workflow/status'),
+  getWorkflow: (taskId) => api.get(`/v1/qme/workflow/${taskId}`),
+  getSuggestions: (taskId) => api.get(`/v1/qme/workflow/${taskId}/suggestions`)
 }
 
 // ============ FEEDBACK API ============

@@ -78,7 +78,7 @@ async function startRestApiAdapter() {
             } else {
               logger.debug(`REST API Adapter: Sent product catalog:`, productCatalog.productId);
             }
-          }
+          });
         } else {
           // Log to console or file instead of sending to Kafka
           const productCatalog = generateMockProductCatalog();

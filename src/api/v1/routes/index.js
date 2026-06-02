@@ -190,6 +190,59 @@ router.get('/qme/task/:taskId', authenticate, async (req, res) => {
   }
 });
 
+// ============ LANGCHAIN ORCHESTRATOR ROUTES ============
+const langchainOrchestrator = require('../../../services/langchainOrchestrator');
+
+// Get workflow status
+router.get('/qme/workflow/status', authenticate, async (req, res) => {
+  try {
+    const status = langchainOrchestrator.getWorkflowStatus();
+    res.json({ success: true, data: status });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get workflow state for a specific task
+router.get('/qme/workflow/:taskId', authenticate, async (req, res) => {
+  try {
+    const workflow = langchainOrchestrator.getWorkflow(req.params.taskId);
+    res.json({ success: true, data: workflow });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get next suggested action based on RAG context
+router.get('/qme/workflow/:taskId/suggestions', authenticate, async (req, res) => {
+  try {
+    const suggestions = await langchainOrchestrator.getNextSuggestedAction(req.params.taskId);
+    res.json({ success: true, data: { suggestions } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Run task with LangChain orchestration
+router.post('/qme/orchestrate/:taskName', authenticate, async (req, res) => {
+  try {
+    const result = await langchainOrchestrator.runTaskWithRAG(req.params.taskName, req.body);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get task context from RAG
+router.get('/qme/context/:query', authenticate, async (req, res) => {
+  try {
+    const context = await langchainOrchestrator.getTaskContext(req.params.query);
+    res.json({ success: true, data: context });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ============ FEEDBACK ROUTES (Self-Improving Loop) ============
 // Record feedback for AI model improvement
 
@@ -246,5 +299,125 @@ router.get('/company/:companyId/legibility', authenticate, scopeToCompany, async
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// ============ ERS (EXPORT READINESS SCORE) ROUTES ============
+// New feature for Korea-Africa corridor initiative
+
+const ersController = require('../controllers/ers/ersController');
+
+// Get ERS for authenticated user's company
+router.get(
+  '/ers/me',
+  authenticate,
+  ersController.getMyERS
+);
+
+// Get ERS breakdown and recommendations
+router.get(
+  '/ers/me/breakdown',
+  authenticate,
+  ersController.getMyERSBreakdown
+);
+
+// Get ERS for specific company (admin/super_admin only)
+router.get(
+  '/ers/:companyId',
+  authenticate,
+  ersController.getCompanyERS
+);
+
+// Get ERS rankings (leaderboard)
+router.get(
+  '/ers/rankings',
+  authenticate,
+  ersController.getERSRankings
+);
+
+// ============ KOREAN COMPLIANCE ROUTES ============
+// New feature for Korea-Africa corridor initiative
+
+const koreanComplianceController = require('../controllers/compliance/koreanComplianceController');
+
+// Check Korean compliance for a specific product
+router.post(
+  '/compliance/korean/check',
+  authenticate,
+  koreanComplianceController.checkProductCompliance
+);
+
+// Batch check Korean compliance for multiple products
+router.post(
+  '/compliance/korean/batch',
+  authenticate,
+  koreanComplianceController.batchCheckCompliance
+);
+
+// Get Korean requirements for a specific product category
+router.get(
+  '/compliance/korean/requirements/:category',
+  authenticate,
+  koreanComplianceController.getKoreanRequirements
+);
+
+// Get all supported product categories for Korean compliance
+router.get(
+  '/compliance/korean/categories',
+  authenticate,
+  koreanComplianceController.getSupportedCategories
+);
+
+// Validate documents for Korean compliance (pre-check)
+router.post(
+  '/compliance/korean/validate-documents',
+  authenticate,
+  koreanComplianceController.validateDocuments
+);
+
+// ============ KOREAN MARKET ANALYSIS ROUTES ============
+// New feature for Korea-Africa corridor initiative
+
+const koreanMarketAnalysisController = require('../controllers/marketAnalysis/koreanMarketAnalysisController');
+
+// Get top import categories in Korea
+router.get(
+  '/market-analysis/korean/top-imports',
+  authenticate,
+  koreanMarketAnalysisController.getTopImportCategories
+);
+
+// Get African products with growing demand in Korea
+router.get(
+  '/market-analysis/korean/african-opportunities',
+  authenticate,
+  koreanMarketAnalysisController.getAfricanGrowthOpportunities
+);
+
+// Analyze product-market fit for Korean market
+router.post(
+  '/market-analysis/korean/analyze',
+  authenticate,
+  koreanMarketAnalysisController.analyzeProductMarketFit
+);
+
+// Analyze product portfolio for Korean market readiness
+router.post(
+  '/market-analysis/korean/portfolio',
+  authenticate,
+  koreanMarketAnalysisController.analyzeProductPortfolio
+);
+
+// Get Korean market trends and preferences
+router.get(
+  '/market-analysis/korean/trends',
+  authenticate,
+  koreanMarketAnalysisController.getMarketTrends
+);
+
+// Get Korean business culture and buyer preferences
+router.get(
+  '/market-analysis/korean/business-culture',
+  authenticate,
+  koreanMarketAnalysisController.getBusinessCulture
+);
 
 module.exports = router;

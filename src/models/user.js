@@ -96,6 +96,20 @@ const userSchema = new Schema({
     type: Boolean,
     default: false
   },
+
+  // Terms & Conditions acceptance (Polsia-style consent layer)
+  termsAccepted: {
+    type: Boolean,
+    default: false
+  },
+  termsAcceptedAt: {
+    type: Date
+  },
+  termsVersion: {
+    type: String,
+    default: '1.0'
+  },
+
   lastLoginAt: {
     type: Date
   },

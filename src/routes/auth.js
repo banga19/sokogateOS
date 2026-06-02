@@ -233,6 +233,29 @@ router.post('/forgot-password', rateLimit(3, 15 * 60 * 1000), async (req, res) =
 });
 
 /**
+ * POST /api/auth/accept-terms
+ * Accept Terms & Conditions (up-to-date version)
+ */
+router.post('/accept-terms', authenticate, async (req, res) => {
+  try {
+    const { version } = req.body;
+    const userId = req.user.id;
+
+    const result = await authService.acceptTerms(userId, version);
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
  * POST /api/auth/reset-password/:token
  * Reset password with token
  */

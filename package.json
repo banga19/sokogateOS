@@ -29,6 +29,7 @@
     "natural": "^6.5.0",
     "node-nlp": "^3.10.2",
     "pdf-parse": "^1.1.1",
+    "playwright": "^1.60.0",
     "rate-limiter-flexible": "^2.4.1",
     "redis": "^4.7.1",
     "socket.io": "^4.7.2",
