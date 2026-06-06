@@ -681,4 +681,3 @@ class KoreanMarketAnalysisService {
 }
 
 module.exports = new KoreanMarketAnalysisService();
-EOF

@@ -2,9 +2,9 @@
 // Calculates export readiness based on company profile, transactions, and compliance
 
 const logger = require('../../utils/logger');
-const Company = require('../models/company');
-const User = require('../models/user');
-const Feedback = require('../models/feedback');
+const Company = require('../../models/company');
+const User = require('../../models/user');
+const Feedback = require('../../models/feedback');
 
 /**
  * Calculate Export Readiness Score (ERS) for a company
@@ -384,4 +384,3 @@ function generateERSRecommendations(scores) {
 module.exports = {
   calculateERS
 };
-EOF

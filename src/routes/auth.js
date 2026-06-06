@@ -49,6 +49,9 @@ setInterval(() => {
 router.post('/register', rateLimit(5, 15 * 60 * 1000), async (req, res) => {
   try {
     const result = await authService.register(req.body);
+    // Track sign-up after successful user creation
+    req.user = result.user;
+    trackSignUp(req, res, () => {});
     res.status(201).json({
       success: true,
       data: result

@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-06-01T18:36:21.160Z",
+  "mode": "headless",
+  "workerType": "testgaps",
+  "model": "sonnet",
+  "durationMs": 175108,
+  "executionId": "testgaps_1780338806052_7jhpnq",
+  "success": true,
+  "findings": {
+    "sections": [],
+    "codeBlocks": []
+  },
+  "rawOutputPreview": "Provider rate limit reached. Please retry shortly. (request_id=req_5303a16cfd5c)\n",
+  "rawOutputLength": 81
+}

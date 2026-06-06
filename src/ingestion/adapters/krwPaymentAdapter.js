@@ -107,4 +107,3 @@ function shutdown() {
 // process.on('SIGTERM', shutdown);
 
 module.exports = { startKRWPaymentAdapter };
-EOF

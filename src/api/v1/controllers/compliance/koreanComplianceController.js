@@ -1,8 +1,8 @@
 // Korean Compliance Checker Controller for SokogateOS
 // Exposes Korean compliance validation through API endpoints
 
-const koreanComplianceService = require('../../../services/compliance/koreanComplianceService');
-const logger = require('../../../utils/logger');
+const koreanComplianceService = require('../../../../services/compliance/koreanComplianceService');
+const logger = require('../../../../utils/logger');
 const auth = require('../../../middleware/auth');
 
 /**
@@ -247,4 +247,3 @@ module.exports = {
   getSupportedCategories,
   validateDocuments
 };
-EOF

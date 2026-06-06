@@ -1,8 +1,8 @@
 // Korean Market Analysis Controller for SokogateOS
 // Exposes Korean market intelligence through API endpoints
 
-const koreanMarketAnalysisService = require('../../../services/marketAnalysis/koreanMarketAnalysisService');
-const logger = require('../../../utils/logger');
+const koreanMarketAnalysisService = require('../../../../services/marketAnalysis/koreanMarketAnalysisService');
+const logger = require('../../../../utils/logger');
 const auth = require('../../../middleware/auth');
 
 /**
@@ -232,4 +232,3 @@ module.exports = {
   getMarketTrends,
   getBusinessCulture
 };
-EOF

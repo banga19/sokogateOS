@@ -1,4 +1,9 @@
-const kafka = require('kafka-node');
+let kafka;
+try {
+  kafka = require('kafka-node');
+} catch {
+  kafka = null;
+}
 const logger = require('../utils/logger');
 
 console.log('In kafka.js module, KAFKA_BROKERS:', process.env.KAFKA_BROKERS); // DEBUG
@@ -18,6 +23,14 @@ const initKafkaProducer = () => {
       kafkaHost = kafkaHost.trim();
     }
     logger.info('KAFKA_BROKERS (using): ' + kafkaHost);
+    if (!kafka) {
+      logger.warn('kafka-node not installed — running without Kafka');
+      resolve({
+        send: (payloads, cb) => { if (cb) cb(null, {}); },
+        close: (cb) => { if (cb) cb(); }
+      });
+      return;
+    }
     try {
       // Try to create the Kafka client
       const client = new kafka.Client(kafkaHost);

@@ -5,7 +5,8 @@ const express = require('express');
 const router = express.Router();
 
 // Import middleware
-const { authenticate, authorize, scopeToCompany } = require('../../../middleware/auth');
+const { authenticate } = require('../../../middleware/auth');
+const { abacAuthorize } = require('../../../middleware/abac');
 const { validate, validators, sanitize } = require('../../../middleware/validation');
 
 // Import controllers
@@ -25,7 +26,7 @@ router.get('/health', (req, res) => {
 router.get(
   '/sourcing/request/:requestId',
   authenticate,
-  authorize('procurement_manager', 'company_admin', 'super_admin', 'executive', 'finance'),
+  abacAuthorize({ action: 'read', domain: 'sourcing' }),
   sourcingController.getSourcingRequest
 );
 
@@ -33,7 +34,7 @@ router.get(
 router.post(
   '/sourcing/request',
   authenticate,
-  authorize('procurement_manager', 'company_admin', 'super_admin'),
+  abacAuthorize({ action: 'create', domain: 'sourcing' }),
   sanitize(['productId', 'quantity', 'requirements', 'budget', 'timeline', 'destination', 'supplierPreferences']),
   validate({
     productId: { rules: [validators.isString], message: 'productId is required' },
@@ -48,8 +49,7 @@ router.post(
 router.get(
   '/sourcing/company/:companyId',
   authenticate,
-  scopeToCompany,
-  authorize('procurement_manager', 'company_admin', 'super_admin', 'executive'),
+  abacAuthorize({ action: 'read', domain: 'sourcing' }),
   sourcingController.getCompanySourcingRequests
 );
 
@@ -57,7 +57,7 @@ router.get(
 router.put(
   '/sourcing/request/:requestId/status',
   authenticate,
-  authorize('procurement_manager', 'company_admin', 'super_admin'),
+  abacAuthorize({ action: 'update', domain: 'sourcing' }),
   sanitize(['status', 'notes']),
   validate({
     status: { rules: [validators.isString, validators.isIn(['draft', 'pending', 'quoted', 'approved', 'rejected', 'completed', 'cancelled'])], message: 'status must be valid' }
@@ -71,14 +71,14 @@ router.put(
 router.get(
   '/customization/request/:requestId',
   authenticate,
-  authorize('sales_team', 'company_admin', 'super_admin', 'executive'),
+  abacAuthorize({ action: 'read', domain: 'customization' }),
   customizationController.getCustomizationRequest
 );
 
 router.post(
   '/customization/request',
   authenticate,
-  authorize('sales_team', 'company_admin', 'super_admin'),
+  abacAuthorize({ action: 'create', domain: 'customization' }),
   sanitize(['productId', 'branding', 'specifications', 'materials', 'quantity', 'deadline', 'budget']),
   validate({
     productId: { rules: [validators.isString], message: 'productId is required' },
@@ -91,15 +91,14 @@ router.post(
 router.get(
   '/customization/company/:companyId',
   authenticate,
-  scopeToCompany,
-  authorize('sales_team', 'company_admin', 'super_admin', 'executive'),
+  abacAuthorize({ action: 'read', domain: 'customization' }),
   customizationController.getCompanyCustomizationRequests
 );
 
 router.put(
   '/customization/request/:requestId/status',
   authenticate,
-  authorize('sales_team', 'company_admin', 'super_admin'),
+  abacAuthorize({ action: 'update', domain: 'customization' }),
   sanitize(['status', 'notes']),
   validate({
     status: { rules: [validators.isString, validators.isIn(['draft', 'pending', 'design_review', 'sampling', 'production', 'qc', 'completed', 'cancelled'])], message: 'status must be valid' }
@@ -113,14 +112,14 @@ router.put(
 router.get(
   '/logistics/shipment/:shipmentId',
   authenticate,
-  authorize('logistics_coordinator', 'company_admin', 'super_admin', 'executive', 'procurement_manager'),
+  abacAuthorize({ action: 'read', domain: 'logistics' }),
   logisticsController.getShipment
 );
 
 router.post(
   '/logistics/shipment',
   authenticate,
-  authorize('logistics_coordinator', 'company_admin', 'super_admin'),
+  abacAuthorize({ action: 'create', domain: 'logistics' }),
   sanitize(['orderId', 'origin', 'destination', 'items', 'shippingMethod', 'deliveryDeadline']),
   validate({
     orderId: { rules: [validators.isString], message: 'orderId is required' },
@@ -134,15 +133,14 @@ router.post(
 router.get(
   '/logistics/company/:companyId',
   authenticate,
-  scopeToCompany,
-  authorize('logistics_coordinator', 'company_admin', 'super_admin', 'executive'),
+  abacAuthorize({ action: 'read', domain: 'logistics' }),
   logisticsController.getCompanyShipments
 );
 
 router.put(
   '/logistics/shipment/:shipmentId/status',
   authenticate,
-  authorize('logistics_coordinator', 'company_admin', 'super_admin'),
+  abacAuthorize({ action: 'update', domain: 'logistics' }),
   sanitize(['status', 'notes', 'estimatedDelivery']),
   validate({
     status: { rules: [validators.isString, validators.isIn(['pending', 'processing', 'shipped', 'in_transit', 'customs', 'delivered', 'cancelled'])], message: 'status must be valid' }
@@ -153,7 +151,7 @@ router.put(
 router.get(
   '/logistics/track/:shipmentId',
   authenticate,
-  authorize('logistics_coordinator', 'company_admin', 'super_admin', 'procurement_manager', 'executive'),
+  abacAuthorize({ action: 'read', domain: 'logistics' }),
   logisticsController.trackShipment
 );
 
@@ -246,7 +244,7 @@ router.get('/qme/context/:query', authenticate, async (req, res) => {
 // ============ FEEDBACK ROUTES (Self-Improving Loop) ============
 // Record feedback for AI model improvement
 
-router.post('/feedback', authenticate, async (req, res) => {
+router.post('/feedback', authenticate, abacAuthorize({ action: 'create', domain: 'analytics' }), async (req, res) => {
   try {
     const feedback = new Feedback({
       ...req.body,
@@ -419,5 +417,10 @@ router.get(
   authenticate,
   koreanMarketAnalysisController.getBusinessCulture
 );
+
+// ============ ANALYTICS ROUTES ============
+// Track user sign-ups, activations, and retention metrics
+const analyticsRoutes = require('../../../routes/analytics/index');
+router.use('/analytics', analyticsRoutes);
 
 module.exports = router;

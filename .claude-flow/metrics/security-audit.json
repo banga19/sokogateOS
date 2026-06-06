@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-06-01T18:50:11.365Z",
+  "mode": "headless",
+  "workerType": "audit",
+  "model": "haiku",
+  "durationMs": 190314,
+  "executionId": "audit_1780339621051_hpmbyl",
+  "success": true,
+  "findings": {
+    "parseError": true,
+    "rawOutput": "Invalid request sent to provider. (request_id=req_d98fd171d077)\n"
+  },
+  "rawOutputPreview": "Invalid request sent to provider. (request_id=req_d98fd171d077)\n",
+  "rawOutputLength": 64
+}

@@ -170,4 +170,3 @@ module.exports = {
   getMyERSBreakdown,
   getERSRankings
 };
-EOF

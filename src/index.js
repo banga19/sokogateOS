@@ -13,7 +13,7 @@ const selfImprovingLoop = require('./engine/selfImprovingLoop');
 const langchainOrchestrator = require('./services/langchainOrchestrator');
 
 // Phase 1 Services
-const { startWhatsAppService } = require('./services/whatsappService');
+const watiService = require('./services/watiService');
 const { startSupplierTrustService } = require('./services/supplierTrustService');
 const { startMpesaService } = require('./services/mpesaService');
 
@@ -79,6 +79,10 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
+
+// Track engagement for all requests
+const { trackEngagement } = require('./middleware/analytics/tracking');
+app.use(trackEngagement);
 
 // Health check route (unauthenticated)
 app.get('/health', (req, res) => {
@@ -182,8 +186,8 @@ const startServer = async () => {
       startCustomizationService(),
       startLogisticsService(),
       startSourcingService(),
-      // Phase 1: WhatsApp Commerce Co-pilot, Supplier Trust Network, M-Pesa
-      startWhatsAppService(),
+      // Phase 1: WhatsApp Commerce Co-pilot (WATI.io), Supplier Trust Network, M-Pesa
+      watiService.initialize(),
       startSupplierTrustService(),
       startMpesaService(),
       // Phase 2: Cross-Border Customs Engine

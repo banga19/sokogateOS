@@ -406,4 +406,3 @@ class KoreanComplianceService {
 }
 
 module.exports = new KoreanComplianceService();
-EOF

@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-06-01T18:41:45.110Z",
+  "mode": "headless",
+  "workerType": "optimize",
+  "model": "sonnet",
+  "durationMs": 172204,
+  "executionId": "optimize_1780339132906_l8i42m",
+  "success": true,
+  "findings": {
+    "sections": [],
+    "codeBlocks": []
+  },
+  "rawOutputPreview": "Invalid request sent to provider. (request_id=req_87cbbad84279)\n",
+  "rawOutputLength": 64
+}
