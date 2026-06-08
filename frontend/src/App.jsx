@@ -15,6 +15,7 @@ const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'))
 const SupplierTrustDashboard = lazy(() => import('./pages/SupplierTrustDashboard'))
 const CustomsDashboard = lazy(() => import('./pages/CustomsDashboard'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
+const HermesAdminPage = lazy(() => import('./pages/HermesAdminPage'))
 
 function LoadingFallback() {
   return (
@@ -69,6 +70,12 @@ export default function App() {
           </Layout>
         </ProtectedRoute>
       } />
+      <Route path="/terms-of-service" element={
+        <PageSuspense><TermsOfServicePage /></PageSuspense>
+      } />
+      <Route path="/privacy-policy" element={
+        <PageSuspense><PrivacyPolicyPage /></PageSuspense>
+      } />
       <Route path="/procurement" element={
         <ProtectedRoute>
           <Layout>
@@ -119,6 +126,15 @@ export default function App() {
           <Layout>
             <ErrorBoundary fallbackMessage="Failed to load the Supplier Trust Network.">
               <PageSuspense><SupplierTrustDashboard /></PageSuspense>
+            </ErrorBoundary>
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/hermes-admin" element={
+        <ProtectedRoute>
+          <Layout>
+            <ErrorBoundary fallbackMessage="Failed to load the Hermes Admin Page.">
+              <PageSuspense><HermesAdminPage /></PageSuspense>
             </ErrorBoundary>
           </Layout>
         </ProtectedRoute>

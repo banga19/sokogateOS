@@ -53,8 +53,29 @@ async function authenticate(req, res, next) {
       id: user._id,
       email: user.email,
       role: user.role,
-      companyId: user.companyId
+      companyId: user.companyId,
+      termsAccepted: user.termsAccepted,
+      termsAcceptedAt: user.termsAcceptedAt,
+      termsVersion: user.termsVersion
     };
+
+    // Redirect to terms acceptance if terms not accepted (except for auth routes and terms acceptance page itself)
+    const originalUrl = req.originalUrl || req.url;
+    if (!user.termsAccepted &&
+        !originalUrl.startsWith('/api/auth') &&
+        !originalUrl.includes('/terms-acceptance') &&
+        !originalUrl.includes('/terms-of-service') &&
+        !originalUrl.includes('/privacy-policy')) {
+      // For API requests, return unauthorized
+      if (originalUrl.startsWith('/api/')) {
+        return res.status(403).json({
+          success: false,
+          error: 'Terms & Conditions acceptance required. Please accept the terms to continue.'
+        });
+      }
+      // For web requests, redirect to terms acceptance page
+      return res.redirect('/terms-acceptance');
+    }
 
     next();
   } catch (error) {

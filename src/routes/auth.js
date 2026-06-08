@@ -51,7 +51,7 @@ router.post('/register', rateLimit(5, 15 * 60 * 1000), async (req, res) => {
     const result = await authService.register(req.body);
     // Track sign-up after successful user creation
     req.user = result.user;
-    trackSignUp(req, res, () => {});
+    await trackSignUp(req, res, () => {});
     res.status(201).json({
       success: true,
       data: result
@@ -80,6 +80,11 @@ router.post('/login', rateLimit(10, 15 * 60 * 1000), async (req, res) => {
     }
 
     const result = await authService.login(email, password);
+    // Track activation for verified users
+    if (result.user && result.user.isEmailVerified) {
+      req.user = result.user;
+      await trackActivation(req, res, () => {});
+    }
     res.status(200).json({
       success: true,
       data: result
@@ -245,6 +250,8 @@ router.post('/accept-terms', authenticate, async (req, res) => {
     const userId = req.user.id;
 
     const result = await authService.acceptTerms(userId, version);
+    // Track terms acceptance as an engagement event
+    // This could be extended to a specific terms acceptance tracking if needed
     res.status(200).json({
       success: true,
       data: result

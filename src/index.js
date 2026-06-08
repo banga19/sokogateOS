@@ -11,6 +11,7 @@ const logger = require('./utils/logger');
 const qme = require('./qme/wrapper');
 const selfImprovingLoop = require('./engine/selfImprovingLoop');
 const langchainOrchestrator = require('./services/langchainOrchestrator');
+const { HermesAgent } = require('./services/hermes/hermesAgent');
 
 // Phase 1 Services
 const watiService = require('./services/watiService');
@@ -135,6 +136,29 @@ const startServer = async () => {
       logger.info('SokogateOS: LangChain orchestrator initialized');
     } catch (langchainError) {
       logger.warn('SokogateOS: LangChain initialization failed (continuing without LangChain):', langchainError.message);
+    }
+
+    // Initialize Hermes agent system
+    try {
+      const hermesAgent = new HermesAgent({
+        config: {
+          analysisInterval: 3600000, // 1 hour
+          optimizationInterval: 7200000, // 2 hours
+          complianceInterval: 86400000, // 24 hours
+          intelligenceInterval: 21600000 // 6 hours
+        }
+      });
+
+      await hermesAgent.initialize();
+      logger.info('SokogateOS: Hermes agent system initialized');
+
+      // Start scheduled runs (every 5 minutes by default)
+      hermesAgent.startScheduledRuns();
+
+      // Make available for potential API routes
+      app.locals.hermesAgent = hermesAgent;
+    } catch (hermesError) {
+      logger.warn('SokogateOS: Hermes initialization failed (continuing without Hermes):', hermesError.message);
     }
 
     // Initialize Kafka
@@ -277,6 +301,57 @@ const startServer = async () => {
           userId: req.user?.id || 'system'
         });
         res.status(201).json({ success: true, data: feedback });
+      } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+
+    // Hermes agent system endpoints
+    app.get('/api/hermes/status', async (req, res) => {
+      try {
+        const status = app.locals.hermesAgent ?
+          await app.locals.hermesAgent.getStatus() :
+          { error: 'Hermes agent not available' };
+        res.json({ success: true, data: status });
+      } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+
+    app.post('/api/hermes/run-cycle', async (req, res) => {
+      try {
+        if (!app.locals.hermesAgent) {
+          return res.status(503).json({ success: false, error: 'Hermes agent not available' });
+        }
+
+        const result = await app.locals.hermesAgent.runCycle();
+        res.json({ success: true, data: result });
+      } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+
+    app.post('/api/hermes/start-scheduled-runs', async (req, res) => {
+      try {
+        if (!app.locals.hermesAgent) {
+          return res.status(503).json({ success: false, error: 'Hermes agent not available' });
+        }
+
+        app.locals.hermesAgent.startScheduledRuns();
+        res.json({ success: true, message: 'Hermes scheduled runs started' });
+      } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+
+    app.post('/api/hermes/stop-scheduled-runs', async (req, res) => {
+      try {
+        if (!app.locals.hermesAgent) {
+          return res.status(503).json({ success: false, error: 'Hermes agent not available' });
+        }
+
+        app.locals.hermesAgent.stopScheduledRuns();
+        res.json({ success: true, message: 'Hermes scheduled runs stopped' });
       } catch (err) {
         res.status(500).json({ success: false, error: err.message });
       }

@@ -7142,3 +7142,357 @@
 2026-06-05T11:37:51.421Z [INFO]: Checking Korean compliance for product: Test Sesame Product
 2026-06-05T11:37:51.469Z [INFO]: Checking Korean compliance for product: Product 1
 2026-06-05T11:37:51.471Z [INFO]: Checking Korean compliance for product: Product 2
+2026-06-08T10:17:37.799Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:17:37.799Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:17:37.799Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:17:38.139Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:17:38.139Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:17:38.139Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:17:38.205Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:17:38.205Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:17:38.205Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:17:38.205Z [DEBUG]: Workflow Automation: Processing order.created
+2026-06-08T10:17:38.205Z [INFO]: Workflow Automation: Processing order ORDER-456
+2026-06-08T10:17:38.205Z [INFO]: Workflow Automation: Executing step credit-check for workflow order-fulfillment
+2026-06-08T10:17:38.398Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:17:38.398Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:17:38.398Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:17:38.398Z [DEBUG]: Workflow Automation: Processing inventory.changed
+2026-06-08T10:17:38.398Z [INFO]: Workflow Automation: Processing inventory change for PROD-123
+2026-06-08T10:17:38.398Z [INFO]: Workflow Automation: Executing step check-supplier-availability for workflow inventory-replenishment
+2026-06-08T10:17:38.490Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:17:38.490Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:17:38.490Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:17:38.490Z [DEBUG]: Workflow Automation: Processing supplier.risk.updated
+2026-06-08T10:17:38.490Z [INFO]: Workflow Automation: Processing supplier risk update for SUP-789
+2026-06-08T10:17:38.490Z [INFO]: Workflow Automation: Executing step assess-risk for workflow supplier-evaluation
+2026-06-08T10:17:40.149Z [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-08T10:17:40.149Z [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-08T10:17:40.149Z [INFO]: Flexport Logistics Adapter started successfully
+2026-06-08T10:17:40.337Z [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-08T10:17:40.337Z [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-08T10:17:40.337Z [INFO]: Flexport Logistics Adapter started successfully
+2026-06-08T10:17:40.397Z [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-08T10:17:40.397Z [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-08T10:17:40.397Z [INFO]: Flexport Logistics Adapter started successfully
+2026-06-08T10:17:39.824Z [INFO]: Checking Korean compliance for product: Test Cocoa Product
+2026-06-08T10:17:39.888Z [INFO]: Checking Korean compliance for product: Test Coffee Product
+2026-06-08T10:17:39.915Z [INFO]: Checking Korean compliance for product: Unknown Product
+2026-06-08T10:17:39.934Z [INFO]: Checking Korean compliance for product: Test Sesame Product
+2026-06-08T10:17:40.008Z [INFO]: Checking Korean compliance for product: Product 1
+2026-06-08T10:17:40.040Z [INFO]: Checking Korean compliance for product: Product 2
+2026-06-08T10:17:40.501Z [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-08T10:17:40.501Z [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-08T10:17:40.501Z [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-08T10:17:40.536Z [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-08T10:17:40.536Z [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-08T10:17:40.536Z [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-08T10:17:40.590Z [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-08T10:17:40.590Z [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-08T10:17:40.590Z [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-08T10:17:41.916Z [INFO]: Initializing REST API Adapter...
+2026-06-08T10:17:41.916Z [INFO]: REST API Adapter: Kafka producer connected
+2026-06-08T10:17:41.916Z [INFO]: REST API Adapter started successfully
+2026-06-08T10:17:41.966Z [INFO]: Initializing REST API Adapter...
+2026-06-08T10:17:41.966Z [INFO]: REST API Adapter: Kafka producer connected
+2026-06-08T10:17:41.966Z [INFO]: REST API Adapter started successfully
+2026-06-08T10:17:42.015Z [INFO]: Initializing REST API Adapter...
+2026-06-08T10:17:42.015Z [INFO]: REST API Adapter: Kafka producer connected
+2026-06-08T10:17:42.015Z [INFO]: REST API Adapter started successfully
+2026-06-08T10:17:42.114Z [INFO]: Initializing Document Processing Pipeline...
+2026-06-08T10:17:42.114Z [INFO]: Document Processing Pipeline: Kafka producer connected
+2026-06-08T10:17:42.114Z [INFO]: Document Processing Pipeline started successfully
+2026-06-08T10:17:42.148Z [INFO]: Initializing Document Processing Pipeline...
+2026-06-08T10:17:42.148Z [INFO]: Document Processing Pipeline: Kafka producer connected
+2026-06-08T10:17:42.148Z [INFO]: Document Processing Pipeline started successfully
+2026-06-08T10:17:40.801Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:40.801Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:40.801Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:41.354Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:41.354Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:41.354Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:41.423Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:41.423Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:41.423Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:41.423Z [DEBUG]: Customization Service received message on topic customization.requested:
+2026-06-08T10:17:41.423Z [INFO]: Customization Service: Processing customization request CUST-456
+2026-06-08T10:17:41.423Z [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+2026-06-08T10:17:41.972Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:41.972Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:41.972Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:41.972Z [DEBUG]: Customization Service received message on topic design.approved:
+2026-06-08T10:17:41.972Z [INFO]: Customization Service: Processing design approval for CUST-456
+2026-06-08T10:17:41.972Z [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+2026-06-08T10:17:42.054Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:42.054Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:42.054Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:42.054Z [DEBUG]: Customization Service received message on topic specification.updated:
+2026-06-08T10:17:42.054Z [INFO]: Customization Service: Processing specification update for CUST-456
+2026-06-08T10:17:42.054Z [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+2026-06-08T10:17:42.155Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:42.155Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:42.155Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:42.155Z [DEBUG]: Customization Service received message on topic material.selected:
+2026-06-08T10:17:42.155Z [INFO]: Customization Service: Processing material selection for CUST-456
+2026-06-08T10:17:42.155Z [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+2026-06-08T10:17:42.300Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:42.300Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:42.300Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:42.300Z [DEBUG]: Customization Service received message on topic pricing.updated:
+2026-06-08T10:17:42.300Z [INFO]: Customization Service: Processing pricing update for CUST-456
+2026-06-08T10:17:42.300Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+2026-06-08T10:17:42.353Z [INFO]: Initializing Customization Service...
+2026-06-08T10:17:42.353Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:17:42.353Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:42.353Z [DEBUG]: Customization Service received message on topic production.ready:
+2026-06-08T10:17:42.353Z [INFO]: Customization Service: Processing production ready for CUST-456
+2026-06-08T10:17:42.353Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+2026-06-08T10:17:42.464Z [INFO]: Initializing SAP Product Adapter...
+2026-06-08T10:17:42.464Z [INFO]: SAP Product Adapter: Kafka producer connected
+2026-06-08T10:17:42.464Z [INFO]: SAP Product Adapter started successfully
+2026-06-08T10:17:42.541Z [INFO]: Initializing SAP Product Adapter...
+2026-06-08T10:17:42.541Z [INFO]: SAP Product Adapter: Kafka producer connected
+2026-06-08T10:17:42.541Z [INFO]: SAP Product Adapter started successfully
+2026-06-08T10:17:43.352Z [INFO]: Initializing Salesforce CRM Adapter...
+2026-06-08T10:17:43.352Z [INFO]: Salesforce CRM Adapter: Kafka producer connected
+2026-06-08T10:17:43.352Z [INFO]: Salesforce CRM Adapter started successfully
+2026-06-08T10:17:43.473Z [INFO]: Initializing Salesforce CRM Adapter...
+2026-06-08T10:17:43.473Z [INFO]: Salesforce CRM Adapter: Kafka producer connected
+2026-06-08T10:17:43.473Z [INFO]: Salesforce CRM Adapter started successfully
+2026-06-08T10:17:43.653Z [INFO]: Initializing Oracle Product Adapter...
+2026-06-08T10:17:43.653Z [INFO]: Oracle Product Adapter: Kafka producer connected
+2026-06-08T10:17:43.653Z [INFO]: Oracle Product Adapter started successfully
+2026-06-08T10:17:43.799Z [INFO]: Initializing Oracle Product Adapter...
+2026-06-08T10:17:43.799Z [INFO]: Oracle Product Adapter: Kafka producer connected
+2026-06-08T10:17:43.799Z [INFO]: Oracle Product Adapter started successfully
+2026-06-08T10:17:44.075Z [INFO]: Initializing HubSpot CRM Adapter...
+2026-06-08T10:17:44.075Z [INFO]: HubSpot CRM Adapter: Kafka producer connected
+2026-06-08T10:17:44.075Z [INFO]: HubSpot CRM Adapter started successfully
+2026-06-08T10:17:44.125Z [INFO]: Initializing HubSpot CRM Adapter...
+2026-06-08T10:17:44.125Z [INFO]: HubSpot CRM Adapter: Kafka producer connected
+2026-06-08T10:17:44.125Z [INFO]: HubSpot CRM Adapter started successfully
+2026-06-08T10:17:43.869Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:17:43.869Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:17:43.869Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:17:44.053Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:17:44.053Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:17:44.053Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:17:44.107Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:17:44.107Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:17:44.107Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:17:44.107Z [DEBUG]: AI Intelligence: Processing product.updated
+2026-06-08T10:17:44.107Z [DEBUG]: AI Intelligence: Generated product_insight insight
+2026-06-08T10:17:44.181Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:17:44.181Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:17:44.181Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:17:44.181Z [DEBUG]: AI Intelligence: Processing order.created
+2026-06-08T10:17:44.659Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:17:44.659Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:17:44.659Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:17:44.659Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:44.828Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:17:44.828Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:17:44.828Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:17:44.828Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:44.910Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:17:44.910Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:17:44.910Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:17:44.910Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:44.910Z [DEBUG]: Sourcing Service received message on topic product.query.received:
+2026-06-08T10:17:44.910Z [INFO]: Sourcing Service: Processing product query QUERY-456
+2026-06-08T10:17:44.910Z [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+2026-06-08T10:17:45.133Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:17:45.133Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:17:45.133Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:17:45.133Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:45.133Z [DEBUG]: Sourcing Service received message on topic product.catalog.updated:
+2026-06-08T10:17:45.133Z [INFO]: Sourcing Service: Processing catalog update for product PROD-123
+2026-06-08T10:17:45.177Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:17:45.177Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:17:45.177Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:17:45.177Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:45.177Z [DEBUG]: Sourcing Service received message on topic supplier.profile.updated:
+2026-06-08T10:17:45.177Z [INFO]: Sourcing Service: Processing supplier profile update for SUP-789
+2026-06-08T10:17:45.203Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:17:45.203Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:17:45.203Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:17:45.203Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:17:45.203Z [DEBUG]: Sourcing Service received message on topic market.trend.updated:
+2026-06-08T10:17:45.203Z [INFO]: Sourcing Service: Processing market trend update for textiles
+2026-06-08T10:43:58.801Z [INFO]: Checking Korean compliance for product: Test Cocoa Product
+2026-06-08T10:43:58.919Z [INFO]: Checking Korean compliance for product: Test Coffee Product
+2026-06-08T10:43:59.100Z [INFO]: Checking Korean compliance for product: Unknown Product
+2026-06-08T10:43:59.123Z [INFO]: Checking Korean compliance for product: Test Sesame Product
+2026-06-08T10:43:59.246Z [INFO]: Checking Korean compliance for product: Product 1
+2026-06-08T10:43:59.263Z [INFO]: Checking Korean compliance for product: Product 2
+2026-06-08T10:43:59.246Z [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-08T10:43:59.246Z [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-08T10:43:59.246Z [INFO]: Flexport Logistics Adapter started successfully
+2026-06-08T10:43:59.663Z [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-08T10:43:59.663Z [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-08T10:43:59.663Z [INFO]: Flexport Logistics Adapter started successfully
+2026-06-08T10:43:59.813Z [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-08T10:43:59.813Z [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-08T10:43:59.813Z [INFO]: Flexport Logistics Adapter started successfully
+2026-06-08T10:44:01.227Z [INFO]: Initializing SAP Product Adapter...
+2026-06-08T10:44:01.227Z [INFO]: SAP Product Adapter: Kafka producer connected
+2026-06-08T10:44:01.227Z [INFO]: SAP Product Adapter started successfully
+2026-06-08T10:44:01.315Z [INFO]: Initializing SAP Product Adapter...
+2026-06-08T10:44:01.315Z [INFO]: SAP Product Adapter: Kafka producer connected
+2026-06-08T10:44:01.315Z [INFO]: SAP Product Adapter started successfully
+2026-06-08T10:44:00.190Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:44:00.190Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:44:00.190Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:44:00.784Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:44:00.784Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:44:00.784Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:44:00.862Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:44:00.862Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:44:00.862Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:44:00.862Z [DEBUG]: Workflow Automation: Processing order.created
+2026-06-08T10:44:00.862Z [INFO]: Workflow Automation: Processing order ORDER-456
+2026-06-08T10:44:00.862Z [INFO]: Workflow Automation: Executing step credit-check for workflow order-fulfillment
+2026-06-08T10:44:00.981Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:44:00.981Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:44:00.981Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:44:00.981Z [DEBUG]: Workflow Automation: Processing inventory.changed
+2026-06-08T10:44:00.981Z [INFO]: Workflow Automation: Processing inventory change for PROD-123
+2026-06-08T10:44:00.981Z [INFO]: Workflow Automation: Executing step check-supplier-availability for workflow inventory-replenishment
+2026-06-08T10:44:01.246Z [INFO]: Initializing Workflow Automation Service...
+2026-06-08T10:44:01.246Z [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-08T10:44:01.246Z [INFO]: Workflow Automation Service started successfully
+2026-06-08T10:44:01.246Z [DEBUG]: Workflow Automation: Processing supplier.risk.updated
+2026-06-08T10:44:01.246Z [INFO]: Workflow Automation: Processing supplier risk update for SUP-789
+2026-06-08T10:44:01.246Z [INFO]: Workflow Automation: Executing step assess-risk for workflow supplier-evaluation
+2026-06-08T10:44:02.152Z [INFO]: Initializing Oracle Product Adapter...
+2026-06-08T10:44:02.152Z [INFO]: Oracle Product Adapter: Kafka producer connected
+2026-06-08T10:44:02.152Z [INFO]: Oracle Product Adapter started successfully
+2026-06-08T10:44:02.363Z [INFO]: Initializing Oracle Product Adapter...
+2026-06-08T10:44:02.363Z [INFO]: Oracle Product Adapter: Kafka producer connected
+2026-06-08T10:44:02.363Z [INFO]: Oracle Product Adapter started successfully
+2026-06-08T10:43:59.302Z [INFO]: Initializing Customization Service...
+2026-06-08T10:43:59.302Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:43:59.302Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:00.404Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:00.404Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:00.404Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:00.515Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:00.515Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:00.515Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:00.515Z [DEBUG]: Customization Service received message on topic customization.requested:
+2026-06-08T10:44:00.515Z [INFO]: Customization Service: Processing customization request CUST-456
+2026-06-08T10:44:00.515Z [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+2026-06-08T10:44:01.289Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:01.289Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:01.289Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:01.289Z [DEBUG]: Customization Service received message on topic design.approved:
+2026-06-08T10:44:01.289Z [INFO]: Customization Service: Processing design approval for CUST-456
+2026-06-08T10:44:01.289Z [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+2026-06-08T10:44:01.654Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:01.654Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:01.654Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:01.654Z [DEBUG]: Customization Service received message on topic specification.updated:
+2026-06-08T10:44:01.654Z [INFO]: Customization Service: Processing specification update for CUST-456
+2026-06-08T10:44:01.654Z [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+2026-06-08T10:44:02.332Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:02.332Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:02.332Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:02.332Z [DEBUG]: Customization Service received message on topic material.selected:
+2026-06-08T10:44:02.332Z [INFO]: Customization Service: Processing material selection for CUST-456
+2026-06-08T10:44:02.332Z [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+2026-06-08T10:44:02.639Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:02.639Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:02.639Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:02.639Z [DEBUG]: Customization Service received message on topic pricing.updated:
+2026-06-08T10:44:02.639Z [INFO]: Customization Service: Processing pricing update for CUST-456
+2026-06-08T10:44:02.639Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+2026-06-08T10:44:02.688Z [INFO]: Initializing Customization Service...
+2026-06-08T10:44:02.688Z [INFO]: Customization Service: Kafka producer connected
+2026-06-08T10:44:02.688Z [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:02.688Z [DEBUG]: Customization Service received message on topic production.ready:
+2026-06-08T10:44:02.688Z [INFO]: Customization Service: Processing production ready for CUST-456
+2026-06-08T10:44:02.688Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+2026-06-08T10:44:03.315Z [INFO]: Initializing REST API Adapter...
+2026-06-08T10:44:03.315Z [INFO]: REST API Adapter: Kafka producer connected
+2026-06-08T10:44:03.315Z [INFO]: REST API Adapter started successfully
+2026-06-08T10:44:03.377Z [INFO]: Initializing REST API Adapter...
+2026-06-08T10:44:03.377Z [INFO]: REST API Adapter: Kafka producer connected
+2026-06-08T10:44:03.377Z [INFO]: REST API Adapter started successfully
+2026-06-08T10:44:03.418Z [INFO]: Initializing REST API Adapter...
+2026-06-08T10:44:03.418Z [INFO]: REST API Adapter: Kafka producer connected
+2026-06-08T10:44:03.418Z [INFO]: REST API Adapter started successfully
+2026-06-08T10:44:03.674Z [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-08T10:44:03.674Z [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-08T10:44:03.674Z [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-08T10:44:04.007Z [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-08T10:44:04.007Z [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-08T10:44:04.007Z [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-08T10:44:04.019Z [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-08T10:44:04.019Z [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-08T10:44:04.019Z [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-08T10:44:04.472Z [INFO]: Initializing Document Processing Pipeline...
+2026-06-08T10:44:04.472Z [INFO]: Document Processing Pipeline: Kafka producer connected
+2026-06-08T10:44:04.472Z [INFO]: Document Processing Pipeline started successfully
+2026-06-08T10:44:04.523Z [INFO]: Initializing Document Processing Pipeline...
+2026-06-08T10:44:04.523Z [INFO]: Document Processing Pipeline: Kafka producer connected
+2026-06-08T10:44:04.523Z [INFO]: Document Processing Pipeline started successfully
+2026-06-08T10:44:05.537Z [INFO]: Initializing HubSpot CRM Adapter...
+2026-06-08T10:44:05.537Z [INFO]: HubSpot CRM Adapter: Kafka producer connected
+2026-06-08T10:44:05.537Z [INFO]: HubSpot CRM Adapter started successfully
+2026-06-08T10:44:05.578Z [INFO]: Initializing HubSpot CRM Adapter...
+2026-06-08T10:44:05.578Z [INFO]: HubSpot CRM Adapter: Kafka producer connected
+2026-06-08T10:44:05.578Z [INFO]: HubSpot CRM Adapter started successfully
+2026-06-08T10:44:05.501Z [INFO]: Initializing Salesforce CRM Adapter...
+2026-06-08T10:44:05.501Z [INFO]: Salesforce CRM Adapter: Kafka producer connected
+2026-06-08T10:44:05.501Z [INFO]: Salesforce CRM Adapter started successfully
+2026-06-08T10:44:05.607Z [INFO]: Initializing Salesforce CRM Adapter...
+2026-06-08T10:44:05.607Z [INFO]: Salesforce CRM Adapter: Kafka producer connected
+2026-06-08T10:44:05.607Z [INFO]: Salesforce CRM Adapter started successfully
+2026-06-08T10:44:06.127Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:44:06.127Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:44:06.127Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:44:06.421Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:44:06.421Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:44:06.421Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:44:06.462Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:44:06.462Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:44:06.462Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:44:06.462Z [DEBUG]: AI Intelligence: Processing product.updated
+2026-06-08T10:44:06.462Z [DEBUG]: AI Intelligence: Generated product_insight insight
+2026-06-08T10:44:06.500Z [INFO]: Initializing AI Intelligence Service...
+2026-06-08T10:44:06.500Z [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-08T10:44:06.500Z [INFO]: AI Intelligence Service started successfully
+2026-06-08T10:44:06.500Z [DEBUG]: AI Intelligence: Processing order.created
+2026-06-08T10:44:05.419Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:44:05.419Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:44:05.419Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:44:05.419Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:05.956Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:44:05.956Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:44:05.956Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:44:05.956Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:06.049Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:44:06.049Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:44:06.049Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:44:06.049Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:06.049Z [DEBUG]: Sourcing Service received message on topic product.query.received:
+2026-06-08T10:44:06.049Z [INFO]: Sourcing Service: Processing product query QUERY-456
+2026-06-08T10:44:06.049Z [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+2026-06-08T10:44:06.446Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:44:06.446Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:44:06.446Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:44:06.446Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:06.446Z [DEBUG]: Sourcing Service received message on topic product.catalog.updated:
+2026-06-08T10:44:06.446Z [INFO]: Sourcing Service: Processing catalog update for product PROD-123
+2026-06-08T10:44:06.497Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:44:06.497Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:44:06.497Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:44:06.497Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:06.497Z [DEBUG]: Sourcing Service received message on topic supplier.profile.updated:
+2026-06-08T10:44:06.497Z [INFO]: Sourcing Service: Processing supplier profile update for SUP-789
+2026-06-08T10:44:06.575Z [INFO]: Initializing Sourcing Service...
+2026-06-08T10:44:06.575Z [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-08T10:44:06.575Z [INFO]: Sourcing Service: Kafka producer connected
+2026-06-08T10:44:06.575Z [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-08T10:44:06.575Z [DEBUG]: Sourcing Service received message on topic market.trend.updated:
+2026-06-08T10:44:06.575Z [INFO]: Sourcing Service: Processing market trend update for textiles
