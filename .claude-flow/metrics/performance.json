@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-06-01T18:41:45.110Z",
+  "timestamp": "2026-06-11T05:35:08.446Z",
   "mode": "headless",
   "workerType": "optimize",
   "model": "sonnet",
-  "durationMs": 172204,
-  "executionId": "optimize_1780339132906_l8i42m",
+  "durationMs": 104930,
+  "executionId": "optimize_1781156003516_ev6m4u",
   "success": true,
   "findings": {
     "sections": [],
     "codeBlocks": []
   },
-  "rawOutputPreview": "Invalid request sent to provider. (request_id=req_87cbbad84279)\n",
-  "rawOutputLength": 64
+  "rawOutputPreview": "Upstream provider NIM returned HTTP 429.\nCategory: rate_limit_error\nMapped message: Provider rate limit reached. Please retry shortly.\n\nUpstream error:\n{\"status\":429,\"title\":\"Too Many Requests\"}\n\nRequest ID: req_26d6950fb6cf\n",
+  "rawOutputLength": 225
 }

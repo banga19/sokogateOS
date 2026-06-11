@@ -143,6 +143,18 @@ class BaseAgent {
         case 'command':
           await this.handleCommand(message.payload);
           break;
+        case 'hermes_mediated_forward':
+          // Handle messages forwarded by Hermes agent
+          logger.debug(`Agent ${this.id} received Hermes-mediated message from ${message.senderId} for target ${message.originalTarget}`);
+          // Extract the original message and process it as if it was sent directly
+          const forwardedMessage = message.payload;
+          // Preserve the original sender information for potential reply handling
+          if (forwardedMessage.requiresResponse && forwardedMessage.replyTo) {
+            // If the original message expected a reply, we need to route through Hermes
+            forwardedMessage.replyTo = this.agentId; // Reply comes back to us
+          }
+          await this.handleIncomingMessage(forwardedMessage);
+          break;
         default:
           logger.warn(`Unknown message type received by agent ${this.id}: ${message.type}`);
       }
@@ -214,6 +226,18 @@ class BaseAgent {
       timestamp: new Date().toISOString(),
       message: 'Query handling not implemented for this agent type'
     };
+  }
+
+  /**
+   * Handle a task delegated from Hermes agent
+   * @param {Object} task - The task to process
+   * @returns {Promise<Object>} - Task result
+   * @protected
+   */
+  async _runAgentTaskForHermes(task) {
+    // By default, delegate to the regular processTask method
+    // Specialized agents can override this for Hermes-specific handling
+    return await this.processTask(task);
   }
 
   /**

@@ -1,11 +1,29 @@
-const { HermesAgent } = require('../src/services/hermes/hermesAgent');
-const logger = require('../utils/logger');
+// Mock sentryService to avoid dependency issues in tests
+jest.mock('../src/services/error/sentryService', () => ({
+  SentryService: {
+    captureException: jest.fn(),
+    captureMessage: jest.fn(),
+    addBreadcrumb: jest.fn(),
+    setUserContext: jest.fn(),
+    setTag: jest.fn(),
+    startTransaction: jest.fn(),
+    isReady: jest.fn(() => true),
+    getStatus: jest.fn(() => ({ initialized: true }))
+  },
+  sentryErrorHandler: jest.fn(),
+  sentryTracingHandler: jest.fn()
+}));
 
 // Mock logger to prevent test output pollution
-jest.spyOn(logger, 'info').mockImplementation(() => {});
-jest.spyOn(logger, 'warn').mockImplementation(() => {});
-jest.spyOn(logger, 'error').mockImplementation(() => {});
-jest.spyOn(logger, 'debug').mockImplementation(() => {});
+jest.mock('../src/utils/logger', () => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn()
+}));
+
+const { HermesAgent } = require('../src/services/hermes/hermesAgent');
+const logger = require('../utils/logger');
 
 describe('Hermes Agent System', () => {
   let hermesAgent;

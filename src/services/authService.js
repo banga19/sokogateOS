@@ -56,6 +56,85 @@ async function register(userData) {
 
     logger.info(`Auth Service: User registered successfully: ${user.email} (${user.role})`);
 
+    // --- TRIGGER SCENARIO: Use onboarding data for personalization ---
+
+    // 1. Send onboarding data as feedback to self-improving loop for long-term model improvement
+    try {
+      const onboardingFeedback = new Feedback({
+        companyId: user.companyId || null,
+        userId: user._id,
+        target: {
+          type: 'general',  // General feedback about user onboarding/profile
+          id: user._id
+        },
+        type: 'explicit',
+        explicit: {
+          category: 'other',
+          comments: JSON.stringify({
+            onboardingData: {
+              role: user.role,
+              preferences: user.preferences,
+              companyId: user.companyId,
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
+              whatsApp: user.whatsApp,
+              termsAccepted: user.termsAccepted,
+              termsAcceptedAt: user.termsAcceptedAt,
+              termsVersion: user.termsVersion
+            }
+          })
+        }
+      });
+
+      await onboardingFeedback.save();
+      logger.info(`Auth Service: Sent onboarding feedback for user ${user._id} to self-improving loop`);
+    } catch (feedbackError) {
+      logger.warn(`Auth Service: Failed to send onboarding feedback:`, feedbackError);
+      // Don't fail registration if feedback submission fails
+    }
+
+    // 2. Send task to Hermes agent for immediate onboarding personalization processing
+    try {
+      // Create Hermes agent instance if not already available
+      // In a production environment, you might want to use dependency injection or a service locator
+      const hermesAgent = new HermesAgent({
+        config: {
+          analysisInterval: 3600000, // 1 hour
+          optimizationInterval: 7200000, // 2 hours
+          complianceInterval: 86400000, // 24 hours
+          intelligenceInterval: 21600000 // 6 hours
+        }
+      });
+
+      await hermesAgent.initialize();
+
+      const personalizationTask = {
+        type: 'onboarding_personalization',
+        payload: {
+          userId: user._id.toString(),
+          onboardingData: {
+            role: user.role,
+            preferences: user.preferences,
+            companyId: user.companyId,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            whatsApp: user.whatsApp
+          }
+        }
+      };
+
+      const result = await hermesAgent.processTask(personalizationTask);
+      logger.info(`Auth Service: Sent onboarding personalization task to Hermes agent for user ${user._id}:`, result);
+
+      // Clean up Hermes agent resources
+      await hermesAgent.shutdown();
+    } catch (hermesError) {
+      logger.warn(`Auth Service: Failed to send onboarding personalization task to Hermes:`, hermesError);
+      // Don't fail registration if Hermes task fails
+    }
+
     return {
       user: sanitizeUser(user),
       tokens

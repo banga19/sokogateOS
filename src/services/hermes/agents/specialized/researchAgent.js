@@ -589,6 +589,31 @@ class ResearchAgent extends BaseAgent {
   }
 
   /**
+   * Handle a task delegated from Hermes agent
+   * @param {Object} task - The task to process
+   * @returns {Promise<Object>} - Task result
+   * @protected
+   */
+  async _runAgentTaskForHermes(task) {
+    // For research agent, we'll enhance the task with research-specific logic
+    // before delegating to the regular _runAgentTask method
+    logger.debug(`ResearchAgent: Enhancing task ${task.type} with research context`);
+
+    // Add research-specific context to the task
+    const enhancedTask = {
+      ...task,
+      researchContext: {
+        timestamp: new Date().toISOString(),
+        agent: 'research',
+        priority: task.priority || 'medium'
+      }
+    };
+
+    // Delegate to the regular agent task processing
+    return await this._runAgentTask(enhancedTask);
+  }
+
+  /**
    * Get agent status
    * @returns {Object} Agent status
    */

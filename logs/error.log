@@ -302,3 +302,23 @@
 2026-06-08T10:44:02.639Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
 2026-06-08T10:44:02.688Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
 2026-06-08T10:44:06.049Z [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+2026-06-11T02:26:10.587Z [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+2026-06-11T02:26:10.691Z [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+2026-06-11T02:26:10.707Z [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+2026-06-11T02:26:10.723Z [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+2026-06-11T02:26:10.737Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+2026-06-11T02:26:10.752Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+2026-06-11T02:28:08.416Z [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+2026-06-11T02:28:08.528Z [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+2026-06-11T02:28:08.544Z [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+2026-06-11T02:28:08.570Z [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+2026-06-11T02:28:08.599Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+2026-06-11T02:28:08.611Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+2026-06-11T02:28:09.426Z [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+2026-06-11T02:30:15.790Z [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+2026-06-11T02:30:15.920Z [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+2026-06-11T02:30:15.941Z [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+2026-06-11T02:30:15.964Z [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+2026-06-11T02:30:15.996Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+2026-06-11T02:30:16.011Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+2026-06-11T02:30:16.823Z [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor

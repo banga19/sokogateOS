@@ -1,5 +1,6 @@
 // Inter-Agent Communication System for sokogateOS Autonomous AI Agent Engine
 // Uses Kafka for message passing between agents
+// Can route messages through a central agent (Hermes) for coordinated intelligence
 
 const { Kafka } = require('kafkajs');
 const logger = require('../utils/logger');
@@ -7,9 +8,14 @@ const logger = require('../utils/logger');
 class AgentCommunication {
   /**
    * @param {string} agentId - Unique identifier for this agent
+   * @param {Object} [options] - Communication options
+   * @param {string} [options.hermesAgentId] - ID of the Hermes agent for mediation
+   * @param {boolean} [options.hermesMediation=false] - Whether to route messages through Hermes
    */
-  constructor(agentId) {
+  constructor(agentId, options = {}) {
     this.agentId = agentId;
+    this.hermesAgentId = options.hermesAgentId || null;
+    this.hermesMediation = options.hermesMediation || false;
     this.kafkaProducer = null;
     this.kafkaConsumer = null;
     this.messageHandlers = new Map(); // messageType => handler function
@@ -104,12 +110,49 @@ class AgentCommunication {
   }
 
   /**
-   * Send a direct message to another agent
+   * Send a message to another agent
+   * Routes through Hermes agent if hermesMediation is enabled
    * @param {string} targetAgentId - ID of the target agent
    * @param {Object} message - Message to send
    * @returns {Promise<void>}
    */
   async sendMessage(targetAgentId, message) {
+    // If Hermes mediation is enabled and we have a Hermes agent ID, route through Hermes
+    if (this.hermesMediation && this.hermesAgentId) {
+      // Create a mediated message that instructs Hermes to forward the message
+      const mediatedMessage = {
+        type: 'hermes_mediated_forward',
+        originalTarget: targetAgentId,
+        payload: message,
+        senderId: this.agentId,
+        timestamp: new Date().toISOString()
+      };
+
+      // Send to Hermes agent instead of direct target
+      if (!this.kafkaProducer) {
+        logger.warn('Cannot send message: Kafka producer not available');
+        // In development, we can log the message instead
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug(`[DEV] Would send mediated message to Hermes ${this.hermesAgentId}:`, mediatedMessage);
+          return;
+        }
+      }
+      try {
+        await this.kafkaProducer.send({
+          topic: `agent.${this.hermesAgentId}.commands`,
+          messages: [{ value: JSON.stringify(mediatedMessage) }]
+        });
+        logger.debug(`Message sent via Hermes ${this.hermesAgentId} to ${targetAgentId}`);
+        return;
+      } catch (error) {
+        logger.warn('(non-critical) Failed to send mediated message:', error.message);
+        // Fall back to direct sending if Hermes routing fails
+        logger.info('Falling back to direct message sending');
+        // Continue to direct sending logic below
+      }
+    }
+
+    // Direct message sending (fallback or when mediation is disabled)
     if (!this.kafkaProducer) {
       logger.warn('Cannot send message: Kafka producer not available');
       // In development, we can log the message instead
@@ -123,7 +166,7 @@ class AgentCommunication {
         topic: `agent.${targetAgentId}.commands`,
         messages: [{ value: JSON.stringify(message) }]
       });
-      logger.debug(`Message sent to agent ${targetAgentId}`);
+      logger.debug(`Message sent directly to agent ${targetAgentId}`);
     } catch (error) {
       logger.warn('(non-critical) Failed to send message:', error.message);
       // In development, we can log the message instead of failing

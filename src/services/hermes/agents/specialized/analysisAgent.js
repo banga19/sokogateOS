@@ -54,11 +54,11 @@ class AnalysisAgent extends BaseAgent {
    */
   async _initializeAnalysisTools() {
     logger.debug('AnalysisAgent: Initializing analysis tools');
-    # In production, this would initialize connections to:
-    # - Statistical analysis libraries
-    # - Data visualization tools
-    # - ML model endpoints for predictive analysis
-    # - Database query engines
+    // In production, this would initialize connections to:
+    // - Statistical analysis libraries
+    // - Data visualization tools
+    // - ML model endpoints for predictive analysis
+    // - Database query engines
   }
 
   /**
@@ -70,21 +70,21 @@ class AnalysisAgent extends BaseAgent {
     try {
       logger.info(`AnalysisAgent: Starting analysis cycle for agent ${this.name}`);
 
-      # Collect data from various sources
+      // Collect data from various sources
       const rawData = await this._collectAnalysisData();
 
-      # Perform different types of analysis
+      // Perform different types of analysis
       const analysisResults = {};
       for (const analysisType of this.analysisTypes) {
         logger.debug(`AnalysisAgent: Performing ${analysisType} analysis`);
         analysisResults[analysisType] = await this._performAnalysisType(analysisType, rawData);
       }
 
-      # Generate insights and recommendations
+      // Generate insights and recommendations
       const insights = await this._generateInsights(analysisResults);
       const recommendations = await this._generateOptimizationRecommendations(insights);
 
-      # Store analysis results
+      // Store analysis results
       await this._storeAnalysisResults({
         analysisTypes: this.analysisTypes,
         rawDataSummary: this._summarizeRawData(rawData),
@@ -94,7 +94,7 @@ class AnalysisAgent extends BaseAgent {
         timestamp: new Date().toISOString()
       });
 
-      # Track analysis metrics
+      // Track analysis metrics
       await this._trackAnalysisMetrics(analysisResults, insights);
 
       logger.info(`AnalysisAgent: Analysis cycle completed for agent ${this.name}`);
@@ -123,7 +123,7 @@ class AnalysisAgent extends BaseAgent {
 
       const data = {};
 
-      # Collect data from each source
+      // Collect data from each source
       for (const source of this.dataSources) {
         try {
           data[source] = await this._collectFromSource(source);
@@ -171,13 +171,13 @@ class AnalysisAgent extends BaseAgent {
    */
   async _collectPosthogData() {
     try {
-      # In a real implementation, this would query PostHog for:
-      # - User engagement metrics
-      # - Feature usage statistics
-      # - Conversion funnels
-      # - Retention cohorts
+      // In a real implementation, this would query PostHog for:
+      // - User engagement metrics
+      // - Feature usage statistics
+      // - Conversion funnels
+      // - Retention cohorts
       return {
-        eventsCollected: 0, # Placeholder
+        eventsCollected: 0, // Placeholder
         uniqueUsers: 0,
         sessions: 0,
         timestamp: new Date().toISOString()
@@ -195,12 +195,12 @@ class AnalysisAgent extends BaseAgent {
    */
   async _collectSentryData() {
     try {
-      # In a real implementation, this would query Sentry for:
-      # - Error frequency and trends
-      # - Error types and severity
-      # - Affected users and sessions
+      // In a real implementation, this would query Sentry for:
+      // - Error frequency and trends
+      // - Error types and severity
+      // - Affected users and sessions
       return {
-        errorsCollected: 0, # Placeholder
+        errorsCollected: 0, // Placeholder
         errorTypes: [],
         affectedUsers: 0,
         timestamp: new Date().toISOString()
@@ -218,13 +218,13 @@ class AnalysisAgent extends BaseAgent {
    */
   async _collectDatabaseMetrics() {
     try {
-      # In a real implementation, this would query database for:
-      # - Query performance metrics
-      # - Connection pool status
-      # - Table sizes and growth rates
-      # - Lock contention and deadlocks
+      // In a real implementation, this would query database for:
+      // - Query performance metrics
+      // - Connection pool status
+      // - Table sizes and growth rates
+      // - Lock contention and deadlocks
       return {
-        queriesPerSecond: 0, # Placeholder
+        queriesPerSecond: 0, // Placeholder
         avgQueryTime: 0,
         connectionPoolUsage: 0,
         timestamp: new Date().toISOString()
@@ -242,13 +242,13 @@ class AnalysisAgent extends BaseAgent {
    */
   async _collectApiLogs() {
     try {
-      # In a real implementation, this would parse API logs for:
-      # - Request/response latency
-      # - Status code distribution
-      # - Endpoint usage frequency
-      # - Error rates by endpoint
+      // In a real implementation, this would parse API logs for:
+      // - Request/response latency
+      // - Status code distribution
+      // - Endpoint usage frequency
+      // - Error rates by endpoint
       return {
-        requestsPerSecond: 0, # Placeholder
+        requestsPerSecond: 0, // Placeholder
         avgResponseTime: 0,
         errorRate: 0,
         timestamp: new Date().toISOString()
@@ -266,11 +266,11 @@ class AnalysisAgent extends BaseAgent {
    */
   async _collectQMeMetrics() {
     try {
-      # In a real implementation, this would query QMe for:
-      # - Task execution statistics
-      # - Agent performance metrics
-      # - Queue depths and processing times
-      # - Failed task analysis
+      // In a real implementation, this would query QMe for:
+      // - Task execution statistics
+      // - Agent performance metrics
+      // - Queue depths and processing times
+      // - Failed task analysis
       if (this.qme && typeof this.qme.getDashboardStatus === 'function') {
         return await this.qme.getDashboardStatus();
       }
@@ -323,11 +323,11 @@ class AnalysisAgent extends BaseAgent {
    * @returns {Promise<Object>} Performance analysis results
    */
   async _analyzePerformance(rawData) {
-    # Would analyze:
-    # - Response time trends
-    # - Throughput metrics
-    # - Resource utilization
-    # - Bottleneck identification
+    // Would analyze:
+    // - Response time trends
+    // - Throughput metrics
+    // - Resource utilization
+    // - Bottleneck identification
     return {
       type: 'performance',
       metrics: {
@@ -351,17 +351,17 @@ class AnalysisAgent extends BaseAgent {
    * @returns {Promise<Object>} Usage patterns analysis
    */
   async _analyzeUsagePatterns(rawData) {
-    # Would analyze:
-    # - Feature adoption rates
-    # - User flow patterns
-    # - Peak usage times
-    # - Drop-off points in funnels
+    // Would analyze:
+    // - Feature adoption rates
+    // - User flow patterns
+    // - Peak usage times
+    // - Drop-off points in funnels
     return {
       type: 'usage_patterns',
       metrics: {
         dailyActiveUsersTrend: 'stable',
         featureAdoptionRate: 0.65,
-        peakUsageHour: 14 # 2 PM
+        peakUsageHour: 14 // 2 PM
       },
       findings: [
         'Usage patterns show consistent engagement',
@@ -379,11 +379,11 @@ class AnalysisAgent extends BaseAgent {
    * @returns {Promise<Object>} Error trends analysis
    */
   async _analyzeErrorTrends(rawData) {
-    # Would analyze:
-    # - Error frequency over time
-    # - Error types and severity distribution
-    # - Correlation with deployments or traffic spikes
-    # - User impact assessment
+    // Would analyze:
+    // - Error frequency over time
+    // - Error types and severity distribution
+    // - Correlation with deployments or traffic spikes
+    // - User impact assessment
     return {
       type: 'error_trends',
       metrics: {
@@ -407,11 +407,11 @@ class AnalysisAgent extends BaseAgent {
    * @returns {Promise<Object>} User behavior analysis
    */
   async _analyzeUserBehavior(rawData) {
-    # Would analyze:
-    # - User journey paths
-    # - Feature interaction sequences
-    # - Conversion funnel analysis
-    # - Retention and churn indicators
+    // Would analyze:
+    // - User journey paths
+    // - Feature interaction sequences
+    // - Conversion funnel analysis
+    // - Retention and churn indicators
     return {
       type: 'user_behavior',
       metrics: {
@@ -435,11 +435,11 @@ class AnalysisAgent extends BaseAgent {
    * @returns {Promise<Object>} System health analysis
    */
   async _analyzeSystemHealth(rawData) {
-    # Would analyze:
-    # - Service availability and uptime
-    # - Dependency health (database, cache, external APIs)
-    # - Resource saturation points
-    # - Recovery time objectives
+    // Would analyze:
+    // - Service availability and uptime
+    // - Dependency health (database, cache, external APIs)
+    // - Resource saturation points
+    // - Recovery time objectives
     return {
       type: 'system_health',
       metrics: {
@@ -463,11 +463,11 @@ class AnalysisAgent extends BaseAgent {
    * @returns {Promise<Object>} Business metrics analysis
    */
   async _analyzeBusinessMetrics(rawData) {
-    # Would analyze:
-    # - Revenue trends and projections
-    # - Customer acquisition costs
-    # - Lifetime value metrics
-    # - Market penetration rates
+    // Would analyze:
+    // - Revenue trends and projections
+    // - Customer acquisition costs
+    // - Lifetime value metrics
+    // - Market penetration rates
     return {
       type: 'business_metrics',
       metrics: {
@@ -494,7 +494,7 @@ class AnalysisAgent extends BaseAgent {
     try {
       const insights = [];
 
-      # Extract key findings from each analysis type
+      // Extract key findings from each analysis type
       for (const [analysisType, results] of Object.entries(analysisResults)) {
         if (results.findings && Array.isArray(results.findings)) {
           for (const finding of results.findings) {
@@ -509,7 +509,7 @@ class AnalysisAgent extends BaseAgent {
         }
       }
 
-      # Look for cross-analysis insights (correlations between different types)
+      // Look for cross-analysis insights (correlations between different types)
       const crossInsights = await this._findCrossAnalysisInsights(analysisResults);
       insights.push(...crossInsights);
 
@@ -530,9 +530,9 @@ class AnalysisAgent extends BaseAgent {
     try {
       const crossInsights = [];
 
-      # Example: Correlate performance with user behavior
+      // Example: Correlate performance with user behavior
       if (analysisResults.performance && analysisResults.user_behavior) {
-        # If performance is good but conversion is low, suggest UX issues
+        // If performance is good but conversion is low, suggest UX issues
         if (
           analysisResults.performance.metrics?.avgResponseTimeTrend === 'stable' &&
           analysisResults.user_behavior.metrics?.conversionRate < 0.3
@@ -547,9 +547,9 @@ class AnalysisAgent extends BaseAgent {
         }
       }
 
-      # Example: Correlate error trends with system health
+      // Example: Correlate error trends with system health
       if (analysisResults.error_trends && analysisResults.system_health) {
-        # If errors are increasing but system health is good, might be application-level issues
+        // If errors are increasing but system health is good, might be application-level issues
         if (
           analysisResults.error_trends.metrics?.errorRateTrend === 'increasing' &&
           analysisResults.system_health.metrics?.uptimePercentage > 99
@@ -581,12 +581,12 @@ class AnalysisAgent extends BaseAgent {
     try {
       const recommendations = [];
 
-      # Filter high-confidence insights
+      // Filter high-confidence insights
       const highConfidenceInsights = insights.filter(
         insight => insight.confidence >= 0.7
       );
 
-      # Map insights to recommendations
+      // Map insights to recommendations
       for (const insight of highConfidenceInsights) {
         const recommendation = this._mapInsightToRecommendation(insight);
         if (recommendation) {
@@ -594,7 +594,7 @@ class AnalysisAgent extends BaseAgent {
         }
       }
 
-      # Add any general recommendations based on analysis completeness
+      // Add any general recommendations based on analysis completeness
       const generalRecs = await this._generateGeneralRecommendations(analysisResults);
       recommendations.push(...generalRecs);
 
@@ -666,7 +666,7 @@ class AnalysisAgent extends BaseAgent {
       };
     }
 
-    # Default recommendation for analysis insights
+    // Default recommendation for analysis insights
     return {
       type: 'analysis_recommendation',
       priority: 'low',
@@ -689,7 +689,7 @@ class AnalysisAgent extends BaseAgent {
     try {
       const recommendations = [];
 
-      # Check if we have sufficient data for meaningful analysis
+      // Check if we have sufficient data for meaningful analysis
       const hasSufficientData = Object.values(analysisResults).some(
         result => result.metrics && Object.keys(result.metrics).length > 0
       );
@@ -724,15 +724,15 @@ class AnalysisAgent extends BaseAgent {
     try {
       logger.debug('AnalysisAgent: Storing analysis results');
 
-      # In a real implementation, this would:
-      # 1. Store results in time-series database for trend analysis
-      # 2. Flag significant findings for alerting
-      # 3. Update dashboards and reports
-      # 4. Potentially feed into predictive models
+      // In a real implementation, this would:
+      // 1. Store results in time-series database for trend analysis
+      // 2. Flag significant findings for alerting
+      // 3. Update dashboards and reports
+      // 4. Potentially feed into predictive models
 
       logger.info('AnalysisAgent: Analysis results stored');
 
-      # Could trigger self-improving loop feedback
+      // Could trigger self-improving loop feedback
       if (this.hermes && typeof this.hermes.triggerSelfImprovingFeedback === 'function') {
         this.hermes.triggerSelfImprovingFeedback({
           source: `analysis_agent_${this.name}`,
@@ -747,7 +747,7 @@ class AnalysisAgent extends BaseAgent {
       }
     } catch (error) {
       logger.warn(`AnalysisAgent: Failed to store analysis results:`, error);
-      # Don't throw - storage failures shouldn't break the analysis cycle
+      // Don't throw - storage failures shouldn't break the analysis cycle
     }
   }
 
@@ -794,7 +794,7 @@ class AnalysisAgent extends BaseAgent {
    */
   async _trackAnalysisMetrics(analysisResults, insights) {
     try {
-      # Track metrics in PostHog or other analytics
+      // Track metrics in PostHog or other analytics
       this.trackEvent('analysis_cycle_completed', {
         analysisTypesPerformed: Object.keys(analysisResults).length,
         successfulAnalyses: Object.values(analysisResults).filter(r => !r.error).length,
@@ -806,6 +806,539 @@ class AnalysisAgent extends BaseAgent {
     } catch (error) {
       logger.warn(`AnalysisAgent: Failed to track analysis metrics:`, error);
     }
+  }
+
+  /**
+   * Handle a task delegated from Hermes agent
+   * @param {Object} task - The task to process
+   * @returns {Promise<Object>} - Task result
+   * @protected
+   */
+  async _runAgentTaskForHermes(task) {
+    // Handle onboarding personalization tasks
+    if (task.type === 'onboarding_personalization') {
+      logger.debug(`AnalysisAgent: Processing onboarding personalization task for user ${task.payload?.userId}`);
+
+      try {
+        // Extract onboarding data from task payload
+        const { userId, onboardingData } = task.payload || {};
+
+        if (!userId) {
+          throw new Error('User ID is required for onboarding personalization');
+        }
+
+        // Process the onboarding data to generate personalization insights
+        const personalizationResult = await this._processOnboardingData(userId, onboardingData || {});
+
+        // Learn from the task outcome via self-improving loop
+        await this._learnFromTask(task, personalizationResult, true);
+
+        return {
+          success: true,
+          result: personalizationResult
+        };
+      } catch (error) {
+        logger.error(`AnalysisAgent: Onboarding personalization failed:`, error);
+        // Learn from the task outcome via self-improving loop
+        await this._learnFromTask(task, null, false, error.message);
+        throw error;
+      }
+    }
+
+    // For all other tasks, delegate to the regular agent task processing
+    logger.debug(`AnalysisAgent: Delegating task ${task.type} to regular processing`);
+    return await this._runAgentTask(task);
+  }
+
+  /**
+   * Process onboarding data to generate personalization insights
+   * @private
+   * @param {string} userId - The user ID
+   * @param {Object} onboardingData - The onboarding data from user registration
+   * @returns {Promise<Object>} Personalization insights and recommendations
+   */
+  async _processOnboardingData(userId, onboardingData) {
+    logger.debug(`AnalysisAgent: Processing onboarding data for user ${userId}`);
+
+    try {
+      // Extract relevant data for personalization
+      const {
+        role,
+        preferences = {},
+        companyId,
+        name,
+        email,
+        phone,
+        whatsApp
+      } = onboardingData;
+
+      // Analyze the onboarding data to determine personalization strategies
+
+      // 1. Role-based personalization
+      const roleBasedInsights = this._analyzeRoleForPersonalization(role);
+
+      // 2. Preference-based personalization
+      const preferenceBasedInsights = this._analyzePreferencesForPersonalization(preferences);
+
+      // 3. Company/context-based personalization (if companyId is available)
+      const contextBasedInsights = companyId ?
+        this._analyzeContextForPersonalization(companyId, onboardingData) :
+        { insights: [], recommendations: [] };
+
+      // 4. Communication channel personalization
+      const channelBasedInsights = this._analyzeChannelsForPersonalization({ phone, whatsApp });
+
+      // Combine all insights
+      const allInsights = [
+        ...roleBasedInsights.insights,
+        ...preferenceBasedInsights.insights,
+        ...contextBasedInsights.insights,
+        ...channelBasedInsights.insights
+      ];
+
+      const allRecommendations = [
+        ...roleBasedInsights.recommendations,
+        ...preferenceBasedInsights.recommendations,
+        ...contextBasedInsights.recommendations,
+        ...channelBasedInsights.recommendations
+      ];
+
+      // Generate a personalization profile
+      const personalizationProfile = {
+        userId,
+        timestamp: new Date().toISOString(),
+        personalizationType: 'onboarding_based',
+        insights: allInsights,
+        recommendations: allRecommendations,
+        settings: {
+          // Generate personalized settings based on the analysis
+          interface: this._generateInterfacePreferences(role, preferences),
+          notifications: this._generateNotificationPreferences(preferences, { phone, whatsApp }),
+          language: preferences.language || 'en',
+          timezone: preferences.timezone || 'Africa/Nairobi',
+          theme: preferences.theme || 'system'
+        }
+      };
+
+      logger.info(`AnalysisAgent: Generated personalization profile for user ${userId}`);
+
+      return {
+        success: true,
+        userId,
+        personalizationProfile,
+        insightsCount: allInsights.length,
+        recommendationsCount: allRecommendations.length,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      logger.error(`AnalysisAgent: Failed to process onboarding data for user ${userId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Analyze user role for personalization insights
+   * @private
+   * @param {string} role - The user's role
+   * @returns {Object} Insights and recommendations for role-based personalization
+   */
+  _analyzeRoleForPersonalization(role) {
+    const rolePersonalizationMap = {
+      'procurement_manager': {
+        insights: [
+          'User is focused on product sourcing and supplier management',
+          'Prioritize supplier discovery and quotation features',
+          'User likely needs bulk pricing and MOQ information'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show sourcing dashboard and supplier search prominently',
+            description: 'Prioritize sourcing-related features for procurement managers'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight supplier verification and quality assessment tools',
+            description: 'Emphasize trust-building features important for procurement'
+          }
+        ]
+      },
+      'logistics_coordinator': {
+        insights: [
+          'User is focused on shipment tracking and logistics coordination',
+          'Prioritize tracking features and delivery management',
+          'User needs real-time visibility and exception handling'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show logistics dashboard and tracking features prominently',
+            description: 'Prioritize logistics-related features for coordinators'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight delivery timeline and exception management tools',
+            description: 'Emphasize reliability and visibility features'
+          }
+        ]
+      },
+      'sales_team': {
+        insights: [
+          'User is focused on product customization and client management',
+          'Prioritize customization tools and customer relationship features',
+          'User needs configuration and pricing flexibility'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show customization studio and customer management features',
+            description: 'Prioritize customization and sales-related features'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight product configuration and quote generation tools',
+            description: 'Emphasize customization capabilities'
+          }
+        ]
+      },
+      'executive': {
+        insights: [
+          'User is focused on dashboard-level oversight and strategic decisions',
+          'Prioritize analytics, reports, and high-level metrics',
+          'User needs aggregated data and trend analysis'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show analytics dashboard and executive reports prominently',
+            description: 'Prioritize overview and analytics features for executives'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight KPIs, trend analysis, and benchmarking tools',
+            description: 'Emphasize data-driven decision making features'
+          }
+        ]
+      },
+      'finance': {
+        insights: [
+          'User is focused on pricing, payments, and financial data',
+          'Prioritize billing, invoicing, and financial reporting features',
+          'User needs payment processing and financial control tools'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show billing dashboard and financial management features',
+            description: 'Prioritize financial-related features for finance users'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight payment processing, invoicing, and financial reporting tools',
+            description: 'Emphasize financial control and accuracy features'
+          }
+        ]
+      },
+      'company_admin': {
+        insights: [
+          'User has administrative responsibilities within their company',
+          'Prioritize user management, settings, and configuration features',
+          'User needs oversight and control capabilities'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show admin panel and user management features prominently',
+            description: 'Prioritize administrative and management features'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight role management, permission settings, and audit tools',
+            description: 'Emphasize governance and control features'
+          }
+        ]
+      },
+      'super_admin': {
+        insights: [
+          'User has full system access and oversees the entire platform',
+          'Prioritize system administration, monitoring, and global settings',
+          'User needs oversight of all platform aspects'
+        ],
+        recommendations: [
+          {
+            type: 'feature_priority',
+            priority: 'high',
+            action: 'Show system administration dashboard and global controls',
+            description: 'Prioritize system-wide administrative features'
+          },
+          {
+            type: 'content_personalization',
+            priority: 'medium',
+            action: 'Highlight system monitoring, user management, and configuration tools',
+            description: 'Emphasize platform oversight and control features'
+          }
+        ]
+      }
+    };
+
+    return rolePersonalizationMap[role] || {
+      insights: ['User role not recognized for specific personalization'],
+      recommendations: [
+        {
+          type: 'general_personalization',
+          priority: 'low',
+          action: 'Apply default personalization based on available preferences',
+          description: 'Use standard personalization approach for unrecognized roles'
+        }
+      ]
+    };
+  }
+
+  /**
+   * Analyze user preferences for personalization insights
+   * @private
+   * @param {Object} preferences - The user's preferences
+   * @returns {Object} Insights and recommendations for preference-based personalization
+   */
+  _analyzePreferencesForPersonalization(preferences) {
+    const {
+      language = 'en',
+      notifications = {},
+      timezone = 'Africa/Nairobi',
+      theme = 'system'
+    } = preferences;
+
+    const insights = [];
+    const recommendations = [];
+
+    // Language-based insights
+    if (language !== 'en') {
+      insights.push(`User prefers ${language} language interface`);
+      recommendations.push({
+        type: 'language_personalization',
+        priority: 'high',
+        action: `Set interface language to ${language}`,
+        description: `Personalize language to user's preference: ${language}`,
+        confidence: 0.9
+      });
+    }
+
+    // Notification preferences
+    const notificationChannels = [];
+    if (notifications.email === false) notificationChannels.push('email');
+    if (notifications.sms === false) notificationChannels.push('sms');
+    if (notifications.whatsapp === false) notificationChannels.push('whatsapp');
+    if (notifications.push === false) notificationChannels.push('push');
+
+    if (notificationChannels.length > 0) {
+      insights.push(`User has disabled notifications for: ${notificationChannels.join(', ')}`);
+      recommendations.push({
+        type: 'notification_personalization',
+        priority: 'medium',
+        action: `Respect user's notification preferences by disabling: ${notificationChannels.join(', ')}`,
+        description: 'Honor user\'s chosen communication channels',
+        confidence: 0.95
+      });
+    }
+
+    // Timezone insights
+    if (timezone !== 'Africa/Nairobi') {
+      insights.push(`User is in timezone: ${timezone}`);
+      recommendations.push({
+        type: 'timezone_personalization',
+        priority: 'medium',
+        action: `Set timezone to ${timezone} for date/time displays`,
+        description: `Personalize timezone to user's location: ${timezone}`,
+        confidence: 0.9
+      });
+    }
+
+    // Theme preferences
+    if (theme !== 'system') {
+      insights.push(`User prefers ${theme} interface theme`);
+      recommendations.push({
+        type: 'theme_personalization',
+        priority: 'medium',
+        action: `Set interface theme to ${theme}`,
+        description: `Personalize visual theme to user's preference: ${theme}`,
+        confidence: 0.85
+      });
+    }
+
+    return { insights, recommendations };
+  }
+
+  /**
+   * Analyze company/context for personalization insights
+   * @private
+   * @param {string} companyId - The company ID
+   * @param {Object} onboardingData - The full onboarding data
+   * @returns {Object} Insights and recommendations for context-based personalization
+   */
+  _analyzeContextForPersonalization(companyId, onboardingData) {
+    // In a real implementation, this would look up company information
+    // from the database to provide industry-specific personalization
+
+    // For now, we'll return general context-based insights
+    return {
+      insights: [
+        'User belongs to a specific company context',
+        'Company-specific features and settings may be relevant'
+      ],
+      recommendations: [
+        {
+          type: 'context_personalization',
+          priority: 'low',
+          action: 'Apply company-specific settings and features when available',
+          description: 'Personalize based on company context and industry',
+          confidence: 0.6
+        }
+      ]
+    };
+  }
+
+  /**
+   * Analyze communication channels for personalization insights
+   * @private
+   * @param {Object} channels - Communication channel information
+   * @returns {Object} Insights and recommendations for channel-based personalization
+   */
+  _analyzeChannelsForPersonalization(channels) {
+    const { phone, whatsApp } = channels;
+
+    const insights = [];
+    const recommendations = [];
+
+    // Phone number insights
+    if (phone) {
+      insights.push('User has provided a phone number for contact');
+      recommendations.push({
+        type: 'channel_personalization',
+        priority: 'medium',
+        action: 'Enable SMS notifications if user consents',
+        description: 'Utilize phone number for communication when appropriate',
+        confidence: 0.7
+      });
+    } else {
+      insights.push('User has not provided a phone number');
+      recommendations.push({
+        type: 'channel_personalization',
+        priority: 'low',
+        action: 'Rely on email and in-app notifications for communication',
+        description: 'Adjust communication strategy based on available contact info',
+        confidence: 0.8
+      });
+    }
+
+    // WhatsApp insights
+    if (whatsApp) {
+      insights.push('User has provided a WhatsApp number');
+      recommendations.push({
+        type: 'channel_personalization',
+        priority: 'medium',
+        action: 'Enable WhatsApp notifications if user consents',
+        description: 'Utilize WhatsApp for communication in regions where it\'s prevalent',
+        confidence: 0.8
+      });
+    } else {
+      insights.push('User has not provided a WhatsApp number');
+    }
+
+    return { insights, recommendations };
+  }
+
+  /**
+   * Generate interface preferences based on role and preferences
+   * @private
+   * @param {string} role - The user's role
+   * @param {Object} preferences - The user's preferences
+   * @returns {Object} Personalized interface settings
+   */
+  _generateInterfacePreferences(role, preferences) {
+    // Base interface preferences
+    const interfacePrefs = {
+      dashboardLayout: 'default',
+      itemsPerPage: 25,
+      showTutorials: true,
+      enableTooltips: true,
+      dateFormat: 'MM/DD/YYYY',
+      timeFormat: '24h'
+    };
+
+    // Adjust based on role
+    switch (role) {
+      case 'executive':
+        interfacePrefs.dashboardLayout = 'analytics_focused';
+        interfacePrefs.itemsPerPage = 10;  // Executives prefer summary views
+        break;
+      case 'finance':
+        interfacePrefs.dashboardLayout = 'data_detailed';
+        interfacePrefs.itemsPerPage = 50;   // Finance users need detailed views
+        break;
+      case 'procurement_manager':
+        interfacePrefs.dashboardLayout = 'sourcing_focused';
+        break;
+      case 'logistics_coordinator':
+        interfacePrefs.dashboardLayout = 'tracking_focused';
+        interfacePrefs.itemsPerPage = 30;
+        break;
+    }
+
+    // Adjust based on preferences
+    if (preferences.theme === 'dark') {
+      interfacePrefs.theme = 'dark';
+    } else if (preferences.theme === 'light') {
+      interfacePrefs.theme = 'light';
+    }
+
+    return interfacePrefs;
+  }
+
+  /**
+   * Generate notification preferences based on preferences and channels
+   * @private
+   * @param {Object} preferences - The user's preferences
+   * @param {Object} channels - Communication channel information
+   * @returns {Object} Personalized notification settings
+   */
+  _generateNotificationPreferences(preferences, channels) {
+    const { phone, whatsApp } = channels;
+    const {
+      email: emailEnabled = true,
+      sms: smsEnabled = true,
+      whatsapp: whatsappEnabled = true,
+      push: pushEnabled = true
+    } = preferences;
+
+    // Start with user preferences
+    const notificationPrefs = {
+      email: emailEnabled,
+      sms: smsEnabled && !!phone,  // Only enable SMS if phone is provided
+      whatsapp: whatsappEnabled && !!whatsApp,  // Only enable WhatsApp if number is provided
+      push: pushEnabled,
+      frequency: 'real_time',
+      digestTiming: '09:00'  // Daily digest at 9 AM local time
+    };
+
+    // Adjust digest timing based on timezone if available
+    if (preferences.timezone) {
+      // In a real implementation, we would adjust the digest time based on timezone
+      // For now, we'll keep it as is
+    }
+
+    return notificationPrefs;
   }
 
   /**
@@ -821,7 +1354,7 @@ class AnalysisAgent extends BaseAgent {
       analysisTypes: this.analysisTypes,
       dataSources: this.dataSources,
       analysisInterval: this.analysisInterval,
-      lastAnalysisTypes: [] # Would be populated from recent runs
+      lastAnalysisTypes: [] // Would be populated from recent runs
     };
   }
 }

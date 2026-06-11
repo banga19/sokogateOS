@@ -164,6 +164,128 @@ class HermesAgent {
     };
   }
 
+  /**
+   * Process a task using Hermes' specialized agents
+   * @param {Object} task - The task to process
+   * @returns {Promise<Object>} - Task result
+   */
+  async processTask(task) {
+    try {
+      logger.info(`Hermes Agent ${this.hermesId}: Processing task ${task.type || 'unknown'}`);
+
+      // Analyze the task and delegate to appropriate specialized agent
+      const result = await this._delegateTaskToSpecializedAgent(task);
+
+      // Learn from the task outcome via self-improving loop
+      await this._learnFromTask(task, result, true);
+
+      return { success: true, result };
+    } catch (error) {
+      logger.error(`Hermes Agent ${this.hermesId}: Task processing failed:`, error);
+      // Learn from the task outcome via self-improving loop
+      await this._learnFromTask(task, null, false, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Delegate task to appropriate specialized agent
+   * @param {Object} task - The task to delegate
+   * @returns {Promise<Object>} - Task result
+   * @private
+   */
+  async _delegateTaskToSpecializedAgent(task) {
+    const taskType = task.type || '';
+
+    // Map task types to specialized agents
+    const taskToAgentMap = {
+      // Research tasks
+      'market_research': 'research',
+      'trend_analysis': 'research',
+      'competitor_analysis': 'research',
+      'opportunity_identification': 'research',
+      'information_gathering': 'research',
+
+      // Analysis tasks
+      'data_analysis': 'analysis',
+      'pattern_recognition': 'analysis',
+      'performance_analysis': 'analysis',
+      'risk_assessment': 'analysis',
+      'forecasting': 'analysis',
+      'onboarding_personalization': 'analysis', // Personalize user experience based on onboarding data
+
+      // Optimization tasks
+      'route_optimization': 'optimization',
+      'resource_allocation': 'optimization',
+      'process_optimization': 'optimization',
+      'cost_reduction': 'optimization',
+      'efficiency_improvement': 'optimization',
+
+      // Compliance tasks
+      'regulatory_check': 'compliance',
+      'compliance_verification': 'compliance',
+      'risk_compliance': 'compliance',
+      'audit_preparation': 'compliance',
+      'policy_review': 'compliance',
+
+      // Market intelligence tasks
+      'market_intelligence': 'marketIntelligence',
+      'competitive_intelligence': 'marketIntelligence',
+      'customer_insights': 'marketIntelligence',
+      'pricing_analysis': 'marketIntelligence',
+      'market_entry_strategy': 'marketIntelligence'
+    };
+
+    const agentName = taskToAgentMap[taskType] || 'research'; // Default to research for unknown tasks
+    const agent = this.agents[agentName];
+
+    if (!agent) {
+      throw new Error(`Specialized agent '${agentName}' not found for task type '${taskType}'`);
+    }
+
+    // Initialize the agent if not already initialized
+    if (!agent.isInitialized) {
+      await agent._initializeAgent();
+    }
+
+    // Execute the task using the specialized agent
+    return await agent._runAgentTaskForHermes(task);
+  }
+
+  /**
+   * Learn from task execution and outcomes via self-improving loop
+   * @param {Object} task - The task that was executed
+   * @param {Object} result - The task result
+   * @param {boolean} success - Whether the task succeeded
+   * @param {string} [errorMessage] - Optional error message
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _learnFromTask(task, result, success, errorMessage) {
+    try {
+      const feedback = {
+        type: 'hermes_task_processing',
+        timestamp: new Date().toISOString(),
+        taskType: task.type || 'unknown',
+        success,
+        result: result ? JSON.stringify(result).substring(0, 500) : null,
+        error: errorMessage || null,
+        metadata: {
+          duration: Date.now() - (task.startedAt || Date.now()),
+          complexity: task.complexity || 'medium'
+        }
+      };
+
+      // Send to self-improving loop engine
+      const selfImprovingLoop = require('../../engine/selfImprovingLoop');
+      await selfImprovingLoop.submitFeedback(feedback);
+
+      logger.debug(`Hermes Agent ${this.hermesId}: Learned from task: ${task.type || 'unknown'}`);
+    } catch (error) {
+      logger.warn(`Hermes Agent ${this.hermesId}: Failed to record learning for task:`, error.message);
+    }
+  }
+
   shutdown() {
     this.stopScheduledRuns();
     logger.info(`Hermes Agent ${this.hermesId}: Shutdown complete`);
