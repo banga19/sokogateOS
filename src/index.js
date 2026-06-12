@@ -12,6 +12,8 @@ const qme = require('./qme/wrapper');
 const selfImprovingLoop = require('./engine/selfImprovingLoop');
 const langchainOrchestrator = require('./services/langchainOrchestrator');
 const { HermesAgent } = require('./services/hermes/hermesAgent');
+const agentService = require('./services/agentService');
+const { cloudflareService } = require('./services/cloudflareService');
 
 // Phase 1 Services
 const watiService = require('./services/watiService');
@@ -48,7 +50,8 @@ const apiRateLimiter = new RateLimiterMemory({
 });
 
 app.use('/api/auth', (req, res, next) => {
-  authRateLimiter.consume(req.ip)
+  authRateLimiter
+    .consume(req.ip)
     .then(() => next())
     .catch((err) => {
       if (err instanceof Error) {
@@ -61,7 +64,8 @@ app.use('/api/auth', (req, res, next) => {
 });
 
 app.use('/api/v1', (req, res, next) => {
-  apiRateLimiter.consume(req.ip)
+  apiRateLimiter
+    .consume(req.ip)
     .then(() => next())
     .catch((err) => {
       if (err instanceof Error) {
@@ -75,7 +79,10 @@ app.use('/api/v1', (req, res, next) => {
 // CORS - allow frontend in development
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
@@ -95,8 +102,8 @@ app.get('/health', (req, res) => {
       auth: true,
       qme: true,
       kafka: true,
-      selfImprovingLoop: true
-    }
+      selfImprovingLoop: true,
+    },
   });
 });
 
@@ -110,7 +117,10 @@ const startServer = async () => {
       await connectDB();
       logger.info('SokogateOS: Database connection initialized');
     } catch (dbError) {
-      logger.warn('SokogateOS: Database connection failed (continuing without DB):', dbError.message);
+      logger.warn(
+        'SokogateOS: Database connection failed (continuing without DB):',
+        dbError.message
+      );
       // Continue without database in development
     }
 
@@ -119,14 +129,17 @@ const startServer = async () => {
       const qmeInitialized = await qme.initialize();
       if (qmeInitialized) {
         logger.info('SokogateOS: QMe task runner initialized');
-        qme.startDashboard().catch(err => {
+        qme.startDashboard().catch((err) => {
           logger.warn('SokogateOS: QMe dashboard start (non-critical):', err.message);
         });
       } else {
         logger.info('SokogateOS: QMe task runner initialization skipped');
       }
     } catch (qmeError) {
-      logger.warn('SokogateOS: QMe initialization failed (continuing without QMe):', qmeError.message);
+      logger.warn(
+        'SokogateOS: QMe initialization failed (continuing without QMe):',
+        qmeError.message
+      );
       // Continue without QMe
     }
 
@@ -135,7 +148,10 @@ const startServer = async () => {
       await langchainOrchestrator.initializeLangChain();
       logger.info('SokogateOS: LangChain orchestrator initialized');
     } catch (langchainError) {
-      logger.warn('SokogateOS: LangChain initialization failed (continuing without LangChain):', langchainError.message);
+      logger.warn(
+        'SokogateOS: LangChain initialization failed (continuing without LangChain):',
+        langchainError.message
+      );
     }
 
     // Initialize Hermes agent system
@@ -145,8 +161,8 @@ const startServer = async () => {
           analysisInterval: 3600000, // 1 hour
           optimizationInterval: 7200000, // 2 hours
           complianceInterval: 86400000, // 24 hours
-          intelligenceInterval: 21600000 // 6 hours
-        }
+          intelligenceInterval: 21600000, // 6 hours
+        },
       });
 
       await hermesAgent.initialize();
@@ -158,7 +174,38 @@ const startServer = async () => {
       // Make available for potential API routes
       app.locals.hermesAgent = hermesAgent;
     } catch (hermesError) {
-      logger.warn('SokogateOS: Hermes initialization failed (continuing without Hermes):', hermesError.message);
+      logger.warn(
+        'SokogateOS: Hermes initialization failed (continuing without Hermes):',
+        hermesError.message
+      );
+    }
+
+    // Initialize agent service
+    try {
+      await agentService.initialize();
+      logger.info('SokogateOS: Agent service initialized');
+      // Make agent service available for potential API routes
+      app.locals.agentService = agentService;
+    } catch (agentServiceError) {
+      logger.error('SokogateOS: Agent service initialization failed:', agentServiceError.message);
+      throw agentServiceError; // This is critical for the agent engine
+    }
+
+    // Initialize Cloudflare service
+    try {
+      await cloudflareService.initialize();
+      logger.info('SokogateOS: Cloudflare service initialized');
+      // Make Cloudflare service available for potential API routes
+      app.locals.cloudflareService = cloudflareService;
+
+      // Apply Cloudflare-specific headers middleware
+      app.use(cloudflareService.getHeadersMiddleware());
+    } catch (cloudflareError) {
+      logger.warn(
+        'SokogateOS: Cloudflare initialization failed (continuing without Cloudflare):',
+        cloudflareError.message
+      );
+      // Continue without Cloudflare - not critical for basic operation
     }
 
     // Initialize Kafka
@@ -170,11 +217,14 @@ const startServer = async () => {
         'inventory.changed',
         'supplier.risk.updated',
         'customer.feedback.received',
-        'document.processed'
+        'document.processed',
       ]);
       logger.info('SokogateOS: Kafka initialized');
     } catch (kafkaError) {
-      logger.warn('SokogateOS: Kafka initialization failed (continuing without Kafka):', kafkaError.message);
+      logger.warn(
+        'SokogateOS: Kafka initialization failed (continuing without Kafka):',
+        kafkaError.message
+      );
       // Continue without Kafka
     }
 
@@ -184,10 +234,16 @@ const startServer = async () => {
     const { startSalesforceCrmAdapter } = require('./ingestion/adapters/salesforceCrmAdapter');
     const { startOracleProductAdapter } = require('./ingestion/adapters/oracleProductAdapter');
     const { startHubspotCrmAdapter } = require('./ingestion/adapters/hubspotCrmAdapter');
-    const { startFlexportLogisticsAdapter } = require('./ingestion/adapters/flexportLogisticsAdapter');
-    const { startShipBobLogisticsAdapter } = require('./ingestion/adapters/shipbobLogisticsAdapter');
+    const {
+      startFlexportLogisticsAdapter,
+    } = require('./ingestion/adapters/flexportLogisticsAdapter');
+    const {
+      startShipBobLogisticsAdapter,
+    } = require('./ingestion/adapters/shipbobLogisticsAdapter');
     const { startRestApiAdapter } = require('./ingestion/adapters/restApiAdapter');
-    const { startDocumentProcessingPipeline } = require('./ingestion/processors/documentProcessingPipeline');
+    const {
+      startDocumentProcessingPipeline,
+    } = require('./ingestion/processors/documentProcessingPipeline');
     const { startAiIntelligenceService } = require('./services/aiIntelligenceService');
     const { startWorkflowAutomationService } = require('./services/workflowAutomationService');
     const { startCustomizationService } = require('./services/customizationService');
@@ -215,29 +271,36 @@ const startServer = async () => {
       startSupplierTrustService(),
       startMpesaService(),
       // Phase 2: Cross-Border Customs Engine
-      startCustomsEngineService()
+      startCustomsEngineService(),
     ];
 
     // Start all services and log individual successes/failures
     for (const startPromise of serviceStarts) {
-      startPromise.then(() => {
-        // Service started successfully
-      }).catch(err => {
-        logger.error('SokogateOS: Service failed to start:', err.message);
-      });
+      startPromise
+        .then(() => {
+          // Service started successfully
+        })
+        .catch((err) => {
+          logger.error('SokogateOS: Service failed to start:', err.message);
+        });
     }
 
     // ===== START SELF-IMPROVING LOOP ENGINE =====
     // This is the core differentiator — turns company artifacts into a self-improving loop
     try {
-      selfImprovingLoop.startLoopEngine({
-        intervalMs: 5 * 60 * 1000,
-        batchSize: 100
-      }).then(metrics => {
-        logger.info(`SokogateOS: Self-Improving Loop started - processing feedback every 5 minutes`);
-      }).catch(err => {
-        logger.error('SokogateOS: Failed to start Self-Improving Loop:', err.message);
-      });
+      selfImprovingLoop
+        .startLoopEngine({
+          intervalMs: 5 * 60 * 1000,
+          batchSize: 100,
+        })
+        .then((metrics) => {
+          logger.info(
+            `SokogateOS: Self-Improving Loop started - processing feedback every 5 minutes`
+          );
+        })
+        .catch((err) => {
+          logger.error('SokogateOS: Failed to start Self-Improving Loop:', err.message);
+        });
     } catch (loopError) {
       logger.error('SokogateOS: Failed to start Self-Improving Loop engine:', loopError.message);
     }
@@ -262,7 +325,22 @@ const startServer = async () => {
       const customsEngineRoutes = require('./routes/customsEngine');
       app.use('/api/customs', customsEngineRoutes);
 
+      const teamsRoutes = require('./routes/teams');
+      const adminRoutes = require('./routes/admin');
+      app.use('/api/teams', teamsRoutes);
+      app.use('/api/admin', adminRoutes);
+
       logger.info('SokogateOS: API routes configured');
+
+      // Register agent routes
+      try {
+        const agentRoutes = require('./routes/agents');
+        app.use('/api/agents', agentRoutes);
+        logger.info('SokogateOS: Agent routes configured');
+      } catch (agentRoutesError) {
+        logger.error('SokogateOS: Failed to setup agent routes:', agentRoutesError.message);
+        // Don't throw here as agents might not be critical for basic operation
+      }
     } catch (routesError) {
       logger.error('SokogateOS: Failed to setup API routes:', routesError.message);
       throw routesError; // Re-throw as this is critical
@@ -298,7 +376,7 @@ const startServer = async () => {
         const feedback = await selfImprovingLoop.submitFeedback({
           ...req.body,
           companyId: req.user?.companyId || 'system',
-          userId: req.user?.id || 'system'
+          userId: req.user?.id || 'system',
         });
         res.status(201).json({ success: true, data: feedback });
       } catch (err) {
@@ -309,9 +387,9 @@ const startServer = async () => {
     // Hermes agent system endpoints
     app.get('/api/hermes/status', async (req, res) => {
       try {
-        const status = app.locals.hermesAgent ?
-          await app.locals.hermesAgent.getStatus() :
-          { error: 'Hermes agent not available' };
+        const status = app.locals.hermesAgent
+          ? await app.locals.hermesAgent.getStatus()
+          : { error: 'Hermes agent not available' };
         res.json({ success: true, data: status });
       } catch (err) {
         res.status(500).json({ success: false, error: err.message });
