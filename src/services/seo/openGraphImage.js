@@ -17,7 +17,7 @@ const DEFAULT_CONFIG = {
   fontFamily: 'Arial',
   logoPath: '/assets/logo.png',
   siteName: 'SokogateOS',
-  siteUrl: process.env.SITE_URL || 'https://sokogateos.com'
+  siteUrl: process.env.SITE_URL || 'https://sokogateos.com',
 };
 
 /**
@@ -96,7 +96,11 @@ class OpenGraphImageGenerator {
 
       // Draw logo if available
       try {
-        const logoPath = path.join(process.cwd(), 'public', this.config.logoPath.replace(/^\//, ''));
+        const logoPath = path.join(
+          process.cwd(),
+          'public',
+          this.config.logoPath.replace(/^\//, '')
+        );
         const logoImage = await loadImage(logoPath);
         const logoSize = 80;
         const logoX = 40;
@@ -198,8 +202,8 @@ class OpenGraphImageGenerator {
         height: this.config.height,
         backgroundColor: this.config.backgroundColor,
         titleColor: this.config.titleColor,
-        subtitleColor: this.config.subtitleColor
-      }
+        subtitleColor: this.config.subtitleColor,
+      },
     });
 
     // Create hash for cache key
@@ -237,3 +241,22 @@ class OpenGraphImageGenerator {
   async getCacheStats() {
     try {
       const files = await fs.readdir(this.uploadsDir);
+      const pngFiles = files.filter((file) => file.endsWith('.png'));
+      let totalSize = 0;
+
+      for (const file of pngFiles) {
+        const stats = await fs.stat(path.join(this.uploadsDir, file));
+        totalSize += stats.size;
+      }
+
+      return {
+        totalFiles: pngFiles.length,
+        totalSize: totalSize,
+        averageSize: pngFiles.length > 0 ? Math.round(totalSize / pngFiles.length) : 0,
+      };
+    } catch (error) {
+      logger.error('Failed to get OG image cache stats:', error);
+      throw error;
+    }
+  }
+}

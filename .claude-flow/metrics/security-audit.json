@@ -1,15 +1,12 @@
 {
-  "timestamp": "2026-06-11T05:49:16.831Z",
-  "mode": "headless",
-  "workerType": "audit",
-  "model": "haiku",
-  "durationMs": 129119,
-  "executionId": "audit_1781156827712_cnxgnf",
-  "success": true,
-  "findings": {
-    "status": 429,
-    "title": "Too Many Requests"
+  "timestamp": "2026-06-12T19:06:43.822Z",
+  "mode": "local",
+  "checks": {
+    "envFilesProtected": true,
+    "gitIgnoreExists": true,
+    "noHardcodedSecrets": true
   },
-  "rawOutputPreview": "Upstream provider NIM returned HTTP 429.\nCategory: rate_limit_error\nMapped message: Provider rate limit reached. Please retry shortly.\n\nUpstream error:\n{\"status\":429,\"title\":\"Too Many Requests\"}\n\nRequest ID: req_f2d5dce7dd36\n",
-  "rawOutputLength": 225
+  "riskLevel": "low",
+  "recommendations": [],
+  "note": "Install Claude Code CLI for AI-powered security analysis"
 }

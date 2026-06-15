@@ -28,11 +28,24 @@ class TeamService {
   }
 
   async get(teamId, requesterId, requesterRole) {
-    const team = await Team.findById(teamId);
-    if (!team || !team.isActive) throw new Error('Team not found.');
-    if (team.companyId.toString() !== requesterId && requesterRole !== 'super_admin')
-      throw new Error('Forbidden.');
-    return team;
+    try {
+      const team = await Team.findById(teamId);
+      if (!team || !team.isActive) throw new Error('Team not found.');
+
+      // Super admin can access any team
+      if (requesterRole === 'super_admin') return team;
+
+      // Check that the requester belongs to the same company as the team
+      const user = await User.findById(requesterId).select('companyId');
+      if (!user || user.companyId.toString() !== team.companyId.toString()) {
+        throw new Error('Forbidden.');
+      }
+
+      return team;
+    } catch (error) {
+      logger.error('Error in teamService.get:', error);
+      throw error;
+    }
   }
 
   async update(teamId, userId, { name, description }) {

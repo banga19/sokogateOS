@@ -1,0 +1,96 @@
+{
+  "agents": {
+    "agent-1781189892112-22uk7r": {
+      "agentId": "agent-1781189892112-22uk7r",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T14:58:12.113Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1781190630639-p2zpex": {
+      "agentId": "agent-1781190630639-p2zpex",
+      "agentType": "architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T15:10:30.640Z",
+      "model": "opus",
+      "modelRoutedBy": "default"
+    },
+    "agent-1781195988567-dcve55": {
+      "agentId": "agent-1781195988567-dcve55",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T16:39:48.568Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1781196056941-lvq1bp": {
+      "agentId": "agent-1781196056941-lvq1bp",
+      "agentType": "tester",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T16:40:56.942Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1781198544747-zzw1ms": {
+      "agentId": "agent-1781198544747-zzw1ms",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T17:22:24.747Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1781199457425-7e247c": {
+      "agentId": "agent-1781199457425-7e247c",
+      "agentType": "tester",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T17:37:37.425Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1781200060094-xnmc75": {
+      "agentId": "agent-1781200060094-xnmc75",
+      "agentType": "reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-06-11T17:47:40.094Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    }
+  },
+  "version": "3.0.0"
+}
