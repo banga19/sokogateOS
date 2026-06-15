@@ -23,7 +23,7 @@ jest.mock('../src/utils/logger', () => ({
 }));
 
 const { HermesAgent } = require('../src/services/hermes/hermesAgent');
-const logger = require('../utils/logger');
+const logger = require('../src/utils/logger');
 
 describe('Hermes Agent System', () => {
   let hermesAgent;

@@ -263,3 +263,44 @@ async function runTaskWithRAG(taskName, taskData, agentId = 'unknown') {
   } catch (error) {
     logger.error('Failed to store learning pattern:', error.message);
   }
+}
+
+/**
+ * Legacy runTaskScript function (to be replaced with actual QMe integration)
+ * @param {string} taskName - Name of the task to run
+ * @param {Object} taskData - Data for the task
+ * @returns {Promise<Object>} Task result
+ */
+function runTaskScript(taskName, taskData) {
+  // This is a placeholder - in a real implementation, this would integrate with QMe
+  // For now, return a mock result
+  return {
+    taskName,
+    status: 'completed',
+    result: `Task ${taskName} completed successfully`,
+    timestamp: new Date().toISOString(),
+    data: taskData
+  };
+}
+
+/**
+ * Execute a task with RAG enhancement
+ * @param {string} taskName - Name of the task to execute
+ * @param {Object} taskData - Data for the task
+ * @param {string} agentId - ID of the agent executing the task
+ * @returns {Promise<Object>} Task execution result
+ */
+async function runTaskWithRAG(taskName, taskData, agentId = 'unknown') {
+  // This function is already defined above, keeping for export
+  // The actual implementation is above
+}
+
+// Export functions
+module.exports = {
+  initializeLangChain: initializeSystems,
+  runTaskWithRAG: runTaskWithRAG,
+  getTaskContext: getRagContextRuflo,
+  storeTaskResult: storeTaskResultRuflo,
+  updateWorkflow: updateWorkflow,
+  getWorkflow: getWorkflow
+};

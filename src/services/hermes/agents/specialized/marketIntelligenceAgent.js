@@ -2,9 +2,9 @@
 // Specialized agent for market analysis, competitor intelligence, and trend forecasting
 // Provides insights for business strategy and decision making
 
-const BaseAgent = require('../baseAgent');
-const logger = require('../../utils/logger');
-const { SentryService } = require('../../services/error/sentryService');
+const { BaseAgent } = require('../baseAgent');
+const logger = require('../../../../utils/logger');
+const { SentryService } = require('../../../error/sentryService');
 
 class MarketIntelligenceAgent extends BaseAgent {
   constructor(options = {}) {
@@ -75,21 +75,21 @@ class MarketIntelligenceAgent extends BaseAgent {
     try {
       logger.info(`MarketIntelligenceAgent: Starting market intelligence cycle for agent ${this.name}`);
 
-      # Collect market data from various sources
+      // Collect market data from various sources
       const marketData = await this._collectMarketData();
 
-      # Perform different types of market intelligence analysis
+      // Perform different types of market intelligence analysis
       const intelligenceResults = {};
       for (const intelType of this.intelligenceTypes) {
         logger.debug(`MarketIntelligenceAgent: Performing ${intelType} analysis`);
         intelligenceResults[intelType] = await this._performIntelligenceType(intelType, marketData);
       }
 
-      # Generate market insights and recommendations
+      // Generate market insights and recommendations
       const insights = await this._generateMarketInsights(intelligenceResults);
       const recommendations = await this._generateMarketRecommendations(insights, intelligenceResults);
 
-      # Store market intelligence results
+      // Store market intelligence results
       await this._storeMarketIntelligenceResults({
         intelligenceTypes: this.intelligenceTypes,
         marketDataSummary: this._summarizeMarketData(marketData),
@@ -99,7 +99,7 @@ class MarketIntelligenceAgent extends BaseAgent {
         timestamp: new Date().toISOString()
       });
 
-      # Track market intelligence metrics
+      // Track market intelligence metrics
       await this._trackMarketIntelligenceMetrics(intelligenceResults, insights, recommendations);
 
       logger.info(`MarketIntelligenceAgent: Market intelligence cycle completed for agent ${this.name}`);
@@ -128,7 +128,7 @@ class MarketIntelligenceAgent extends BaseAgent {
 
       const data = {};
 
-      # Collect data from each source
+      // Collect data from each source
       for (const source of this.dataSources) {
         try {
           data[source] = await this._collectFromSource(source);
@@ -182,15 +182,15 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectInternalSalesData() {
     try {
-      # In a real implementation, this would query:
-      # - Sales transactions
-      # - Customer purchase history
-      # - Product performance metrics
-      # - Geographic sales distribution
+      // In a real implementation, this would query:
+      // - Sales transactions
+      // - Customer purchase history
+      // - Product performance metrics
+      // - Geographic sales distribution
       return {
-        totalSales: Math.random() * 100000, # Placeholder
-        salesGrowthRate: (Math.random() - 0.5) * 0.2, # -10% to +10%
-        topProducts: ['Product A', 'Product B', 'Product C'], # Placeholder
+        totalSales: Math.random() * 100000, // Placeholder
+        salesGrowthRate: (Math.random() - 0.5) * 0.2, // -10% to +10%
+        topProducts: ['Product A', 'Product B', 'Product C'], // Placeholder
         geographicDistribution: {
           kenya: 0.4,
           nigeria: 0.25,
@@ -212,17 +212,17 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectWebAnalyticsData() {
     try {
-      # In a real implementation, this would get:
-      # - Website traffic metrics
-      # - User behavior analytics
-      # - Conversion funnels
-      # - Traffic sources
+      // In a real implementation, this would get:
+      // - Website traffic metrics
+      // - User behavior analytics
+      // - Conversion funnels
+      // - Traffic sources
       return {
         visitors: Math.floor(Math.random() * 50000),
         pageViews: Math.floor(Math.random() * 200000),
-        bounceRate: Math.random() * 0.6, # 0-60%
-        avgSessionDuration: Math.random() * 300, # 0-5 minutes
-        conversionRate: Math.random() * 0.05, # 0-5%
+        bounceRate: Math.random() * 0.6, // 0-60%
+        avgSessionDuration: Math.random() * 300, // 0-5 minutes
+        conversionRate: Math.random() * 0.05, // 0-5%
         trafficSources: {
           organic: 0.4,
           direct: 0.25,
@@ -245,16 +245,16 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectSocialMediaData() {
     try {
-      # In a real implementation, this would get:
-      # - Brand mentions
-      # - Sentiment analysis
-      # - Engagement metrics
-      # - Follower growth
+      // In a real implementation, this would get:
+      // - Brand mentions
+      // - Sentiment analysis
+      // - Engagement metrics
+      // - Follower growth
       return {
         mentions: Math.floor(Math.random() * 1000),
-        sentimentScore: (Math.random() - 0.5) * 2, # -1 to +1
-        engagementRate: Math.random() * 0.1, # 0-10%
-        followerGrowth: Math.floor((Math.random() - 0.5) * 1000), # -500 to +500
+        sentimentScore: (Math.random() - 0.5) * 2, // -1 to +1
+        engagementRate: Math.random() * 0.1, // 0-10%
+        followerGrowth: Math.floor((Math.random() - 0.5) * 1000), // -500 to +500
         platforms: {
           facebook: { followers: Math.floor(Math.random() * 10000), engagement: Math.random() * 0.1 },
           twitter: { followers: Math.floor(Math.random() * 8000), engagement: Math.random() * 0.1 },
@@ -276,18 +276,18 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectNewsFeedsData() {
     try {
-      # In a real implementation, this would get:
-      # - Industry news articles
-      # - Press releases
-      # - Regulatory updates
-      # - Market trends from news
+      // In a real implementation, this would get:
+      // - Industry news articles
+      // - Press releases
+      // - Regulatory updates
+      // - Market trends from news
       return {
         articlesCount: Math.floor(Math.random() * 50),
-        trendingTopics: ['supply chain optimization', 'afcfta implementation', 'digital trade platforms'], # Placeholder
+        trendingTopics: ['supply chain optimization', 'afcfta implementation', 'digital trade platforms'], // Placeholder
         sentiment: {
-          positive: Math.random() * 0.4 + 0.3, # 30-70%
-          neutral: Math.random() * 0.3, # 0-30%
-          negative: Math.random() * 0.3 # 0-30%
+          positive: Math.random() * 0.4 + 0.3, // 30-70%
+          neutral: Math.random() * 0.3, // 0-30%
+          negative: Math.random() * 0.3 // 0-30%
         },
         timestamp: new Date().toISOString()
       };
@@ -304,15 +304,15 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectIndustryReportsData() {
     try {
-      # In a real implementation, this would get:
-      # - Market research reports
-      # - Industry forecasts
-      # - Trade analysis
-      # - Competitive landscape studies
+      // In a real implementation, this would get:
+      // - Market research reports
+      // - Industry forecasts
+      // - Trade analysis
+      // - Competitive landscape studies
       return {
         reportsAvailable: Math.floor(Math.random() * 10),
-        marketSizeEstimate: Math.random() * 1000000000, # $0-1B
-        growthForecast: (Math.random() - 0.5) * 0.3, # -15% to +15%
+        marketSizeEstimate: Math.random() * 1000000000, // $0-1B
+        growthForecast: (Math.random() - 0.5) * 0.3, // -15% to +15%
         keyTrends: ['AI adoption', 'sustainability focus', 'cross-border e-commerce'],
         timestamp: new Date().toISOString()
       };
@@ -329,27 +329,27 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectEconomicIndicatorsData() {
     try {
-      # In a real implementation, this would get:
-      # - GDP growth rates
-      # - Inflation rates
-      # - Exchange rates
-      # - Interest rates
-      # - Unemployment rates
+      // In a real implementation, this would get:
+      // - GDP growth rates
+      // - Inflation rates
+      // - Exchange rates
+      // - Interest rates
+      // - Unemployment rates
       return {
         gdpGrowth: {
-          kenya: (Math.random() - 0.5) * 0.1, # -5% to +5%
-          africa_average: (Math.random() - 0.5) * 0.08, # -4% to +4%
-          global_average: (Math.random() - 0.5) * 0.06 # -3% to +3%
+          kenya: (Math.random() - 0.5) * 0.1, // -5% to +5%
+          africa_average: (Math.random() - 0.5) * 0.08, // -4% to +4%
+          global_average: (Math.random() - 0.5) * 0.06 // -3% to +3%
         },
         inflationRate: {
-          kenya: Math.random() * 0.1, # 0-10%
-          africa_average: Math.random() * 0.08, # 0-8%
-          global_average: Math.random() * 0.05 # 0-5%
+          kenya: Math.random() * 0.1, // 0-10%
+          africa_average: Math.random() * 0.08, // 0-8%
+          global_average: Math.random() * 0.05 // 0-5%
         },
         exchangeRateUsd: {
-          kes: 100 + Math.random() * 20, # 100-120 KES/USD
-          ngn: 400 + Math.random() * 100, # 400-500 NGN/USD
-          zar: 15 + Math.random() * 5 # 15-20 ZAR/USD
+          kes: 100 + Math.random() * 20, // 100-120 KES/USD
+          ngn: 400 + Math.random() * 100, // 400-500 NGN/USD
+          zar: 15 + Math.random() * 5 // 15-20 ZAR/USD
         },
         timestamp: new Date().toISOString()
       };
@@ -366,18 +366,18 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectCompetitorWebsitesData() {
     try {
-      # In a real implementation, this would get:
-      # - Competitor pricing
-      # - Product offerings
-      # - Marketing strategies
-      # - Website traffic estimates
+      // In a real implementation, this would get:
+      // - Competitor pricing
+      // - Product offerings
+      // - Marketing strategies
+      // - Website traffic estimates
       return {
         competitors: [
           { name: 'Competitor A', marketShare: Math.random() * 0.3, avgPrice: Math.random() * 100 + 50 },
           { name: 'Competitor B', marketShare: Math.random() * 0.25, avgPrice: Math.random() * 100 + 50 },
           { name: 'Competitor C', marketShare: Math.random() * 0.2, avgPrice: Math.random() * 100 + 50 }
         ],
-        priceCompetitiveness: Math.random(), # 0-1 (1 = most competitive)
+        priceCompetitiveness: Math.random(), // 0-1 (1 = most competitive)
         featureGapAnalysis: {
           ahead: ['feature1', 'feature2'],
           behind: ['feature3', 'feature4'],
@@ -398,15 +398,15 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _collectCustomerFeedbackData() {
     try {
-      # In a real implementation, this would get:
-      # - Survey responses
-      # - Review ratings
-      # - Support ticket analysis
-      # - Net Promoter Score (NPS)
+      // In a real implementation, this would get:
+      // - Survey responses
+      // - Review ratings
+      // - Support ticket analysis
+      // - Net Promoter Score (NPS)
       return {
         surveyResponses: Math.floor(Math.random() * 1000),
-        averageRating: Math.random() * 2 + 3, # 3-5 stars
-        npsScore: Math.floor((Math.random() - 0.5) * 100), # -50 to +50
+        averageRating: Math.random() * 2 + 3, // 3-5 stars
+        npsScore: Math.floor((Math.random() - 0.5) * 100), // -50 to +50
         commonComplaints: ['shipping delays', 'pricing concerns', 'limited product range'],
         commonPraises: ['ease of use', 'customer support', 'product quality'],
         timestamp: new Date().toISOString()
@@ -462,33 +462,33 @@ class MarketIntelligenceAgent extends BaseAgent {
 
     const insights = [];
 
-    # Analyze trending topics from news
+    // Analyze trending topics from news
     if (newsData.trendingTopics && Array.isArray(newsData.trendingTopics)) {
       for (const topic of newsData.trendingTopics) {
         insights.push({
           topic,
           source: 'news_feeds',
-          relevance: Math.random(), # Placeholder
+          relevance: Math.random(), // Placeholder
           confidence: 0.7
         });
       }
     }
 
-    # Analyze industry forecasts
+    // Analyze industry forecasts
     if (industryData.growthForecast !== undefined) {
       insights.push({
         topic: 'market_growth_forecast',
-        description: f'Market growth forecast: ${(industryData.growthForecast * 100).toFixed(1)}%',
+        description: `Market growth forecast: ${(industryData.growthForecast * 100).toFixed(1)}%`,
         source: 'industry_reports',
         confidence: 0.8
       });
     }
 
-    # Analyze economic indicators
+    // Analyze economic indicators
     if (economicData.gdpGrowth && economicData.gdpGrowth.kenya !== undefined) {
       insights.push({
         topic: 'kenya_gdp_growth',
-        description: f'Kenya GDP growth: ${(economicData.gdpGrowth.kenya * 100).toFixed(1)}%',
+        description: `Kenya GDP growth: ${(economicData.gdpGrowth.kenya * 100).toFixed(1)}%`,
         source: 'economic_indicators',
         confidence: 0.85
       });
@@ -514,36 +514,36 @@ class MarketIntelligenceAgent extends BaseAgent {
 
     const insights = [];
 
-    # Analyze market share
+    // Analyze market share
     if (competitorData.competitors && Array.isArray(competitorData.competitors)) {
       for (const competitor of competitorData.competitors) {
         insights.push({
           topic: `market_share_${competitor.name.toLowerCase().replace(/\s+/g, '_')}`,
-          description: f'{competitor.name} market share: ${(competitor.marketShare * 100).toFixed(1)}%',
+          description: `{competitor.name} market share: ${(competitor.marketShare * 100).toFixed(1)}%`,
           source: 'competitor_websites',
           confidence: 0.7
         });
       }
     }
 
-    # Analyze price competitiveness
+    // Analyze price competitiveness
     if (competitorData.priceCompetitiveness !== undefined) {
       insights.push({
         topic: 'price_competitiveness',
-        description: f'Price competitiveness score: {(competitorData.priceCompetitiveness * 100).toFixed(1)}%',
+        description: `Price competitiveness score: {(competitorData.priceCompetitiveness * 100).toFixed(1)}%`,
         source: 'competitor_websites',
         confidence: 0.75
       });
     }
 
-    # Analyze feature gaps
+    // Analyze feature gaps
     if (competitorData.featureGapAnalysis) {
       const gaps = competitorData.featureGapAnalysis;
       if (gaps.behind && Array.isArray(gaps.behind)) {
         for (const feature of gaps.behind) {
           insights.push({
             topic: `feature_gap_${feature.toLowerCase().replace(/\s+/g, '_')}`,
-            description: f'Competitive disadvantage: {feature}',
+            description: `Competitive disadvantage: {feature}`,
             source: 'competitor_websites',
             priority: 'high',
             confidence: 0.8
@@ -573,12 +573,12 @@ class MarketIntelligenceAgent extends BaseAgent {
 
     const insights = [];
 
-    # Analyze customer feedback
+    // Analyze customer feedback
     if (feedbackData.commonComplaints && Array.isArray(feedbackData.commonComplaints)) {
       for (const complaint of feedbackData.commonComplaints) {
         insights.push({
           topic: `customer_complaint_${complaint.toLowerCase().replace(/\s+/g, '_')}`,
-          description: f'Common customer complaint: {complaint}',
+          description: `Common customer complaint: {complaint}`,
           source: 'customer_feedback',
           priority: 'medium',
           confidence: 0.75
@@ -590,28 +590,28 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const praise of feedbackData.commonPraises) {
         insights.push({
           topic: `customer_praise_${praise.toLowerCase().replace(/\s+/g, '_')}`,
-          description: f'Common customer praise: {praise}',
+          description: `Common customer praise: {praise}`,
           source: 'customer_feedback',
           confidence: 0.7
         });
       }
     }
 
-    # Analyze NPS score
+    // Analyze NPS score
     if (feedbackData.npsScore !== undefined) {
       insights.push({
         topic: 'net_promoter_score',
-        description: f'Net Promoter Score: {feedbackData.npsScore}',
+        description: `Net Promoter Score: {feedbackData.npsScore}`,
         source: 'customer_feedback',
         confidence: 0.8
       });
     }
 
-    # Analyze web analytics for behavior insights
+    // Analyze web analytics for behavior insights
     if (webData.bounceRate !== undefined && webData.bounceRate > 0.5) {
       insights.push({
         topic: 'high_bounce_rate',
-        description: f'High bounce rate detected: {(webData.bounceRate * 100).toFixed(1)}%',
+        description: `High bounce rate detected: {(webData.bounceRate * 100).toFixed(1)}%`,
         source: 'web_analytics',
         priority: 'medium',
         confidence: 0.7
@@ -638,19 +638,19 @@ class MarketIntelligenceAgent extends BaseAgent {
 
     const insights = [];
 
-    # Analyze competitor pricing
+    // Analyze competitor pricing
     if (competitorData.competitors && Array.isArray(competitorData.competitors)) {
       for (const competitor of competitorData.competitors) {
         insights.push({
           topic: `competitor_pricing_${competitor.name.toLowerCase().replace(/\s+/g, '_')}`,
-          description: f'{competitor.name} average price: ${competitor.avgPrice.toFixed(2)} USD',
+          description: `{competitor.name} average price: ${competitor.avgPrice.toFixed(2)} USD`,
           source: 'competitor_websites',
           confidence: 0.75
         });
       }
     }
 
-    # Analyze price competitiveness
+    // Analyze price competitiveness
     if (competitorData.priceCompetitiveness !== undefined) {
       if (competitorData.priceCompetitiveness < 0.4) {
         insights.push({
@@ -691,32 +691,32 @@ class MarketIntelligenceAgent extends BaseAgent {
 
     const insights = [];
 
-    # Analyze historical sales trends
+    // Analyze historical sales trends
     if (salesData.salesGrowthRate !== undefined) {
       insights.push({
         topic: 'historical_sales_trend',
-        description: f'Historical sales growth rate: {(salesData.salesGrowthRate * 100).toFixed(1)}%',
+        description: `Historical sales growth rate: {(salesData.salesGrowthRate * 100).toFixed(1)}%`,
         source: 'internal_sales',
         confidence: 0.8
       });
     }
 
-    # Analyze economic indicators for demand impact
+    // Analyze economic indicators for demand impact
     if (economicData.gdpGrowth && economicData.gdpGrowth.kenya !== undefined) {
       const gdpImpact = economicData.gdpGrowth.kenya > 0 ? 'positive' : 'negative';
       insights.push({
         topic: 'gdp_demand_correlation',
-        description: f'Kenya GDP growth ({ (economicData.gdpGrowth.kenya * 100).toFixed(1)}%) expected to have {gdpImpact} impact on demand',
+        description: `Kenya GDP growth ({ (economicData.gdpGrowth.kenya * 100).toFixed(1)}%) expected to have {gdpImpact} impact on demand`,
         source: 'economic_indicators',
         confidence: 0.7
       });
     }
 
-    # Analyze industry forecasts
+    // Analyze industry forecasts
     if (industryData.growthForecast !== undefined) {
       insights.push({
         topic: 'industry_demand_forecast',
-        description: f'Industry demand forecast: {(industryData.growthForecast * 100).toFixed(1)}% growth',
+        description: `Industry demand forecast: {(industryData.growthForecast * 100).toFixed(1)}% growth`,
         source: 'industry_reports',
         confidence: 0.75
       });
@@ -743,12 +743,12 @@ class MarketIntelligenceAgent extends BaseAgent {
 
     const insights = [];
 
-    # Identify trending topics as opportunities
+    // Identify trending topics as opportunities
     if (newsData.trendingTopics && Array.isArray(newsData.trendingTopics)) {
       for (const topic of newsData.trendingTopics) {
         insights.push({
           topic: `opportunity_${topic.toLowerCase().replace(/\s+/g, '_')}`,
-          description: f'Emerging opportunity: {topic}',
+          description: `Emerging opportunity: {topic}`,
           source: 'news_feeds',
           priority: 'medium',
           confidence: 0.6
@@ -756,23 +756,23 @@ class MarketIntelligenceAgent extends BaseAgent {
       }
     }
 
-    # Identify industry trends as opportunities
+    // Identify industry trends as opportunities
     if (industryData.keyTrends && Array.isArray(industryData.keyTrends)) {
       for (const trend of industryData.keyTrends) {
         insights.push({
           topic: `industry_opportunity_${trend.toLowerCase().replace(/\s+/g, '_')}`,
-          description: f'Industry trend opportunity: {trend}',
+          description: `Industry trend opportunity: {trend}`,
           source: 'industry_reports',
           confidence: 0.7
         });
       }
     }
 
-    # Analyze social media for opportunity signals
+    // Analyze social media for opportunity signals
     if (socialData.mentions && socialData.mentions > 100) {
       insights.push({
         topic: 'social_media_buzz',
-        description: f'High social media buzz detected: {socialData.mentions} mentions',
+        description: `High social media buzz detected: {socialData.mentions} mentions`,
         source: 'social_media',
         confidence: 0.65
       });
@@ -796,7 +796,7 @@ class MarketIntelligenceAgent extends BaseAgent {
     try {
       const insights = [];
 
-      # Extract insights from each intelligence type
+      // Extract insights from each intelligence type
       for (const [intelType, results] of Object.entries(intelligenceResults)) {
         if (results.insights && Array.isArray(results.insights)) {
           for (const insight of results.insights) {
@@ -810,7 +810,7 @@ class MarketIntelligenceAgent extends BaseAgent {
         }
       }
 
-      # Look for cross-intelligence insights (correlations between different types)
+      // Look for cross-intelligence insights (correlations between different types)
       const crossInsights = await this._findCrossIntelligenceInsights(intelligenceResults);
       insights.push(...crossInsights);
 
@@ -831,9 +831,9 @@ class MarketIntelligenceAgent extends BaseAgent {
     try {
       const crossInsights = [];
 
-      # Example: Correlate market trends with customer insights
+      // Example: Correlate market trends with customer insights
       if (intelligenceResults.market_trends && intelligenceResults.customer_insights) {
-        # If there's growing interest in sustainable products and customer feedback shows preference for eco-friendly
+        // If there's growing interest in sustainable products and customer feedback shows preference for eco-friendly
         const sustainabilityTrend = intelligenceResults.market_trends.insights?.some(
           i => i.topic && i.topic.toLowerCase().includes('sustain')
         );
@@ -853,9 +853,9 @@ class MarketIntelligenceAgent extends BaseAgent {
         }
       }
 
-      # Example: Correlate competitor analysis with pricing intelligence
+      // Example: Correlate competitor analysis with pricing intelligence
       if (intelligenceResults.competitor_analysis && intelligenceResults.pricing_intelligence) {
-        # If competitors have pricing advantage but we have feature gaps we can exploit
+        // If competitors have pricing advantage but we have feature gaps we can exploit
         const competitorPriceAdvantage = intelligenceResults.competitor_analysis.insights?.some(
           i => i.topic && i.topic.toLowerCase().includes('price_advantage')
         );
@@ -893,12 +893,12 @@ class MarketIntelligenceAgent extends BaseAgent {
     try {
       const recommendations = [];
 
-      # Filter high-confidence insights
+      // Filter high-confidence insights
       const highConfidenceInsights = insights.filter(
         insight => insight.confidence >= 0.7
       );
 
-      # Map insights to recommendations
+      // Map insights to recommendations
       for (const insight of highConfidenceInsights) {
         const recommendation = this._mapInsightToRecommendation(insight);
         if (recommendation) {
@@ -906,11 +906,11 @@ class MarketIntelligenceAgent extends BaseAgent {
         }
       }
 
-      # Add any general recommendations based on intelligence completeness
+      // Add any general recommendations based on intelligence completeness
       const generalRecs = await this._generateGeneralRecommendations(intelligenceResults);
       recommendations.push(...generalRecs);
 
-      # Sort by priority and confidence
+      // Sort by priority and confidence
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       recommendations.sort((a, b) => {
         const priorityDiff = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
@@ -987,7 +987,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       };
     }
 
-    # Default recommendation for market intelligence insights
+    // Default recommendation for market intelligence insights
     return {
       type: 'market_intelligence_recommendation',
       priority: insight.priority || 'low',
@@ -1010,7 +1010,7 @@ class MarketIntelligenceAgent extends BaseAgent {
     try {
       const recommendations = [];
 
-      # Check if we have sufficient intelligence for meaningful analysis
+      // Check if we have sufficient intelligence for meaningful analysis
       const hasSufficientIntelligence = Object.values(intelligenceResults).some(
         result => result.insights && Array.isArray(result.insights) && result.insights.length > 0
       );
@@ -1028,7 +1028,7 @@ class MarketIntelligenceAgent extends BaseAgent {
         });
       }
 
-      # Check for intelligence gaps
+      // Check for intelligence gaps
       const missingTypes = this.intelligenceTypes.filter(
         type => !intelligenceResults[type] || !intelligenceResults[type].insights || intelligenceResults[type].insights.length === 0
       );
@@ -1063,16 +1063,16 @@ class MarketIntelligenceAgent extends BaseAgent {
     try {
       logger.debug('MarketIntelligenceAgent: Storing market intelligence results');
 
-      # In a real implementation, this would:
-      # 1. Store results in market intelligence database for trend analysis
-      # 2. Flag significant insights for strategic review
-      # 3. Update market intelligence dashboards and reports
-      # 4. Feed insights into business planning and forecasting
-      # 5. Trigger strategic initiative workflows for high-opportunity insights
+      // In a real implementation, this would:
+      // 1. Store results in market intelligence database for trend analysis
+      // 2. Flag significant insights for strategic review
+      // 3. Update market intelligence dashboards and reports
+      // 4. Feed insights into business planning and forecasting
+      // 5. Trigger strategic initiative workflows for high-opportunity insights
 
       logger.info('MarketIntelligenceAgent: Market intelligence results stored');
 
-      # Could trigger self-improving loop feedback
+      // Could trigger self-improving loop feedback
       if (this.hermes && typeof this.hermes.triggerSelfImprovingFeedback === 'function') {
         this.hermes.triggerSelfImprovingFeedback({
           source: `market_intelligence_agent_${this.name}`,
@@ -1087,7 +1087,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       }
     } catch (error) {
       logger.warn(`MarketIntelligenceAgent: Failed to store market intelligence results:`, error);
-      # Don't throw - storage failures shouldn't break the market intelligence cycle
+      // Don't throw - storage failures shouldn't break the market intelligence cycle
     }
   }
 
@@ -1135,7 +1135,7 @@ class MarketIntelligenceAgent extends BaseAgent {
    */
   async _trackMarketIntelligenceMetrics(intelligenceResults, insights, recommendations) {
     try {
-      # Track metrics in PostHog or other analytics
+      // Track metrics in PostHog or other analytics
       this.trackEvent('market_intelligence_cycle_completed', {
         intelligenceTypesPerformed: Object.keys(intelligenceResults).length,
         successfulIntelligenceTypes: Object.values(intelligenceResults).filter(r => !r.error).length,
@@ -1167,7 +1167,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       dataSources: this.dataSources,
       analysisInterval: this.analysisInterval,
       geographicFocus: this.geographicFocus,
-      lastIntelligenceTypes: [] # Would be populated from recent runs
+      lastIntelligenceTypes: [] // Would be populated from recent runs
     };
   }
 }

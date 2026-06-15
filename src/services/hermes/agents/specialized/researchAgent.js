@@ -2,9 +2,9 @@
 // Specialized agent for information gathering, trend analysis, and opportunity identification
 // Conducts research on market trends, competitor analysis, and emerging opportunities
 
-const BaseAgent = require('../baseAgent');
-const logger = require('../../utils/logger');
-const { SentryService } = require('../../services/error/sentryService');
+const { BaseAgent } = require('../baseAgent');
+const logger = require('../../../../utils/logger');
+const { SentryService } = require('../../../error/sentryService');
 
 class ResearchAgent extends BaseAgent {
   constructor(options = {}) {
@@ -20,7 +20,11 @@ class ResearchAgent extends BaseAgent {
       'competitor_analysis',
       'customer_insights',
       'technology_trends',
-      'regulatory_changes'
+      'regulatory_changes',
+      'supplier_research',
+      'buyer_research',
+      'trade_opportunity_analysis',
+      'trade_risk_assessment'
     ];
     this.researchInterval = this.config.researchInterval || 1800000; // Default 30 minutes
     this.dataSources = this.config.dataSources || [
@@ -325,12 +329,145 @@ class ResearchAgent extends BaseAgent {
           return await this._analyzeTechnologyTrends(rawData);
         case 'regulatory_changes':
           return await this._analyzeRegulatoryEnvironment(rawData);
+        case 'supplier_research':
+          return await this._analyzeSupplierIntelligence(rawData);
+        case 'buyer_research':
+          return await this._analyzeBuyerIntelligence(rawData);
+        case 'trade_opportunity_analysis':
+          return await this._analyzeTradeOpportunities(rawData);
+        case 'trade_risk_assessment':
+          return await this._assessTradeRisks(rawData);
         default:
           logger.warn(`ResearchAgent: Unknown research type: ${researchType}`);
           return { message: 'Research type not implemented' };
       }
     } catch (error) {
       logger.error(`ResearchAgent: Failed to perform ${researchType} research:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Analyze supplier intelligence
+   * @private
+   * @param {Object} rawData - Raw data from sources
+   * @returns {Promise<Object>} Supplier intelligence analysis
+   */
+  async _analyzeSupplierIntelligence(rawData) {
+    try {
+      logger.debug('ResearchAgent: Analyzing supplier intelligence');
+
+      // In a real implementation, this would:
+      // - Analyze supplier financial health and stability
+      // - Assess supplier capacity and production capabilities
+      // - Evaluate supplier quality history and certifications
+      // - Check supplier compliance and regulatory standing
+      // - Monitor supplier news and market reputation
+      // - Analyze geographic and political risk factors
+      return {
+        suppliersAnalyzed: [], // Placeholder
+        intelligenceReports: [],
+        riskAssessments: [],
+        opportunities: [],
+        confidenceLevel: 'medium',
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      logger.error('ResearchAgent: Failed to analyze supplier intelligence:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Analyze buyer intelligence
+   * @private
+   * @param {Object} rawData - Raw data from sources
+   * @returns {Promise<Object>} Buyer intelligence analysis
+   */
+  async _analyzeBuyerIntelligence(rawData) {
+    try {
+      logger.debug('ResearchAgent: Analyzing buyer intelligence');
+
+      // In a real implementation, this would:
+      // - Analyze buyer purchasing power and payment history
+      // - Assess buyer market position and growth trajectory
+      // - Evaluate buyer procurement patterns and preferences
+      // - Check buyer compliance and regulatory standing
+      // - Monitor buyer news and market activity
+      // - Analyze seasonal purchasing cycles and budget timing
+      return {
+        buyersAnalyzed: [], // Placeholder
+        intelligenceReports: [],
+        procurementPatterns: [],
+        opportunities: [],
+        confidenceLevel: 'medium',
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      logger.error('ResearchAgent: Failed to analyze buyer intelligence:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Analyze trade opportunities
+   * @private
+   * @param {Object} rawData - Raw data from sources
+   * @returns {Promise<Object>} Trade opportunity analysis
+   */
+  async _analyzeTradeOpportunities(rawData) {
+    try {
+      logger.debug('ResearchAgent: Analyzing trade opportunities');
+
+      // In a real implementation, this would:
+      // - Identify arbitrage opportunities between regions
+      // - Analyze supply/demand imbalances
+      // - Track emerging market trends and commodities
+      // - Evaluate trade routes and logistics efficiency
+      // - Assess regulatory changes affecting trade
+      // - Monitor currency fluctuations and hedging opportunities
+      return {
+        opportunitiesIdentified: [], // Placeholder
+        marketAnalysis: [],
+        recommendedActions: [],
+        riskFactors: [],
+        confidenceLevel: 'medium',
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      logger.error('ResearchAgent: Failed to analyze trade opportunities:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Assess trade risks
+   * @private
+   * @param {Object} rawData - Raw data from sources
+   * @returns {Promise<Object>} Trade risk assessment
+   */
+  async _assessTradeRisks(rawData) {
+    try {
+      logger.debug('ResearchAgent: Assessing trade risks');
+
+      // In a real implementation, this would:
+      // - Analyze political and economic stability risks
+      // - Assess currency and exchange rate risks
+      // - Evaluate transportation and logistics risks
+      // - Analyze commodity price volatility
+      // - Check regulatory and compliance risks
+      // - Evaluate counterparty credit risks
+      // - Monitor force majeure and natural disaster risks
+      return {
+        risksAssessed: [], // Placeholder
+        riskCategories: [],
+        mitigationStrategies: [],
+        overallRiskScore: 0,
+        confidenceLevel: 'medium',
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      logger.error('ResearchAgent: Failed to assess trade risks:', error);
       throw error;
     }
   }
@@ -618,7 +755,7 @@ class ResearchAgent extends BaseAgent {
    * @returns {Object} Agent status
    */
   getStatus() {
-    const baseStatus = super.getState();
+    const baseStatus = super.getStatus();
     return {
       ...baseStatus,
       agentType: 'research',

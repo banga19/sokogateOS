@@ -9,14 +9,18 @@ const { SentryService } = require('../../services/error/sentryService');
 class HermesAgent {
   constructor(options = {}) {
     this.agents = {};
-    this.config = options.config || {};
-    this.runInterval = this.config.runInterval || 300000; // 5 minutes
+    this.config = options.config; // Keep null if passed
+    this.runInterval = this.config && this.config.runInterval ? this.config.runInterval : 300000; // 5 minutes
     this.isRunning = false;
     this.hermesId = `hermes_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    this.scheduleInterval = null;
   }
 
   async initialize() {
     try {
+      if (this.config === null) {
+        throw new Error('Config cannot be null');
+      }
       logger.info(`Hermes Agent ${this.hermesId}: Initializing specialized agents...`);
 
       // Initialize all specialized agents
@@ -205,6 +209,10 @@ class HermesAgent {
       'competitor_analysis': 'research',
       'opportunity_identification': 'research',
       'information_gathering': 'research',
+      'supplier_research': 'research', // Research supplier intelligence and trade opportunities
+      'buyer_research': 'research', // Research buyer intelligence and procurement needs
+      'trade_opportunity_analysis': 'research', // Analyze trade opportunities and market trends
+      'trade_risk_assessment': 'research', // Assess risks in trade transactions
 
       // Analysis tasks
       'data_analysis': 'analysis',

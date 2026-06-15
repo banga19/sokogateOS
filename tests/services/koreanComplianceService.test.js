@@ -141,8 +141,8 @@ describe('KoreanComplianceService', () => {
     test('should process multiple products correctly', async () => {
       const service = createFreshInstance();
       const products = [
-        { name: 'Product 1', category: 'cocoa' },
-        { name: 'Product 2', category: 'coffee' }
+        { name: 'Product 1', category: 'cocoa', id: 'product1' },
+        { name: 'Product 2', category: 'coffee', id: 'product2' }
       ];
 
       const productDocuments = new Map([

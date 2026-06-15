@@ -325,6 +325,16 @@ const startServer = async () => {
       const customsEngineRoutes = require('./routes/customsEngine');
       app.use('/api/customs', customsEngineRoutes);
 
+// Phase 2 Routes: CRM (Contacts, Accounts, Sequences, Enrollments)
+const contactsRoutes = require('./routes/contacts');
+const accountsRoutes = require('./routes/accounts');
+const sequencesRoutes = require('./routes/sequences');
+const enrollmentsRoutes = require('./routes/enrollments');
+app.use('/api/contacts', contactsRoutes);
+app.use('/api/accounts', accountsRoutes);
+app.use('/api/sequences', sequencesRoutes);
+app.use('/api/enrollments', enrollmentsRoutes);
+
       const teamsRoutes = require('./routes/teams');
       const adminRoutes = require('./routes/admin');
       app.use('/api/teams', teamsRoutes);

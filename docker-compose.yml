@@ -15,6 +15,25 @@ services:
       - redis
       - postgres
       - minio
+    networks:
+      - sokogate-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+      - VITE_WS_URL=ws://localhost:3000
+    volumes:
+      - ./frontend/src:/app/src
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - sokogate-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -27,6 +46,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    networks:
+      - sokogate-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -35,6 +56,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - sokogate-network
 
   mongo:
     image: mongo:latest
@@ -42,6 +65,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - sokogate-network
 
   postgres:
     image: postgres:16-alpine
@@ -53,11 +78,15 @@ services:
       POSTGRES_DB: sokogate
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sokogate-network
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    networks:
+      - sokogate-network
 
   minio:
     image: minio/minio:latest
@@ -70,6 +99,8 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+    networks:
+      - sokogate-network
 
   prometheus:
     image: prom/prometheus:latest
@@ -83,6 +114,8 @@ services:
       - '--storage.tsdb.path=/prometheus'
     depends_on:
       - api
+    networks:
+      - sokogate-network
 
   grafana:
     image: grafana/grafana:latest
@@ -96,6 +129,8 @@ services:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
+    networks:
+      - sokogate-network
 
 volumes:
   mongo_data:
@@ -103,3 +138,7 @@ volumes:
   minio_data:
   prometheus_data:
   grafana_data:
+
+networks:
+  sokogate-network:
+    driver: bridge

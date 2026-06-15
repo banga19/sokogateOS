@@ -2,9 +2,9 @@
 // Specialized agent for data analysis, performance metrics, and business intelligence
 // Processes operational data to identify patterns, trends, and optimization opportunities
 
-const BaseAgent = require('../baseAgent');
-const logger = require('../../utils/logger');
-const { SentryService } = require('../../services/error/sentryService');
+const { BaseAgent } = require('../baseAgent');
+const logger = require('../../../../utils/logger');
+const { SentryService } = require('../../../error/sentryService');
 
 class AnalysisAgent extends BaseAgent {
   constructor(options = {}) {

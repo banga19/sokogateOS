@@ -3,3 +3,11 @@ node_modules
 .env.development
 .env.production
 logs/
+coverage/
+dist/
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+*.pid
+.agentdb.rvf.lock

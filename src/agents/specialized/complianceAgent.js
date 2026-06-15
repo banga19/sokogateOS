@@ -292,3 +292,5 @@ class ComplianceAgent extends BaseAgent {
     };
   }
 }
+
+module.exports = { ComplianceAgent };

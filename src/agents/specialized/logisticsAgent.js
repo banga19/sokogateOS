@@ -255,3 +255,4 @@ class LogisticsAgent extends BaseAgent {
     };
   }
 }
+module.exports = { LogisticsAgent };

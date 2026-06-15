@@ -212,4 +212,326 @@ class NegotiationAgent extends BaseAgent {
             dueDate: payload.milestones?.[2]?.dueDate || endDate,
             completed: false
           }
-        ]
+        ],
+        performanceMetrics: {
+          onTimeDelivery: 0.92,
+          qualityRating: 4.3,
+          responsiveness: 4.1
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Manage supplier relationship
+   * @param {Object} payload - Supplier relationship management request
+   * @returns {Promise<Object>} - Relationship management results
+   */
+  async manageSupplierRelationship(payload) {
+    logger.info(`NegotiationAgent ${this.id} managing supplier relationship:`, payload);
+
+    // In a full implementation, this would:
+    // - Track communication history
+    // - Manage contract terms
+    // - Handle disputes and resolutions
+    // - Optimize ordering patterns
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        relationshipId: payload.relationshipId || `rel_${Date.now()}`,
+        supplierId: payload.supplierId,
+        status: 'active',
+        engagementScore: 78,
+        lastInteraction: new Date().toISOString(),
+        upcomingRenewals: [
+          {
+            contract: 'supply_agreement_v2',
+            date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+            terms: ['price_review', 'volume_commitment']
+          }
+        ],
+        performanceMetrics: {
+          onTimeDelivery: 0.92,
+          qualityRating: 4.3,
+          responsiveness: 4.1
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Optimize contract terms
+   * @param {Object} payload - Terms optimization request
+   * @returns {Promise<Object>} - Optimization results
+   */
+  async optimizeTerms(payload) {
+    logger.info(`NegotiationAgent ${this.id} optimizing terms for:`, payload);
+
+    // In a full implementation, this would:
+    // - Analyze current terms vs market standards
+    // - Identify improvement opportunities
+    // - Propose optimized terms
+    // - Model impact of term changes
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        optimizationId: `opt_${Date.now()}`,
+        contractId: payload.contractId,
+        originalTerms: {
+          price: payload.originalPrice || 100,
+          minimumOrderQuantity: payload.originalMoq || 100,
+          paymentTerms: payload.originalPaymentTerms || 'Net 30'
+        },
+        optimizedTerms: {
+          price: payload.originalPrice * 0.95, // 5% price reduction
+          minimumOrderQuantity: payload.originalMoq * 1.1, // 10% increase in MOQ
+          paymentTerms: 'Net 45' // Extended payment terms
+        },
+        estimatedImpact: {
+          costSavings: payload.quantity * (payload.originalPrice * 0.05),
+          cashFlowImprovement: 'Extended payment terms improve working capital',
+          relationshipScore: '+5 points'
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Mitigate risks in supplier relationships
+   * @param {Object} payload - Risk mitigation request
+   * @returns {Promise<Object>} - Risk mitigation results
+   */
+  async mitigateRisk(payload) {
+    logger.info(`NegotiationAgent ${this.id} mitigating risk for:`, payload);
+
+    // In a full implementation, this would:
+    // - Identify potential risks (financial, operational, geopolitical)
+    // - Assess likelihood and impact
+    // - Develop mitigation strategies
+    // - Create contingency plans
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        riskAssessmentId: `risk_${Date.now()}`,
+        supplierId: payload.supplierId,
+        riskLevel: 'medium', // low, medium, high
+        identifiedRisks: [
+          {
+            type: 'financial',
+            description: 'Supplier has high debt-to-equity ratio',
+            likelihood: 0.3,
+            impact: 0.7,
+            riskScore: 0.21
+          },
+          {
+            type: 'operational',
+            description: 'Single point of failure in manufacturing',
+            likelihood: 0.4,
+            impact: 0.8,
+            riskScore: 0.32
+          }
+        ],
+        mitigationStrategies: [
+          {
+            strategy: 'Diversify supplier base',
+            description: 'Add secondary supplier for critical components',
+            effectiveness: 0.8,
+            cost: 'medium'
+          },
+          {
+            strategy: 'Increase safety stock',
+            description: 'Hold 30 days of critical inventory',
+            effectiveness: 0.6,
+            cost: 'low'
+          }
+        ],
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Close a deal and finalize agreement
+   * @param {Object} payload - Deal closure request
+   * @returns {Promise<Object>} - Deal closure results
+   */
+  async closeDeal(payload) {
+    logger.info(`NegotiationAgent ${this.id} closing deal:`, payload);
+
+    // In a full implementation, this would:
+    // - Generate final contract documents
+    // - Process signatures and approvals
+    // - Set up payment and delivery schedules
+    // - Notify stakeholders
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        dealId: `deal_${Date.now()}`,
+        supplierId: payload.supplierId,
+        productId: payload.productId,
+        status: 'closed',
+        closedAt: new Date().toISOString(),
+        finalTerms: {
+          pricePerUnit: payload.finalPrice || 85.00,
+          quantity: payload.quantity || 100,
+          totalValue: (payload.finalPrice || 85.00) * (payload.quantity || 100),
+          currency: 'USD',
+          paymentTerms: payload.paymentTerms || 'Net 30',
+          deliveryDate: payload.deliveryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        nextSteps: [
+          'Send contract for signature',
+          'Schedule initial production run',
+          'Arrange for quality inspection',
+          'Coordinate logistics and shipping'
+        ],
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Get pricing information
+   * @param {Object} payload - Pricing info request
+   * @returns {Promise<Object>} - Pricing information
+   */
+  async getPricingInfo(payload) {
+    logger.debug(`NegotiationAgent ${this.id} getting pricing info for:`, payload);
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        productId: payload.productId || `prod_${Date.now()}`,
+        supplierId: payload.supplierId || `suppl_${Date.now()}`,
+        basePrice: 100.00,
+        discountTiers: [
+          { quantity: 50, discount: 5, price: 95.00 },
+          { quantity: 100, discount: 10, price: 90.00 },
+          { quantity: 500, discount: 15, price: 85.00 },
+          { quantity: 1000, discount: 20, price: 80.00 }
+        ],
+        currency: 'USD',
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Get contract information
+   * @param {Object} payload - Contract info request
+   * @returns {Promise<Object>} - Contract information
+   */
+  async getContractInfo(payload) {
+    logger.debug(`NegotiationAgent ${this.id} getting contract info for:`, payload);
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        contractId: payload.contractId || `cont_${Date.now()}`,
+        supplierId: payload.supplierId || `suppl_${Date.now()}`,
+        contractType: 'supply_agreement',
+        status: 'active',
+        startDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days ago
+        endDate: new Date(Date.now() + 300 * 24 * 60 * 60 * 1000).toISOString(), // 300 days from now
+        keyTerms: {
+          minimumOrderQuantity: 100,
+          exclusivity: false,
+          territory: 'Global',
+          governingLaw: 'International Chamber of Commerce (ICC)',
+          disputeResolution: 'Arbitration'
+        },
+        currentPerformance: {
+          onTimeDelivery: 0.92,
+          qualityRating: 4.3,
+          responsiveness: 4.1
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Get supplier information
+   * @param {Object} payload - Supplier info request
+   * @returns {Promise<Object>} - Supplier information
+   */
+  async getSupplierInfo(payload) {
+    logger.debug(`NegotiationAgent ${this.id} getting supplier info for:`, payload);
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        supplierId: payload.supplierId || `suppl_${Date.now()}`,
+        name: 'Global Manufacturing Solutions',
+        description: 'Leading manufacturer of consumer electronics and components',
+        certifications: ['ISO_9001', 'ISO_14001', 'BSCI', 'SEDEX'],
+        yearsInBusiness: 8,
+        location: {
+          headquarters: 'Guangzhou, China',
+          manufacturingFacilities: ['Guangzhou', 'Shenzhen', 'Vietnam']
+        },
+        productCategories: ['electronics', 'components', 'accessories'],
+        capacity: {
+          monthlyOutput: 50000,
+          currentUtilization: 0.65
+        },
+        financials: {
+          annualRevenue: '$120M',
+          creditRating: 'A-'
+        },
+        contactInfo: {
+          primaryContact: 'sales@globalmfg.com',
+          phone: '+86 20 1234 5678',
+          website: 'www.globalmfg.com'
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Get terms information
+   * @param {Object} payload - Terms info request
+   * @returns {Promise<Object>} - Terms information
+   */
+  async getTermsInfo(payload) {
+    logger.debug(`NegotiationAgent ${this.id} getting terms info for:`, payload);
+
+    // Mock implementation for now
+    return {
+      success: true,
+      data: {
+        standardTerms: {
+          paymentTerms: ['Net 30', 'Net 45', 'Net 60'],
+          incoterms: ['FOB', 'CIF', 'EXW', 'DDP'],
+          warrantyPeriod: ['3 months', '6 months', '12 months'],
+          qualityStandards: ['ISO_9001', 'CE', 'UL', 'FCC']
+        },
+        marketBenchmarks: {
+          averageMoq: 150,
+          averageLeadTime: '2-4 weeks',
+          averagePaymentTerms: 'Net 30',
+          commonWarranty: '12 months'
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+}
+
+module.exports = { NegotiationAgent };

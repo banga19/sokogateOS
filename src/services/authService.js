@@ -4,6 +4,8 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/user');
+const Feedback = require('../models/feedback');
+const { HermesAgent } = require('../services/hermes/hermesAgent');
 const logger = require('../utils/logger');
 
 // Token configuration
@@ -127,6 +129,19 @@ async function register(userData) {
 
       const result = await hermesAgent.processTask(personalizationTask);
       logger.info(`Auth Service: Sent onboarding personalization task to Hermes agent for user ${user._id}:`, result);
+
+      // Store personalization results in user profile
+      if (result.success && result.result && result.result.personalizationProfile) {
+        user.personalization = {
+          insights: result.result.personalizationProfile.insights || [],
+          recommendations: result.result.personalizationProfile.recommendations || [],
+          personalizationProfile: result.result.personalizationProfile.settings || {},
+          lastUpdated: new Date(),
+          version: result.result.personalizationProfile.personalizationType || '1.0'
+        };
+        await user.save();
+        logger.info(`Auth Service: Stored personalization data for user ${user._id}`);
+      }
 
       // Clean up Hermes agent resources
       await hermesAgent.shutdown();
@@ -440,6 +455,7 @@ function sanitizeUser(user) {
   delete userObj.passwordResetToken;
   delete userObj.passwordResetExpires;
   delete userObj.__v;
+  // Keep personalization data for frontend use
   return userObj;
 }
 

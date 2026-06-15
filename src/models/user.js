@@ -142,6 +142,20 @@ const userSchema = new Schema({
       default: 'system'
     }
   },
+  // Personalization insights from Hermes agent based on onboarding data
+  personalization: {
+    insights: [{ type: Schema.Types.Mixed }],
+    recommendations: [{ type: Schema.Types.Mixed }],
+    personalizationProfile: {
+      interface: { type: Schema.Types.Mixed },
+      notifications: { type: Schema.Types.Mixed },
+      language: { type: String },
+      timezone: { type: String },
+      theme: { type: String }
+    },
+    lastUpdated: { type: Date },
+    version: { type: String, default: '1.0' }
+  },
 
   // Metadata
   createdBy: {

@@ -11,7 +11,13 @@ class TeamService {
     const seatsLimit = company.seatsLimit || 5;
     const totalUsers = await User.countDocuments({ companyId, isActive: true });
 
-    const team = await Team.create({ name, description, companyId, ownerId, members: [{ userId: ownerId, role: 'owner' }] });
+    const team = await Team.create({
+      name,
+      description,
+      companyId,
+      ownerId,
+      members: [{ userId: ownerId, role: 'owner' }],
+    });
     await Company.findByIdAndUpdate(companyId, { $set: { seatsUsed: totalUsers + 1 } });
     logger.info(`TeamService: created team "${name}" for company ${companyId}`);
     return team;
@@ -24,7 +30,8 @@ class TeamService {
   async get(teamId, requesterId, requesterRole) {
     const team = await Team.findById(teamId);
     if (!team || !team.isActive) throw new Error('Team not found.');
-    if (team.companyId.toString() !== requesterId && requesterRole !== 'super_admin') throw new Error('Forbidden.');
+    if (team.companyId.toString() !== requesterId && requesterRole !== 'super_admin')
+      throw new Error('Forbidden.');
     return team;
   }
 
@@ -46,9 +53,15 @@ class TeamService {
       throw new Error('User not in the same company.');
     }
 
-    if (team.members.some(m => m.userId.toString() === userId)) throw new Error('User is already a team member.');
+    if (team.members.some((m) => m.userId.toString() === userId))
+      throw new Error('User is already a team member.');
 
-    if (inviterRole === 'member' && !team.members.some(m => m.userId.toString() === inviterId && ['owner', 'admin'].includes(m.role))) {
+    if (
+      inviterRole === 'member' &&
+      !team.members.some(
+        (m) => m.userId.toString() === inviterId && ['owner', 'admin'].includes(m.role)
+      )
+    ) {
       throw new Error('Insufficient permissions to add members.');
     }
 

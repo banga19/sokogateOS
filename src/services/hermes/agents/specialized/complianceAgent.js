@@ -2,9 +2,9 @@
 // Specialized agent for regulatory compliance, risk assessment, and governance
 // Ensures adherence to legal requirements, industry standards, and internal policies
 
-const BaseAgent = require('../baseAgent');
-const logger = require('../../utils/logger');
-const { SentryService } = require('../../services/error/sentryService');
+const { BaseAgent } = require('../baseAgent');
+const logger = require('../../../../utils/logger');
+const { SentryService } = require('../../../error/sentryService');
 
 class ComplianceAgent extends BaseAgent {
   constructor(options = {}) {
@@ -71,23 +71,23 @@ class ComplianceAgent extends BaseAgent {
     try {
       logger.info(`ComplianceAgent: Starting compliance cycle for agent ${this.name}`);
 
-      # Collect compliance-relevant data
+      // Collect compliance-relevant data
       const complianceData = await this._collectComplianceData();
 
-      # Perform compliance checks against different frameworks
+      // Perform compliance checks against different frameworks
       const complianceResults = {};
       for (const framework of this.complianceFrameworks) {
         logger.debug(`ComplianceAgent: Performing ${framework} compliance check`);
         complianceResults[framework] = await this._performComplianceCheck(framework, complianceData);
       }
 
-      # Perform risk assessment
+      // Perform risk assessment
       const riskAssessment = await this._performRiskAssessment(complianceData, complianceResults);
 
-      # Generate compliance recommendations
+      // Generate compliance recommendations
       const recommendations = await this._generateComplianceRecommendations(complianceResults, riskAssessment);
 
-      # Store compliance results
+      // Store compliance results
       await this._storeComplianceResults({
         complianceFrameworks: this.complianceFrameworks,
         complianceDataSummary: this._summarizeComplianceData(complianceData),
@@ -97,7 +97,7 @@ class ComplianceAgent extends BaseAgent {
         timestamp: new Date().toISOString()
       });
 
-      # Track compliance metrics
+      // Track compliance metrics
       await this._trackComplianceMetrics(complianceResults, riskAssessment, recommendations);
 
       logger.info(`ComplianceAgent: Compliance cycle completed for agent ${this.name}`);
@@ -125,7 +125,7 @@ class ComplianceAgent extends BaseAgent {
 
       const data = {};
 
-      # Collect data from each source
+      // Collect data from each source
       for (const source of ['user_data', 'system_logs', 'access_controls', 'data_processing', 'third_party', 'security_incidents', 'policies', 'training']) {
         try {
           data[source] = await this._collectFromSource(source);
@@ -179,16 +179,16 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectUserData() {
     try {
-      # In a real implementation, this would query:
-      # - What personal data is collected
-      # - How it's stored and processed
-      # - Consent mechanisms
-      # - Data retention policies
+      // In a real implementation, this would query:
+      // - What personal data is collected
+      // - How it's stored and processed
+      // - Consent mechanisms
+      // - Data retention policies
       return {
-        personalDataCollected: ['email', 'name', 'phone', 'address'], # Placeholder
-        sensitiveDataCollected: [], # Placeholder
+        personalDataCollected: ['email', 'name', 'phone', 'address'], // Placeholder
+        sensitiveDataCollected: [], // Placeholder
         consentMechanisms: ['explicit_opt_in', 'privacy_policy'],
-        dataRetentionPeriod: '2_years', # Placeholder
+        dataRetentionPeriod: '2_years', // Placeholder
         timestamp: new Date().toISOString()
       };
     } catch (error) {
@@ -204,12 +204,12 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectSystemLogs() {
     try {
-      # In a real implementation, this would get:
-      # - Log retention policies
-      # - Access to logs
-      # - Log integrity measures
+      // In a real implementation, this would get:
+      // - Log retention policies
+      // - Access to logs
+      // - Log integrity measures
       return {
-        logRetentionPeriod: '6_months', # Placeholder
+        logRetentionPeriod: '6_months', // Placeholder
         logsAccessControlled: true,
         logIntegrityChecks: true,
         timestamp: new Date().toISOString()
@@ -227,12 +227,12 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectAccessControls() {
     try {
-      # In a real implementation, this would get:
-      # - Authentication mechanisms
-      # - Authorization policies
-      # - Privileged access management
+      // In a real implementation, this would get:
+      // - Authentication mechanisms
+      // - Authorization policies
+      // - Privileged access management
       return {
-        authenticationMethods: ['password', 'mfa', 'sso'], # Placeholder
+        authenticationMethods: ['password', 'mfa', 'sso'], // Placeholder
         passwordPolicy: {
           minLength: 8,
           requireSpecialChars: true,
@@ -255,13 +255,13 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectDataProcessing() {
     try {
-      # In a real implementation, this would get:
-      # - Data processing agreements
-      # - Data transfer mechanisms
-      # - Anonymization/pseudonymization techniques
+      // In a real implementation, this would get:
+      // - Data processing agreements
+      // - Data transfer mechanisms
+      // - Anonymization/pseudonymization techniques
       return {
         dataProcessingAgreements: true,
-        crossBorderTransfers: ['eu_to_us'], # Placeholder
+        crossBorderTransfers: ['eu_to_us'], // Placeholder
         anonymizationTechniques: ['pseudonymization'],
         dataMinimization: true,
         timestamp: new Date().toISOString()
@@ -279,10 +279,10 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectThirdPartyData() {
     try {
-      # In a real implementation, this would get:
-      # - Third-party vendor assessments
-      # - Data sharing agreements
-      # - Subprocessor lists
+      // In a real implementation, this would get:
+      // - Third-party vendor assessments
+      // - Data sharing agreements
+      // - Subprocessor lists
       return {
         vendorAssessments: true,
         dataSharingAgreements: true,
@@ -302,15 +302,15 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectSecurityIncidents() {
     try {
-      # In a real implementation, this would get:
-      # - Incident response procedures
-      # - Breach notification timelines
-      # - Incident tracking and reporting
+      // In a real implementation, this would get:
+      // - Incident response procedures
+      // - Breach notification timelines
+      // - Incident tracking and reporting
       return {
         incidentResponsePlan: true,
-        breachNotificationTimeline: '72_hours', # Placeholder
+        breachNotificationTimeline: '72_hours', // Placeholder
         incidentTracking: true,
-        recentIncidents: [], # Placeholder
+        recentIncidents: [], // Placeholder
         timestamp: new Date().toISOString()
       };
     } catch (error) {
@@ -326,11 +326,11 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectPolicies() {
     try {
-      # In a real implementation, this would get:
-      # - Privacy policy
-      # - Terms of service
-      # - Security policies
-      # - Data handling policies
+      // In a real implementation, this would get:
+      // - Privacy policy
+      // - Terms of service
+      // - Security policies
+      // - Data handling policies
       return {
         privacyPolicy: {
           exists: true,
@@ -361,18 +361,18 @@ class ComplianceAgent extends BaseAgent {
    */
   async _collectTrainingData() {
     try {
-      # In a real implementation, this would get:
-      # - Security awareness training
-      # - Compliance training
-      # - Role-specific training
+      // In a real implementation, this would get:
+      // - Security awareness training
+      // - Compliance training
+      // - Role-specific training
       return {
         securityTraining: {
           frequency: 'quarterly',
-          completionRate: 0.95 # Placeholder
+          completionRate: 0.95 // Placeholder
         },
         complianceTraining: {
           frequency: 'annually',
-          completionRate: 0.9 # Placeholder
+          completionRate: 0.9 // Placeholder
         },
         roleSpecificTraining: true,
         timestamp: new Date().toISOString()
@@ -440,13 +440,13 @@ class ComplianceAgent extends BaseAgent {
       {
         id: 'data_subject_rights',
         description: 'Data subject rights implementation',
-        status: 'partially_compliant', # Would need to check actual implementation
+        status: 'partially_compliant', // Would need to check actual implementation
         details: 'Basic rights acknowledged, implementation needs verification'
       },
       {
         id: 'data_protection_officer',
         description: 'Data Protection Officer appointment',
-        status: 'not_applicable', # Depends on organization size and processing
+        status: 'not_applicable', // Depends on organization size and processing
         details: 'Assessment needed based on Article 37 requirements'
       },
       {
@@ -463,7 +463,7 @@ class ComplianceAgent extends BaseAgent {
       }
     ];
 
-    # Calculate compliance score
+    // Calculate compliance score
     compliantCount = requirements.filter(r => r.status === 'compliant').length;
     totalCount = requirements.length;
     complianceScore = compliantCount / totalCount;
@@ -514,7 +514,7 @@ class ComplianceAgent extends BaseAgent {
       }
     ];
 
-    # Calculate compliance score
+    // Calculate compliance score
     compliantCount = requirements.filter(r => r.status === 'compliant').length;
     totalCount = requirements.length;
     complianceScore = compliantCount / totalCount;
@@ -535,18 +535,18 @@ class ComplianceAgent extends BaseAgent {
    * @returns {Promise<Object>} PCI DSS compliance results
    */
   async _checkPCIDSSCompliance(complianceData) {
-    # Would check:
-    # - Cardholder data environment
-    # - Encryption of transmission
-    # - Vulnerability management
-    # - Access control measures
-    # - Network monitoring and testing
-    # - Information security policy
+    // Would check:
+    // - Cardholder data environment
+    // - Encryption of transmission
+    // - Vulnerability management
+    // - Access control measures
+    // - Network monitoring and testing
+    // - Information security policy
 
     return {
       framework: 'pci_dss',
-      complianceScore: 0.0, # Placeholder - would need actual assessment
-      status: 'not_applicable', # Assuming we don't process credit cards directly
+      complianceScore: 0.0, // Placeholder - would need actual assessment
+      status: 'not_applicable', // Assuming we don't process credit cards directly
       requirements: [{
         id: 'scope',
         description: 'PCI DSS scope determination',
@@ -601,7 +601,7 @@ class ComplianceAgent extends BaseAgent {
       }
     ];
 
-    # Calculate compliance score
+    // Calculate compliance score
     compliantCount = requirements.filter(r => r.status === 'compliant').length;
     totalCount = requirements.length;
     complianceScore = compliantCount / totalCount;
@@ -622,16 +622,16 @@ class ComplianceAgent extends BaseAgent {
    * @returns {Promise<Object>} SOC 2 compliance results
    */
   async _checkSOC2Compliance(complianceData) {
-    # Would check:
-    # - Security
-    # - Availability
-    # - Processing integrity
-    # - Confidentiality
-    # - Privacy
+    // Would check:
+    // - Security
+    // - Availability
+    // - Processing integrity
+    // - Confidentiality
+    // - Privacy
 
     return {
       framework: 'soc_2',
-      complianceScore: 0.75, # Placeholder
+      complianceScore: 0.75, // Placeholder
       status: 'needs_improvement',
       requirements: [
         {
@@ -658,8 +658,8 @@ class ComplianceAgent extends BaseAgent {
    * @returns {Promise<Object>} Local data protection compliance results
    */
   async _checkLocalDataProtectionCompliance(complianceData) {
-    # Would check local regulations based on jurisdiction
-    # For Kenya: Data Protection Act, 2019
+    // Would check local regulations based on jurisdiction
+    // For Kenya: Data Protection Act, 2019
 
     const userData = complianceData.user_data || {};
     const policies = complianceData.policies || {};
@@ -685,7 +685,7 @@ class ComplianceAgent extends BaseAgent {
       }
     ];
 
-    # Calculate compliance score
+    // Calculate compliance score
     compliantCount = requirements.filter(r => r.status === 'compliant').length;
     totalCount = requirements.length;
     complianceScore = compliantCount / totalCount;
@@ -706,15 +706,15 @@ class ComplianceAgent extends BaseAgent {
    * @returns {Promise<Object>} Financial regulations compliance results
    */
   async _checkFinancialRegulationsCompliance(complianceData) {
-    # Would check:
-    # - AML/KYC requirements
-    # - Financial reporting standards
-    # - Electronic transaction regulations
-    # - Consumer financial protection
+    // Would check:
+    // - AML/KYC requirements
+    // - Financial reporting standards
+    // - Electronic transaction regulations
+    // - Consumer financial protection
 
     return {
       framework: 'financial_regulations',
-      complianceScore: 0.6, # Placeholder
+      complianceScore: 0.6, // Placeholder
       status: 'needs_improvement',
       requirements: [
         {
@@ -741,12 +741,12 @@ class ComplianceAgent extends BaseAgent {
    * @returns {Promise<Object>} Industry-specific compliance results
    */
   async _checkIndustrySpecificCompliance(complianceData) {
-    # Would check industry-specific regulations
-    # For logistics/trade industry: customs regulations, trade compliance, etc.
+    // Would check industry-specific regulations
+    // For logistics/trade industry: customs regulations, trade compliance, etc.
 
     return {
       framework: 'industry_specific',
-      complianceScore: 0.7, # Placeholder
+      complianceScore: 0.7, // Placeholder
       status: 'needs_improvement',
       requirements: [
         {
@@ -775,13 +775,13 @@ class ComplianceAgent extends BaseAgent {
    */
   async _performRiskAssessment(complianceData, complianceResults) {
     try {
-      # Calculate overall risk score based on compliance gaps
+      // Calculate overall risk score based on compliance gaps
       let totalRiskScore = 0;
       let frameworkCount = 0;
 
       for (const [framework, results] of Object.entries(complianceResults)) {
         if (results.complianceScore !== undefined) {
-          # Risk score is inverse of compliance score (0 = no risk, 1 = maximum risk)
+          // Risk score is inverse of compliance score (0 = no risk, 1 = maximum risk)
           const frameworkRiskScore = 1 - results.complianceScore;
           totalRiskScore += frameworkRiskScore;
           frameworkCount++;
@@ -790,13 +790,13 @@ class ComplianceAgent extends BaseAgent {
 
       const overallRiskScore = frameworkCount > 0 ? totalRiskScore / frameworkCount : 0.5;
 
-      # Determine risk level
+      // Determine risk level
       let riskLevel = 'low';
       if (overallRiskScore >= 0.7) riskLevel = 'critical';
       else if (overallRiskScore >= 0.5) riskLevel = 'high';
       else if (overallRiskScore >= 0.3) riskLevel = 'medium';
 
-      # Identify high-risk areas
+      // Identify high-risk areas
       const highRiskAreas = [];
       for (const [framework, results] of Object.entries(complianceResults)) {
         if (results.complianceScore !== undefined && results.complianceScore < 0.6) {
@@ -837,7 +837,7 @@ class ComplianceAgent extends BaseAgent {
     try {
       const recommendations = [];
 
-      # Add recommendations based on compliance gaps
+      // Add recommendations based on compliance gaps
       for (const [framework, results] of Object.entries(complianceResults)) {
         if (results.requirements && Array.isArray(results.requirements)) {
           for (const req of results.requirements) {
@@ -857,7 +857,7 @@ class ComplianceAgent extends BaseAgent {
         }
       }
 
-      # Add recommendations based on risk assessment
+      // Add recommendations based on risk assessment
       if (riskAssessment.highRiskAreas && riskAssessment.highRiskAreas.length > 0) {
         for (const area of riskAssessment.highRiskAreas) {
           recommendations.push({
@@ -872,7 +872,7 @@ class ComplianceAgent extends BaseAgent {
         }
       }
 
-      # Add general recommendations if no specific issues found
+      // Add general recommendations if no specific issues found
       if (recommendations.length === 0) {
         recommendations.push({
           type: 'compliance_maintenance',
@@ -918,16 +918,16 @@ class ComplianceAgent extends BaseAgent {
     try {
       logger.debug('ComplianceAgent: Storing compliance results');
 
-      # In a real implementation, this would:
-      # 1. Store results in compliance database for trend analysis
-      # 2. Flag non-compliant items for remediation
-      # 3. Update compliance dashboards and reports
-      # 4. Generate compliance certificates or attestations
-      # 5. Trigger remediation workflows for critical issues
+      // In a real implementation, this would:
+      // 1. Store results in compliance database for trend analysis
+      // 2. Flag non-compliant items for remediation
+      // 3. Update compliance dashboards and reports
+      // 4. Generate compliance certificates or attestations
+      // 5. Trigger remediation workflows for critical issues
 
       logger.info('ComplianceAgent: Compliance results stored');
 
-      # Could trigger self-improving loop feedback
+      // Could trigger self-improving loop feedback
       if (this.hermes && typeof this.hermes.triggerSelfImprovingFeedback === 'function') {
         this.hermes.triggerSelfImprovingFeedback({
           source: `compliance_agent_${this.name}`,
@@ -941,7 +941,7 @@ class ComplianceAgent extends BaseAgent {
       }
     } catch (error) {
       logger.warn(`ComplianceAgent: Failed to store compliance results:`, error);
-      # Don't throw - storage failures shouldn't break the compliance cycle
+      // Don't throw - storage failures shouldn't break the compliance cycle
     }
   }
 
@@ -989,7 +989,7 @@ class ComplianceAgent extends BaseAgent {
    */
   async _trackComplianceMetrics(complianceResults, riskAssessment, recommendations) {
     try {
-      # Track metrics in PostHog or other analytics
+      // Track metrics in PostHog or other analytics
       this.trackEvent('compliance_cycle_completed', {
         frameworksChecked: Object.keys(complianceResults).length,
         compliantFrameworks: Object.values(complianceResults).filter(r => r.status === 'compliant').length,
@@ -1020,7 +1020,7 @@ class ComplianceAgent extends BaseAgent {
       complianceFrameworks: this.complianceFrameworks,
       complianceInterval: this.complianceInterval,
       riskLevels: this.riskLevels,
-      lastComplianceCheck: [] # Would be populated from recent runs
+      lastComplianceCheck: [] // Would be populated from recent runs
     };
   }
 }

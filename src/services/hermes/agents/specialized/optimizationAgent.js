@@ -2,9 +2,9 @@
 // Specialized agent for system optimization, performance tuning, and resource efficiency
 // Identifies optimization opportunities and recommends improvements
 
-const BaseAgent = require('../baseAgent');
-const logger = require('../../utils/logger');
-const { SentryService } = require('../../services/error/sentryService');
+const { BaseAgent } = require('../baseAgent');
+const logger = require('../../../../utils/logger');
+const { SentryService } = require('../../../../services/error/sentryService');
 
 class OptimizationAgent extends BaseAgent {
   constructor(options = {}) {
@@ -70,20 +70,20 @@ class OptimizationAgent extends BaseAgent {
     try {
       logger.info(`OptimizationAgent: Starting optimization cycle for agent ${this.name}`);
 
-      # Collect system metrics and data
+      // Collect system metrics and data
       const systemData = await this._collectSystemData();
 
-      # Perform different types of optimization analysis
+      // Perform different types of optimization analysis
       const optimizationResults = {};
       for (const optType of this.optimizationTypes) {
         logger.debug(`OptimizationAgent: Performing ${optType} optimization`);
         optimizationResults[optType] = await this._performOptimizationType(optType, systemData);
       }
 
-      # Generate optimization recommendations
+      // Generate optimization recommendations
       const recommendations = await this._generateOptimizationRecommendations(optimizationResults);
 
-      # Store optimization results
+      // Store optimization results
       await this._storeOptimizationResults({
         optimizationTypes: this.optimizationTypes,
         systemDataSummary: this._summarizeSystemData(systemData),
@@ -92,7 +92,7 @@ class OptimizationAgent extends BaseAgent {
         timestamp: new Date().toISOString()
       });
 
-      # Track optimization metrics
+      // Track optimization metrics
       await this._trackOptimizationMetrics(optimizationResults, recommendations);
 
       logger.info(`OptimizationAgent: Optimization cycle completed for agent ${this.name}`);
@@ -120,7 +120,7 @@ class OptimizationAgent extends BaseAgent {
 
       const data = {};
 
-      # Collect data from each source
+      // Collect data from each source
       for (const source of ['system_metrics', 'application_metrics', 'database_metrics', 'cache_metrics', 'api_metrics']) {
         try {
           data[source] = await this._collectFromSource(source);
@@ -168,14 +168,14 @@ class OptimizationAgent extends BaseAgent {
    */
   async _collectSystemMetrics() {
     try {
-      # In a real implementation, this would use os-utils or similar to get:
-      # - CPU usage percentage
-      # - Memory usage percentage
-      # - Disk I/O statistics
-      # - Network throughput
-      # - Load averages
+      // In a real implementation, this would use os-utils or similar to get:
+      // - CPU usage percentage
+      // - Memory usage percentage
+      // - Disk I/O statistics
+      // - Network throughput
+      // - Load averages
       return {
-        cpuUsage: Math.random() * 100, # Placeholder
+        cpuUsage: Math.random() * 100, // Placeholder
         memoryUsage: Math.random() * 100,
         diskUsage: Math.random() * 100,
         networkIn: Math.random() * 1000,
@@ -196,11 +196,11 @@ class OptimizationAgent extends BaseAgent {
    */
   async _collectApplicationMetrics() {
     try {
-      # In a real implementation, this would get:
-      # - Active connections
-      # - Request throughput
-      # - Error rates
-      # - Response times
+      // In a real implementation, this would get:
+      // - Active connections
+      // - Request throughput
+      // - Error rates
+      // - Response times
       return {
         activeConnections: Math.floor(Math.random() * 1000),
         requestsPerSecond: Math.random() * 500,
@@ -221,11 +221,11 @@ class OptimizationAgent extends BaseAgent {
    */
   async _collectDatabaseMetrics() {
     try {
-      # In a real implementation, this would query database for:
-      # - Query performance metrics
-      # - Connection pool status
-      # - Table sizes and growth rates
-      # - Lock contention and deadlocks
+      // In a real implementation, this would query database for:
+      // - Query performance metrics
+      // - Connection pool status
+      // - Table sizes and growth rates
+      // - Lock contention and deadlocks
       return {
         queriesPerSecond: Math.random() * 1000,
         avgQueryTime: Math.random() * 100,
@@ -246,13 +246,13 @@ class OptimizationAgent extends BaseAgent {
    */
   async _collectCacheMetrics() {
     try {
-      # In a real implementation, this would get:
-      # - Cache hit/miss ratios
-      # - Memory usage
-      # - Eviction rates
+      // In a real implementation, this would get:
+      // - Cache hit/miss ratios
+      // - Memory usage
+      // - Eviction rates
       return {
-        hitRate: Math.random(), # 0-1
-        missRate: Math.random(), # 0-1
+        hitRate: Math.random(), // 0-1
+        missRate: Math.random(), // 0-1
         memoryUsage: Math.random() * 100,
         evictionsPerHour: Math.floor(Math.random() * 1000),
         timestamp: new Date().toISOString()
@@ -270,11 +270,11 @@ class OptimizationAgent extends BaseAgent {
    */
   async _collectApiMetrics() {
     try {
-      # In a real implementation, this would parse API logs or metrics for:
-      # - Endpoint performance
-      # - Status code distribution
-      # - Payload sizes
-      # - Rate limiting statistics
+      // In a real implementation, this would parse API logs or metrics for:
+      // - Endpoint performance
+      // - Status code distribution
+      // - Payload sizes
+      // - Rate limiting statistics
       return {
         endpoints: {
           '/api/v1/products': { avgResponseTime: Math.random() * 2000, errorRate: Math.random() * 0.1 },
@@ -282,7 +282,7 @@ class OptimizationAgent extends BaseAgent {
           '/api/v1/customers': { avgResponseTime: Math.random() * 1500, errorRate: Math.random() * 0.1 }
         },
         totalRequests: Math.floor(Math.random() * 10000),
-        bandwidthUsage: Math.random() * 1000000, # bytes
+        bandwidthUsage: Math.random() * 1000000, // bytes
         timestamp: new Date().toISOString()
       };
     } catch (error) {
@@ -335,32 +335,32 @@ class OptimizationAgent extends BaseAgent {
 
     const recommendations = [];
 
-    # Check response times
+    // Check response times
     if (appMetrics.avgResponseTime && appMetrics.avgResponseTime > this.thresholds.responseTime) {
       recommendations.push({
         type: 'response_time',
         priority: 'high',
-        description: f'Average response time (${appMetrics.avgResponseTime.toFixed(0)}ms) exceeds threshold (${this.thresholds.responseTime}ms)',
+        description: `Average response time (${appMetrics.avgResponseTime.toFixed(0)}ms) exceeds threshold (${this.thresholds.responseTime}ms)`,
         suggestion: 'Consider implementing caching, optimizing database queries, or upgrading infrastructure'
       });
     }
 
-    # Check CPU usage
+    // Check CPU usage
     if (sysMetrics.cpuUsage && sysMetrics.cpuUsage > this.thresholds.cpuUsage) {
       recommendations.push({
         type: 'cpu_usage',
         priority: 'high',
-        description: f'CPU usage (${sysMetrics.cpuUsage.toFixed(1)}%) exceeds threshold (${this.thresholds.cpuUsage}%)',
+        description: `CPU usage (${sysMetrics.cpuUsage.toFixed(1)}%) exceeds threshold (${this.thresholds.cpuUsage}%)`,
         suggestion: 'Consider horizontal scaling, optimizing CPU-intensive operations, or checking for infinite loops'
       });
     }
 
-    # Check memory usage
+    // Check memory usage
     if (sysMetrics.memoryUsage && sysMetrics.memoryUsage > this.thresholds.memoryUsage) {
       recommendations.push({
         type: 'memory_usage',
         priority: 'high',
-        description: f'Memory usage (${sysMetrics.memoryUsage.toFixed(1)}%) exceeds threshold (${this.thresholds.memoryUsage}%)',
+        description: `Memory usage (${sysMetrics.memoryUsage.toFixed(1)}%) exceeds threshold (${this.thresholds.memoryUsage}%)`,
         suggestion: 'Check for memory leaks, optimize data structures, or increase available memory'
       });
     }
@@ -392,22 +392,22 @@ class OptimizationAgent extends BaseAgent {
 
     const recommendations = [];
 
-    # Check connection pool utilization
+    // Check connection pool utilization
     if (dbMetrics.connectionPoolUsage && dbMetrics.connectionPoolUsage > 90) {
       recommendations.push({
         type: 'connection_pool',
         priority: 'medium',
-        description: f'Database connection pool usage (${dbMetrics.connectionPoolUsage.toFixed(1)}%) is high',
+        description: `Database connection pool usage (${dbMetrics.connectionPoolUsage.toFixed(1)}%) is high`,
         suggestion: 'Consider increasing connection pool size or optimizing connection usage'
       });
     }
 
-    # Check cache efficiency
+    // Check cache efficiency
     if (cacheMetrics.hitRate !== undefined && cacheMetrics.hitRate < this.thresholds.cacheHitRate) {
       recommendations.push({
         type: 'cache_efficiency',
         priority: 'medium',
-        description: f'Cache hit rate (${(cacheMetrics.hitRate * 100).toFixed(1)}%) is below threshold (${this.thresholds.cacheHitRate * 100}%)',
+        description: `Cache hit rate (${(cacheMetrics.hitRate * 100).toFixed(1)}%) is below threshold (${this.thresholds.cacheHitRate * 100}%)`,
         suggestion: 'Review caching strategy, increase cache size, or optimize cache key generation'
       });
     }
@@ -433,11 +433,11 @@ class OptimizationAgent extends BaseAgent {
    * @returns {Promise<Object>} Cost efficiency optimization results
    */
   async _analyzeCostEfficiency(systemData) {
-    # Would analyze:
-    # - Resource usage vs cost
-    # - Idle resource detection
-    # - Over-provisioned services
-    # - Spot instance opportunities
+    // Would analyze:
+    // - Resource usage vs cost
+    // - Idle resource detection
+    // - Over-provisioned services
+    // - Spot instance opportunities
 
     const recommendations = [
       {
@@ -457,9 +457,9 @@ class OptimizationAgent extends BaseAgent {
     return {
       type: 'cost_efficiency',
       metrics: {
-        estimatedMonthlyCost: 0, # Placeholder
-        potentialSavings: 0, # Placeholder
-        utilizationScore: Math.random() # 0-1
+        estimatedMonthlyCost: 0, // Placeholder
+        potentialSavings: 0, // Placeholder
+        utilizationScore: Math.random() // 0-1
       },
       recommendations,
       confidence: 0.7,
@@ -483,14 +483,14 @@ class OptimizationAgent extends BaseAgent {
         recommendations.push({
           type: 'cache_strategy',
           priority: 'high',
-          description: f'Cache hit rate is very low (${(cacheMetrics.hitRate * 100).toFixed(1)}%)',
+          description: `Cache hit rate is very low (${(cacheMetrics.hitRate * 100).toFixed(1)}%)`,
           suggestion: 'Review what is being cached and consider alternative caching strategies'
         });
       } else if (cacheMetrics.hitRate < 0.8) {
         recommendations.push({
           type: 'cache_optimization',
           priority: 'medium',
-          description: f'Cache hit rate could be improved (${(cacheMetrics.hitRate * 100).toFixed(1)}%)',
+          description: `Cache hit rate could be improved (${(cacheMetrics.hitRate * 100).toFixed(1)}%)`,
           suggestion: 'Optimize cache key generation and review TTL values'
         });
       }
@@ -521,22 +521,22 @@ class OptimizationAgent extends BaseAgent {
 
     const recommendations = [];
 
-    # Check for slow queries
+    // Check for slow queries
     if (dbMetrics.slowQueries && dbMetrics.slowQueries > 10) {
       recommendations.push({
         type: 'slow_queries',
         priority: 'high',
-        description: f'High number of slow queries detected: ${dbMetrics.slowQueries}',
+        description: `High number of slow queries detected: ${dbMetrics.slowQueries}`,
         suggestion: 'Review and optimize slow queries, add appropriate indexes'
       });
     }
 
-    # Check connection pool usage
+    // Check connection pool usage
     if (dbMetrics.connectionPoolUsage && dbMetrics.connectionPoolUsage > 80) {
       recommendations.push({
         type: 'connection_pool_size',
         priority: 'medium',
-        description: f'Connection pool usage is high: ${dbMetrics.connectionPoolUsage.toFixed(1)}%',
+        description: `Connection pool usage is high: ${dbMetrics.connectionPoolUsage.toFixed(1)}%`,
         suggestion: 'Consider increasing connection pool size or implementing connection pooling better'
       });
     }
@@ -566,23 +566,23 @@ class OptimizationAgent extends BaseAgent {
 
     const recommendations = [];
 
-    # Analyze endpoint performance
+    // Analyze endpoint performance
     if (apiMetrics.endpoints) {
       for (const [endpoint, metrics] of Object.entries(apiMetrics.endpoints)) {
-        if (metrics.avgResponseTime > 2000) { # 2 seconds
+        if (metrics.avgResponseTime > 2000) { // 2 seconds
           recommendations.push({
             type: 'endpoint_performance',
             priority: 'medium',
-            description: f'Endpoint {endpoint} has high response time: ${metrics.avgResponseTime.toFixed(0)}ms',
+            description: `Endpoint ${endpoint} has high response time: ${metrics.avgResponseTime.toFixed(0)}ms`,
             suggestion: 'Optimize endpoint implementation, consider caching, or review database queries'
           });
         }
 
-        if (metrics.errorRate > 0.05) { # 5%
+        if (metrics.errorRate > 0.05) { // 5%
           recommendations.push({
             type: 'endpoint_errors',
             priority: 'high',
-            description: f'Endpoint {endpoint} has high error rate: ${(metrics.errorRate * 100).toFixed(1)}%',
+            description: `Endpoint {endpoint} has high error rate: ${(metrics.errorRate * 100).toFixed(1)}%`,
             suggestion: 'Investigate error causes and implement better error handling'
           });
         }
@@ -612,7 +612,7 @@ class OptimizationAgent extends BaseAgent {
     try {
       const allRecommendations = [];
 
-      # Collect all recommendations from each optimization type
+      // Collect all recommendations from each optimization type
       for (const [optType, results] of Object.entries(optimizationResults)) {
         if (results.recommendations && Array.isArray(results.recommendations)) {
           for (const rec of results.recommendations) {
@@ -626,7 +626,7 @@ class OptimizationAgent extends BaseAgent {
         }
       }
 
-      # Sort by priority and confidence
+      // Sort by priority and confidence
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       allRecommendations.sort((a, b) => {
         const priorityDiff = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
@@ -651,15 +651,15 @@ class OptimizationAgent extends BaseAgent {
     try {
       logger.debug('OptimizationAgent: Storing optimization results');
 
-      # In a real implementation, this would:
-      # 1. Store results in time-series database for trend analysis
-      # 2. Flag significant recommendations for alerting
-      # 3. Update optimization dashboards and reports
-      # 4. Potentially trigger automated optimization scripts
+      // In a real implementation, this would:
+      // 1. Store results in time-series database for trend analysis
+      // 2. Flag significant recommendations for alerting
+      // 3. Update optimization dashboards and reports
+      // 4. Potentially trigger automated optimization scripts
 
       logger.info('OptimizationAgent: Optimization results stored');
 
-      # Could trigger self-improving loop feedback
+      // Could trigger self-improving loop feedback
       if (this.hermes && typeof this.hermes.triggerSelfImprovingFeedback === 'function') {
         this.hermes.triggerSelfImprovingFeedback({
           source: `optimization_agent_${this.name}`,
@@ -673,7 +673,7 @@ class OptimizationAgent extends BaseAgent {
       }
     } catch (error) {
       logger.warn(`OptimizationAgent: Failed to store optimization results:`, error);
-      # Don't throw - storage failures shouldn't break the optimization cycle
+      // Don't throw - storage failures shouldn't break the optimization cycle
     }
   }
 
@@ -720,7 +720,7 @@ class OptimizationAgent extends BaseAgent {
    */
   async _trackOptimizationMetrics(optimizationResults, recommendations) {
     try {
-      # Track metrics in PostHog or other analytics
+      // Track metrics in PostHog or other analytics
       this.trackEvent('optimization_cycle_completed', {
         optimizationTypesPerformed: Object.keys(optimizationResults).length,
         successfulOptimizations: Object.values(optimizationResults).filter(r => !r.error).length,
@@ -747,7 +747,7 @@ class OptimizationAgent extends BaseAgent {
       optimizationTypes: this.optimizationTypes,
       optimizationInterval: this.optimizationInterval,
       thresholds: this.thresholds,
-      lastOptimizationTypes: [] # Would be populated from recent runs
+      lastOptimizationTypes: [] // Would be populated from recent runs
     };
   }
 }

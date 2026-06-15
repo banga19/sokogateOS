@@ -17,10 +17,14 @@ async function trackSignUp(req, res, next) {
     // It tracks when a new user signs up
 
     if (req.user && req.user.id) {
-      // Track sign-up in analytics
+      // Track sign-up in analytics with onboarding data for personalization optimization
       logger.info(`User sign-up tracked: ${req.user.email}`, {
         userId: req.user.id,
         email: req.user.email,
+        role: req.user.role,
+        preferences: req.user.preferences,
+        companyId: req.user.companyId,
+        hasPersonalization: !!req.user.personalization,
         timestamp: new Date().toISOString()
       });
 
@@ -29,6 +33,17 @@ async function trackSignUp(req, res, next) {
 
       // Add sign-up tracking header for frontend consumption
       res.setHeader('X-Analytics-Signup', 'tracked');
+
+      // If personalization data is available, also track that for optimization insights
+      if (req.user.personalization && req.user.personalization.lastUpdated) {
+        logger.info(`User personalization data available: ${req.user.email}`, {
+          userId: req.user.id,
+          personalizationVersion: req.user.personalization.version,
+          personalizationAgeMs: Date.now() - new Date(req.user.personalization.lastUpdated).getTime(),
+          insightsCount: req.user.personalization.insights?.length || 0,
+          recommendationsCount: req.user.personalization.recommendations?.length || 0
+        });
+      }
     }
 
     next();
