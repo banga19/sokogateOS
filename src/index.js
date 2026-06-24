@@ -332,7 +332,9 @@ const startServer = async () => {
       try {
         const status = await qme.getDashboardStatus();
         res.json({ success: true, data: status });
-      } catch {}
+      } catch {
+        // QMe status failures are non-critical
+      }
     });
 
     // Self-Improving Loop engine endpoint
