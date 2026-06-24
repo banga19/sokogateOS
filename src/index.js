@@ -172,7 +172,9 @@ const startServer = async () => {
         if (svcName === 'Cloudflare' && result.value.error === undefined) {
           try {
             app.use(cloudflareService.getHeadersMiddleware());
-          } catch (_) {}
+          } catch {
+            // Middleware errors here are expected and non-critical
+          }
         }
       }
     }
@@ -253,7 +255,7 @@ const startServer = async () => {
           intervalMs: 5 * 60 * 1000,
           batchSize: 100,
         })
-        .then((metrics) => {
+        .then(() => {
           logger.info(
             `SokogateOS: Self-Improving Loop started - processing feedback every 5 minutes`
           );
@@ -330,9 +332,7 @@ const startServer = async () => {
       try {
         const status = await qme.getDashboardStatus();
         res.json({ success: true, data: status });
-      } catch (err) {
-        res.json({ success: true, data: { status: 'inactive' } });
-      }
+      } catch {}
     });
 
     // Self-Improving Loop engine endpoint
@@ -414,9 +414,15 @@ const startServer = async () => {
       }
     });
 
-    // Root route
-    app.get('/', (req, res) => {
-      res.status(200).json({ success: true, name: 'sokogateos', status: 'running' });
+    // Serve built frontend assets
+    app.use(express.static('frontend/dist', { index: false }));
+
+    // SPA fallback — serve index.html for non-API GET requests
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+        return next();
+      }
+      res.sendFile('index.html', { root: 'frontend/dist' });
     });
 
     // Set up Sentry Express integration lazily (avoids circular dependency)
