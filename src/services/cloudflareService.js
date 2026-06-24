@@ -13,7 +13,7 @@ const CLOUDFLARE_API_BASE = 'https://api.cloudflare.com/client/v4';
 
 class CloudflareService {
   constructor() {
-    this.enabled = !!CLOUDFLARE_API_TOKEN && !!CLOUDFLARE_ZONE_ID;
+    this.enabled = Boolean(CLOUDFLARE_API_TOKEN) && Boolean(CLOUDFLARE_ZONE_ID);
     if (!this.enabled) {
       logger.info('Cloudflare Service: Not configured (missing API token or zone ID)');
     }
