@@ -582,7 +582,7 @@ class OptimizationAgent extends BaseAgent {
           recommendations.push({
             type: 'endpoint_errors',
             priority: 'high',
-            description: `Endpoint {endpoint} has high error rate: ${(metrics.errorRate * 100).toFixed(1)}%`,
+            description: `Endpoint ${endpoint} has high error rate: ${(metrics.errorRate * 100).toFixed(1)}%`,
             suggestion: 'Investigate error causes and implement better error handling'
           });
         }

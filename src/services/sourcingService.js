@@ -11,6 +11,10 @@ let consumer = null;
 let producer = null;
 let activeSourcingRequests = new Map();
 
+function hasPrototypeKey(obj) {
+  return obj && typeof obj === 'object' && ['__proto__', 'constructor', 'prototype'].some((k) => Object.prototype.hasOwnProperty.call(obj, k));
+}
+
 // In-memory supplier knowledge base (would be DB-backed in production)
 const supplierKnowledgeBase = new Map();
 
@@ -531,6 +535,9 @@ async function handleSupplierProfileUpdated(supplierData) {
 
     if (supplierKnowledgeBase.has(supplierData.supplierId)) {
       const existing = supplierKnowledgeBase.get(supplierData.supplierId);
+      if (hasPrototypeKey(supplierData)) {
+        throw new Error('Invalid supplier payload');
+      }
       Object.assign(existing, supplierData, { lastUpdated: new Date() });
       supplierKnowledgeBase.set(supplierData.supplierId, existing);
       logger.info(`Sourcing Service: Updated supplier ${supplierData.supplierId} in knowledge base`);

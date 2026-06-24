@@ -6,6 +6,7 @@ const logger = require('../utils/logger');
 const SupplierTrust = require('../models/supplierTrust');
 const Company = require('../models/company');
 const Sourcing = require('../models/sourcing');
+const apifyService = require('./apifyService');
 
 // Service state
 let initialized = false;
@@ -514,6 +515,103 @@ async function releaseEscrow(escrowId, confirmation) {
   }
 }
 
+// ===== APIFY-POWERED SUPPLIER ENRICHMENT =====
+
+/**
+ * Enrich a supplier's public profile using Apify company intelligence.
+ * Pulls company descriptions, industry, size, and contact data from public sources.
+ * @param {string} supplierId
+ * @returns {Promise<Object|null>} Enriched supplier or null
+ */
+async function apifyEnrichSupplierProfile(supplierId) {
+  try {
+    const supplier = await SupplierTrust.findOne({ supplierId });
+    if (!supplier) throw new Error('Supplier not found');
+
+    const enriched = await apifyService.enrichCompanyData(
+      supplier.supplierName,
+      supplier.publicProfile?.website
+    );
+
+    if (!enriched) {
+      logger.info(`Supplier Trust: No Apify enrichment found for ${supplier.supplierName}`);
+      return supplier;
+    }
+
+    // Merge enriched data into the supplier's public profile
+    if (enriched.description && !supplier.publicProfile.description) {
+      supplier.publicProfile.description = enriched.description;
+    }
+    if (enriched.industry) {
+      supplier.publicProfile.categories = [
+        ...new Set([...(supplier.publicProfile.categories || []), enriched.industry]),
+      ];
+    }
+    if (enriched.employeeCount) {
+      supplier.publicProfile.employeeCount = enriched.employeeCount;
+    }
+    if (enriched.foundedYear) {
+      supplier.publicProfile.foundedYear = enriched.foundedYear;
+    }
+
+    // Boost trust score for verified external data
+    if (enriched.confidence > 0.7) {
+      supplier.trustScore.overall = Math.min(100, (supplier.trustScore.overall || 70) + 3);
+    }
+
+    supplier.lastApifyEnrichment = new Date();
+    await supplier.save();
+
+    logger.info(`Supplier Trust: Apify-enriched profile for ${supplier.supplierName}`);
+    return supplier;
+  } catch (error) {
+    logger.error('Supplier Trust: Apify enrichment error:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Discover new suppliers using Apify lead-finding actors.
+ * Returns a list of candidate supplier objects for review.
+ * @param {Object} criteria
+ * @param {string} criteria.productCategory - e.g. 'textiles', 'electronics'
+ * @param {string} [criteria.country] - e.g. 'China', 'India'
+ * @param {number} [criteria.maxResults=10]
+ * @returns {Promise<Array>}
+ */
+async function apifyDiscoverSuppliers(criteria) {
+  try {
+    const candidates = await apifyService.searchSuppliers({
+      productCategory: criteria.productCategory,
+      country: criteria.country,
+      maxResults: criteria.maxResults || 10,
+    });
+
+    logger.info(
+      `Supplier Trust: Apify discovered ${candidates.length} supplier candidates for ${criteria.productCategory}`
+    );
+
+    return candidates.map((c, i) => ({
+      candidateId: `apify_candidate_${Date.now()}_${i}`,
+      name: c.companyName || c.name || 'Unknown',
+      domain: c.domain || c.website || '',
+      description: c.description || '',
+      industry: c.industry || criteria.productCategory,
+      country: c.country || c.location || criteria.country || 'Unknown',
+      employeeCount: c.employeeCount || null,
+      estimatedRevenue: c.revenue || null,
+      contactEmail: c.email || null,
+      contactPhone: c.phone || null,
+      source: 'apify',
+      discoveredAt: new Date(),
+      status: 'pending_review',
+    }));
+  } catch (error) {
+    logger.error('Supplier Trust: Apify supplier discovery error:', error.message);
+    return [];
+  }
+}
+
 // ===== SUPPLIER DISCOVERY =====
 
 async function searchSuppliers(criteria = {}) {
@@ -589,5 +687,8 @@ module.exports = {
   searchSuppliers,
   getSupplierDetail,
   getServiceStatus,
-  shutdownSupplierTrustService
+  shutdownSupplierTrustService,
+  // Apify-powered
+  apifyEnrichSupplierProfile,
+  apifyDiscoverSuppliers,
 };

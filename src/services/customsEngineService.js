@@ -12,6 +12,15 @@ const {
   TradeAgreement,
   DocumentTemplate
 } = require('../models/customsEngine');
+const apifyService = require('./apifyService');
+
+// Seed data extracted to dedicated data files
+const SEED_HS_CODES = require('../data/customs-engine/hs-codes');
+const SEED_TARIFFS = require('../data/customs-engine/tariffs');
+const SEED_ROUTES = require('../data/customs-engine/routes');
+const SEED_COMPLIANCE_RULES = require('../data/customs-engine/compliance-rules');
+const SEED_TRADE_AGREEMENTS = require('../data/customs-engine/trade-agreements');
+const SEED_DOCUMENT_TEMPLATES = require('../data/customs-engine/document-templates');
 
 // ===== SERVICE STATE =====
 
@@ -22,675 +31,6 @@ let routeCache = new Map();           // origin:destination -> route details
 let agreementCache = new Map();       // country -> trade agreements
 let complianceCache = new Map();      // country:hsCode -> compliance rules
 let documentCache = new Map();        // type:country -> document template
-
-// ===== SEED DATA =====
-
-const SEED_HS_CODES = [
-  // Textiles (Chapter 50-63)
-  { code: '5209.39', chapter: '52', heading: '5209', description: 'Woven fabrics of cotton, dyed', category: 'textiles', keywords: ['cotton fabric', 'woven cotton', 'dyed cotton', 'textile', 'fabric'] },
-  { code: '5208.12', chapter: '52', heading: '5208', description: 'Woven fabrics of cotton, plain weave, unbleached', category: 'textiles', keywords: ['cotton fabric', 'plain weave', 'unbleached cotton', 'textile'] },
-  { code: '5512.19', chapter: '55', heading: '5512', description: 'Woven fabrics of polyester staple fibers', category: 'textiles', keywords: ['polyester fabric', 'synthetic fabric', 'polyester textile'] },
-  { code: '5407.10', chapter: '54', heading: '5407', description: 'Woven fabrics of synthetic filament yarn', category: 'textiles', keywords: ['synthetic fabric', 'nylon fabric', 'filament fabric'] },
-  { code: '6301.20', chapter: '63', heading: '6301', description: 'Blankets and travelling rugs of wool or fine animal hair', category: 'textiles', keywords: ['blankets', 'wool blankets', 'travelling rugs'] },
-  { code: '6204.62', chapter: '62', heading: '6204', description: 'Women\'s or girls\' trousers of cotton', category: 'textiles', keywords: ['trousers', 'pants', 'cotton trousers', 'women clothing'] },
-  { code: '6109.10', chapter: '61', heading: '6109', description: 'T-shirts, singlets of cotton, knitted', category: 'textiles', keywords: ['t-shirts', 'cotton tshirts', 'knitted shirts', 'apparel'] },
-  { code: '6203.42', chapter: '62', heading: '6203', description: 'Men\'s or boys\' trousers of cotton', category: 'textiles', keywords: ['men trousers', 'cotton trousers', 'boys pants'] },
-
-  // Electronics (Chapter 85)
-  { code: '8517.13', chapter: '85', heading: '8517', description: 'Smartphones for cellular networks', category: 'electronics', keywords: ['smartphone', 'mobile phone', 'cell phone', 'iphone', 'android'] },
-  { code: '8517.12', chapter: '85', heading: '8517', description: 'Telephones for cellular networks or other wireless networks', category: 'electronics', keywords: ['mobile phone', 'cell phone', 'feature phone'] },
-  { code: '8471.30', chapter: '84', heading: '8471', description: 'Portable digital automatic data processing machines (laptops)', category: 'electronics', keywords: ['laptop', 'notebook', 'computer', 'portable computer'] },
-  { code: '8471.41', chapter: '84', heading: '8471', description: 'Data processing machines (desktop computers) not elsewhere specified', category: 'electronics', keywords: ['desktop computer', 'computer', 'pc'] },
-  { code: '8528.72', chapter: '85', heading: '8528', description: 'Television receivers, color, not incorporating video recording', category: 'electronics', keywords: ['television', 'tv', 'tv set', 'flat screen tv'] },
-  { code: '8518.30', chapter: '85', heading: '8518', description: 'Loudspeakers, headphones, earphones', category: 'electronics', keywords: ['speakers', 'headphones', 'earphones', 'audio equipment'] },
-  { code: '8542.31', chapter: '85', heading: '8542', description: 'Electronic integrated circuits as processors and controllers', category: 'electronics', keywords: ['microchip', 'processor', 'integrated circuit', 'semiconductor'] },
-  { code: '8525.80', chapter: '85', heading: '8525', description: 'Television cameras, digital cameras, video camera recorders', category: 'electronics', keywords: ['camera', 'digital camera', 'cctv', 'video camera'] },
-  { code: '8470.10', chapter: '84', heading: '8470', description: 'Electronic calculators capable of operation without external power', category: 'electronics', keywords: ['calculator', 'electronic calculator'] },
-
-  // Machinery (Chapter 84)
-  { code: '8429.20', chapter: '84', heading: '8429', description: 'Bulldozers, angledozers, graders, levellers', category: 'machinery', keywords: ['bulldozer', 'construction machinery', 'grader', 'leveller'] },
-  { code: '8429.51', chapter: '84', heading: '8429', description: 'Front-end shovel loaders', category: 'machinery', keywords: ['loader', 'shovel loader', 'construction equipment'] },
-  { code: '8431.49', chapter: '84', heading: '8431', description: 'Parts of machinery for construction, mining, and earth-moving', category: 'machinery', keywords: ['machine parts', 'construction parts', 'mining equipment parts'] },
-  { code: '8481.80', chapter: '84', heading: '8481', description: 'Taps, cocks, valves and similar appliances for pipes', category: 'machinery', keywords: ['valves', 'taps', 'pipes', 'plumbing'] },
-  { code: '8413.70', chapter: '84', heading: '8413', description: 'Centrifugal pumps for liquids', category: 'machinery', keywords: ['pump', 'centrifugal pump', 'water pump'] },
-  { code: '8414.80', chapter: '84', heading: '8414', description: 'Air or gas pumps, compressors, fans', category: 'machinery', keywords: ['compressor', 'air pump', 'fan', 'ventilator'] },
-  { code: '8421.23', chapter: '84', heading: '8421', description: 'Oil or fuel filters for internal combustion engines', category: 'machinery', keywords: ['oil filter', 'fuel filter', 'engine filter'] },
-  { code: '8450.11', chapter: '84', heading: '8450', description: 'Fully automatic washing machines of dry capacity not exceeding 10 kg', category: 'machinery', keywords: ['washing machine', 'laundry machine'] },
-
-  // Food & Beverage (Chapters 1-24)
-  { code: '1006.30', chapter: '10', heading: '1006', description: 'Semi-milled or wholly milled rice', category: 'food_beverage', keywords: ['rice', 'milled rice', 'white rice', 'grain'] },
-  { code: '1006.20', chapter: '10', heading: '1006', description: 'Husked (brown) rice', category: 'food_beverage', keywords: ['brown rice', 'husked rice', 'grain'] },
-  { code: '1101.00', chapter: '11', heading: '1101', description: 'Wheat or meslin flour', category: 'food_beverage', keywords: ['flour', 'wheat flour', 'bread flour'] },
-  { code: '1511.10', chapter: '15', heading: '1511', description: 'Crude palm oil', category: 'food_beverage', keywords: ['palm oil', 'crude palm oil', 'cooking oil'] },
-  { code: '1517.90', chapter: '15', heading: '1517', description: 'Edible vegetable oil blends', category: 'food_beverage', keywords: ['cooking oil', 'vegetable oil', 'edible oil'] },
-  { code: '1701.14', chapter: '17', heading: '1701', description: 'Raw cane sugar', category: 'food_beverage', keywords: ['sugar', 'cane sugar', 'raw sugar'] },
-  { code: '1704.90', chapter: '17', heading: '1704', description: 'Sugar confectionery not containing cocoa', category: 'food_beverage', keywords: ['candy', 'sweets', 'confectionery'] },
-  { code: '2101.11', chapter: '21', heading: '2101', description: 'Coffee extracts, essences and concentrates', category: 'food_beverage', keywords: ['coffee', 'coffee extract', 'instant coffee'] },
-  { code: '2202.10', chapter: '22', heading: '2202', description: 'Waters with added sugar or sweeteners (soft drinks)', category: 'food_beverage', keywords: ['soft drinks', 'soda', 'beverages', 'juice drink'] },
-  { code: '0901.11', chapter: '9', heading: '0901', description: 'Coffee, not roasted, not decaffeinated', category: 'food_beverage', keywords: ['green coffee', 'coffee beans', 'raw coffee'] },
-  { code: '1801.00', chapter: '18', heading: '1801', description: 'Cocoa beans, whole or broken, raw or roasted', category: 'food_beverage', keywords: ['cocoa beans', 'cocoa', 'chocolate'] },
-  { code: '0402.10', chapter: '4', heading: '0402', description: 'Milk powder with fat content not exceeding 1.5%', category: 'food_beverage', keywords: ['milk powder', 'powdered milk', 'dairy'] },
-
-  // Chemicals (Chapter 28-38)
-  { code: '2807.00', chapter: '28', heading: '2807', description: 'Sulphuric acid, oleum', category: 'chemicals', keywords: ['sulphuric acid', 'sulfuric acid', 'industrial chemical'] },
-  { code: '2815.11', chapter: '28', heading: '2815', description: 'Sodium hydroxide (caustic soda), solid', category: 'chemicals', keywords: ['caustic soda', 'sodium hydroxide', 'industrial chemical'] },
-  { code: '2836.20', chapter: '28', heading: '2836', description: 'Disodium carbonate (soda ash)', category: 'chemicals', keywords: ['soda ash', 'sodium carbonate', 'industrial chemical'] },
-  { code: '3105.20', chapter: '31', heading: '3105', description: 'Mineral or chemical fertilizers with nitrogen, phosphorus, potassium', category: 'chemicals', keywords: ['fertilizer', 'NPK', 'chemical fertilizer', 'agricultural input'] },
-  { code: '3808.91', chapter: '38', heading: '3808', description: 'Insecticides for retail sale', category: 'chemicals', keywords: ['insecticide', 'pesticide', 'agricultural chemical'] },
-  { code: '3401.11', chapter: '34', heading: '3401', description: 'Soap for toilet use', category: 'chemicals', keywords: ['soap', 'toilet soap', 'personal care'] },
-  { code: '3401.19', chapter: '34', heading: '3401', description: 'Soap for other purposes (laundry soap)', category: 'chemicals', keywords: ['laundry soap', 'washing soap', 'detergent'] },
-  { code: '3303.00', chapter: '33', heading: '3303', description: 'Perfumes and toilet waters', category: 'chemicals', keywords: ['perfume', 'fragrance', 'toilet water'] },
-  { code: '3004.90', chapter: '30', heading: '3004', description: 'Medicaments for retail sale, not elsewhere specified', category: 'pharmaceuticals', keywords: ['medicine', 'pharmaceuticals', 'drugs', 'medication'] },
-
-  // Construction Materials (Chapters 25-27, 68-70)
-  { code: '2523.29', chapter: '25', heading: '2523', description: 'Portland cement not elsewhere specified', category: 'construction', keywords: ['cement', 'portland cement', 'construction material'] },
-  { code: '2523.10', chapter: '25', heading: '2523', description: 'Cement clinkers', category: 'construction', keywords: ['clinker', 'cement clinker', 'cement'] },
-  { code: '7210.41', chapter: '72', heading: '7210', description: 'Flat-rolled iron/steel products, corrugated', category: 'construction', keywords: ['steel sheet', 'corrugated iron', 'building material', 'iron sheet'] },
-  { code: '7214.20', chapter: '72', heading: '7214', description: 'Bars and rods of iron/steel, with indentations (rebar)', category: 'construction', keywords: ['rebar', 'steel bar', 'reinforcement bar', 'construction steel'] },
-  { code: '7306.30', chapter: '73', heading: '7306', description: 'Welded tubes and pipes of iron/steel', category: 'construction', keywords: ['steel pipe', 'steel tube', 'pipes'] },
-  { code: '6901.00', chapter: '69', heading: '6901', description: 'Bricks, blocks, tiles of siliceous earth', category: 'construction', keywords: ['bricks', 'tiles', 'ceramic tiles', 'floor tiles'] },
-  { code: '6810.11', chapter: '68', heading: '6810', description: 'Building blocks and bricks of cement/concrete', category: 'construction', keywords: ['concrete blocks', 'building blocks', 'paving blocks'] },
-  { code: '4403.11', chapter: '44', heading: '4403', description: 'Coniferous wood treated with paint or preservatives', category: 'wood', keywords: ['timber', 'wood', 'lumber', 'pine wood'] },
-
-  // Plastics & Rubber (Chapter 39-40)
-  { code: '3923.10', chapter: '39', heading: '3923', description: 'Boxes, cases, crates of plastic for packaging', category: 'plastics', keywords: ['plastic packaging', 'plastic boxes', 'crates', 'containers'] },
-  { code: '3926.90', chapter: '39', heading: '3926', description: 'Articles of plastic not elsewhere specified', category: 'plastics', keywords: ['plastic articles', 'plastic products', 'plasticware'] },
-  { code: '4011.20', chapter: '40', heading: '4011', description: 'Pneumatic tires for buses or trucks', category: 'plastics', keywords: ['tires', 'tyres', 'truck tires', 'bus tires'] },
-  { code: '4016.93', chapter: '40', heading: '4016', description: 'Gaskets, washers and other seals of rubber', category: 'plastics', keywords: ['rubber gaskets', 'rubber seals', 'washing machines'] },
-
-  // Vehicles (Chapter 87)
-  { code: '8703.23', chapter: '87', heading: '8703', description: 'Motor vehicles with engine > 1500cc but not > 3000cc', category: 'vehicles', keywords: ['car', 'automobile', 'motor vehicle', 'used car', 'SUV'] },
-  { code: '8704.21', chapter: '87', heading: '8704', description: 'Motor vehicles for goods transport, GVW not exceeding 5 tonnes', category: 'vehicles', keywords: ['truck', 'pickup truck', 'delivery van', 'commercial vehicle'] },
-  { code: '8704.22', chapter: '87', heading: '8704', description: 'Motor vehicles for goods transport, GVW 5-20 tonnes', category: 'vehicles', keywords: ['truck', 'lorry', 'heavy truck', 'cargo truck'] },
-  { code: '8711.20', chapter: '87', heading: '8711', description: 'Motorcycles with reciprocating engine > 50cc but not > 250cc', category: 'vehicles', keywords: ['motorcycle', 'motorbike', 'boda boda'] },
-  { code: '8711.30', chapter: '87', heading: '8711', description: 'Motorcycles with reciprocating engine > 250cc but not > 500cc', category: 'vehicles', keywords: ['motorcycle', 'bike', 'motorbike'] },
-
-  // Metals (Chapter 72-83)
-  { code: '7601.10', chapter: '76', heading: '7601', description: 'Unwrought aluminium, not alloyed', category: 'metals', keywords: ['aluminium', 'aluminum', 'aluminium ingot'] },
-  { code: '7403.11', chapter: '74', heading: '7403', description: 'Refined copper, cathodes', category: 'metals', keywords: ['copper', 'copper cathode', 'refined copper'] },
-  { code: '7208.39', chapter: '72', heading: '7208', description: 'Flat-rolled iron/steel products, hot-rolled', category: 'metals', keywords: ['steel coil', 'hot rolled steel', 'steel sheet'] },
-
-  // Agricultural (Chapters 6-14)
-  { code: '0701.90', chapter: '7', heading: '0701', description: 'Fresh or chilled potatoes', category: 'agricultural', keywords: ['potatoes', 'fresh potatoes', 'vegetables'] },
-  { code: '0803.10', chapter: '8', heading: '0803', description: 'Fresh plantains', category: 'agricultural', keywords: ['plantains', 'bananas', 'fresh fruit'] },
-  { code: '1201.90', chapter: '12', heading: '1201', description: 'Soya beans, whether or not broken', category: 'agricultural', keywords: ['soybeans', 'soya beans', 'oil seeds'] },
-  { code: '1005.90', chapter: '10', heading: '1005', description: 'Maize (corn) other than seed', category: 'agricultural', keywords: ['maize', 'corn', 'grain'] }
-];
-
-const SEED_TARIFFS = [
-  // China → Kenya (typical textile duties)
-  { hsCode: '5209.39', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16, preferentialRate: null },
-  { hsCode: '5512.19', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16 },
-  { hsCode: '8517.13', country: 'Kenya', originCountry: 'China', baseDutyRate: 0, vatRate: 16 },      // Smartphones duty-free
-  { hsCode: '8471.30', country: 'Kenya', originCountry: 'China', baseDutyRate: 0, vatRate: 16 },      // Laptops duty-free
-  { hsCode: '2523.29', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16 },
-  { hsCode: '7214.20', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16 },
-  { hsCode: '8703.23', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16, exciseDuty: 20 },
-  { hsCode: '4011.20', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16 },
-  { hsCode: '1006.30', country: 'Kenya', originCountry: 'China', baseDutyRate: 35, vatRate: 16 },     // Rice higher duty
-  { hsCode: '3923.10', country: 'Kenya', originCountry: 'China', baseDutyRate: 25, vatRate: 16 },
-  { hsCode: '8429.51', country: 'Kenya', originCountry: 'China', baseDutyRate: 10, vatRate: 16 },
-  { hsCode: '3004.90', country: 'Kenya', originCountry: 'China', baseDutyRate: 0, vatRate: 16 },
-
-  // India → Kenya
-  { hsCode: '5209.39', country: 'Kenya', originCountry: 'India', baseDutyRate: 25, vatRate: 16, preferentialRate: null },
-  { hsCode: '3004.90', country: 'Kenya', originCountry: 'India', baseDutyRate: 0, vatRate: 16 },
-  { hsCode: '1511.10', country: 'Kenya', originCountry: 'India', baseDutyRate: 10, vatRate: 16 },
-  { hsCode: '1006.30', country: 'Kenya', originCountry: 'India', baseDutyRate: 35, vatRate: 16 },
-
-  // Turkey → Kenya
-  { hsCode: '5209.39', country: 'Kenya', originCountry: 'Turkey', baseDutyRate: 25, vatRate: 16 },
-  { hsCode: '8450.11', country: 'Kenya', originCountry: 'Turkey', baseDutyRate: 25, vatRate: 16 },
-
-  // China → Nigeria
-  { hsCode: '5209.39', country: 'Nigeria', originCountry: 'China', baseDutyRate: 20, vatRate: 7.5 },
-  { hsCode: '8517.13', country: 'Nigeria', originCountry: 'China', baseDutyRate: 5, vatRate: 7.5 },
-  { hsCode: '8471.30', country: 'Nigeria', originCountry: 'China', baseDutyRate: 0, vatRate: 7.5 },
-  { hsCode: '1006.30', country: 'Nigeria', originCountry: 'China', baseDutyRate: 30, vatRate: 7.5 },
-  { hsCode: '8703.23', country: 'Nigeria', originCountry: 'China', baseDutyRate: 35, vatRate: 7.5, exciseDuty: 15 },
-
-  // China → Tanzania
-  { hsCode: '5209.39', country: 'Tanzania', originCountry: 'China', baseDutyRate: 25, vatRate: 18 },
-  { hsCode: '8517.13', country: 'Tanzania', originCountry: 'China', baseDutyRate: 0, vatRate: 18 },
-  { hsCode: '2523.29', country: 'Tanzania', originCountry: 'China', baseDutyRate: 25, vatRate: 18 },
-  { hsCode: '1006.30', country: 'Tanzania', originCountry: 'China', baseDutyRate: 35, vatRate: 18 },
-
-  // China → Uganda
-  { hsCode: '5209.39', country: 'Uganda', originCountry: 'China', baseDutyRate: 25, vatRate: 18 },
-  { hsCode: '8517.13', country: 'Uganda', originCountry: 'China', baseDutyRate: 0, vatRate: 18 },
-
-  // China → South Africa
-  { hsCode: '5209.39', country: 'South Africa', originCountry: 'China', baseDutyRate: 22, vatRate: 15 },
-  { hsCode: '8517.13', country: 'South Africa', originCountry: 'China', baseDutyRate: 0, vatRate: 15 },
-  { hsCode: '8703.23', country: 'South Africa', originCountry: 'China', baseDutyRate: 25, vatRate: 15 },
-  { hsCode: '1006.30', country: 'South Africa', originCountry: 'China', baseDutyRate: 10, vatRate: 15 },
-  { hsCode: '3004.90', country: 'South Africa', originCountry: 'China', baseDutyRate: 0, vatRate: 15 },
-  { hsCode: '3923.10', country: 'South Africa', originCountry: 'China', baseDutyRate: 10, vatRate: 15 },
-
-  // EAC intra-trade (Kenya → Uganda, Tanzania → Kenya, etc.) — preferential rates
-  { hsCode: '5209.39', country: 'Uganda', originCountry: 'Kenya', baseDutyRate: 25, vatRate: 18, preferentialRate: 0, tradeAgreement: { name: 'EAC', rulesOfOrigin: 'Produced in EAC', requiresCertificateOfOrigin: true } },
-  { hsCode: '2523.29', country: 'Uganda', originCountry: 'Kenya', baseDutyRate: 25, vatRate: 18, preferentialRate: 0, tradeAgreement: { name: 'EAC', rulesOfOrigin: 'Produced in EAC', requiresCertificateOfOrigin: true } },
-  { hsCode: '1511.10', country: 'Kenya', originCountry: 'Tanzania', baseDutyRate: 10, vatRate: 16, preferentialRate: 0, tradeAgreement: { name: 'EAC', rulesOfOrigin: 'Produced in EAC', requiresCertificateOfOrigin: true } },
-  { hsCode: '2523.29', country: 'Rwanda', originCountry: 'Kenya', baseDutyRate: 25, vatRate: 18, preferentialRate: 0, tradeAgreement: { name: 'EAC', rulesOfOrigin: 'Produced in EAC', requiresCertificateOfOrigin: true } },
-
-  // COMESA preferential (Ethiopia → Kenya, Zambia → Kenya, etc.)
-  { hsCode: '0901.11', country: 'Kenya', originCountry: 'Ethiopia', baseDutyRate: 10, vatRate: 16, preferentialRate: 0, tradeAgreement: { name: 'COMESA', rulesOfOrigin: 'Produced in COMESA member', requiresCertificateOfOrigin: true } },
-];
-
-const SEED_ROUTES = [
-  {
-    name: 'China → Kenya (Mombasa)', originPort: 'Shanghai', destinationPort: 'Mombasa',
-    originCountry: 'China', destinationCountry: 'Kenya', tradeBloc: 'none',
-    avgTransitDays: 25, preferredCarriers: ['Maersk', 'MSC', 'CMA CGM'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true, description: 'Original or telex release' },
-      { type: 'commercial_invoice', required: true, description: '3 signed originals' },
-      { type: 'packing_list', required: true, description: 'Detailed packing list' },
-      { type: 'certificate_of_origin', required: true, description: 'For duty assessment' },
-      { type: 'import_declaration', required: true, description: 'Single administrative document for Kenya' },
-      { type: 'certificate_of_insurance', required: true, description: 'CIF value coverage' }
-    ],
-    estimatedDutyRate: 20,
-    popularityScore: 95
-  },
-  {
-    name: 'India → Kenya (Mombasa)', originPort: 'Mumbai', destinationPort: 'Mombasa',
-    originCountry: 'India', destinationCountry: 'Kenya', tradeBloc: 'none',
-    avgTransitDays: 18, preferredCarriers: ['Maersk', 'Evergreen', 'Hapag-Lloyd'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true },
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'import_declaration', required: true },
-      { type: 'certificate_of_insurance', required: true }
-    ],
-    estimatedDutyRate: 20,
-    popularityScore: 80
-  },
-  {
-    name: 'China → Nigeria (Lagos)', originPort: 'Guangzhou', destinationPort: 'Lagos',
-    originCountry: 'China', destinationCountry: 'Nigeria', tradeBloc: 'none',
-    avgTransitDays: 30, preferredCarriers: ['MSC', 'CMA CGM', 'Maersk'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true },
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'import_declaration', required: true },
-      { type: 'certificate_of_insurance', required: true },
-      { type: 'fumigation_cert', required: true, description: 'Required for goods in wooden packaging' }
-    ],
-    estimatedDutyRate: 18,
-    popularityScore: 90
-  },
-  {
-    name: 'Turkey → Kenya (Mombasa)', originPort: 'Istanbul', destinationPort: 'Mombasa',
-    originCountry: 'Turkey', destinationCountry: 'Kenya', tradeBloc: 'none',
-    avgTransitDays: 20, preferredCarriers: ['Maersk', 'MSC'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true },
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'import_declaration', required: true }
-    ],
-    estimatedDutyRate: 22,
-    popularityScore: 65
-  },
-  {
-    name: 'Kenya → Uganda (Nairobi-Kampala Overland)', originPort: 'Nairobi', destinationPort: 'Kampala',
-    originCountry: 'Kenya', destinationCountry: 'Uganda', tradeBloc: 'EAC',
-    avgTransitDays: 5, preferredCarriers: ['EAC Rail', 'Express Kenya', 'Uganda Railways'],
-    requiredDocuments: [
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true, description: 'EAC certificate for duty-free treatment' },
-      { type: 'transit_document', required: true },
-      { type: 'single_administrative_document', required: true }
-    ],
-    estimatedDutyRate: 0,
-    popularityScore: 85
-  },
-  {
-    name: 'Kenya → Tanzania (Nairobi-Dar es Salaam Overland)', originPort: 'Nairobi', destinationPort: 'Dar es Salaam',
-    originCountry: 'Kenya', destinationCountry: 'Tanzania', tradeBloc: 'EAC',
-    avgTransitDays: 7, preferredCarriers: ['EAC Rail', 'Tanzania Road Haulage'],
-    requiredDocuments: [
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'transit_document', required: true },
-      { type: 'single_administrative_document', required: true }
-    ],
-    estimatedDutyRate: 0,
-    popularityScore: 75
-  },
-  {
-    name: 'China → South Africa (Durban)', originPort: 'Shanghai', destinationPort: 'Durban',
-    originCountry: 'China', destinationCountry: 'South Africa', tradeBloc: 'none',
-    avgTransitDays: 22, preferredCarriers: ['Maersk', 'MSC', 'CMA CGM'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true },
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'import_declaration', required: true },
-      { type: 'single_administrative_document', required: true }
-    ],
-    estimatedDutyRate: 15,
-    popularityScore: 70
-  },
-  {
-    name: 'Kenya → Rwanda (Nairobi-Kigali Overland)', originPort: 'Nairobi', destinationPort: 'Kigali',
-    originCountry: 'Kenya', destinationCountry: 'Rwanda', tradeBloc: 'EAC',
-    avgTransitDays: 10, preferredCarriers: ['EAC Rail', 'Rwanda Road Haulage'],
-    requiredDocuments: [
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'transit_document', required: true },
-      { type: 'single_administrative_document', required: true }
-    ],
-    estimatedDutyRate: 0,
-    popularityScore: 55
-  },
-  {
-    name: 'China → Tanzania (Dar es Salaam)', originPort: 'Guangzhou', destinationPort: 'Dar es Salaam',
-    originCountry: 'China', destinationCountry: 'Tanzania', tradeBloc: 'none',
-    avgTransitDays: 28, preferredCarriers: ['Maersk', 'MSC'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true },
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'import_declaration', required: true }
-    ],
-    estimatedDutyRate: 20,
-    popularityScore: 60
-  },
-  {
-    name: 'China → Uganda (via Mombasa-Kampala Corridor)', originPort: 'Shanghai', destinationPort: 'Kampala',
-    originCountry: 'China', destinationCountry: 'Uganda', tradeBloc: 'none',
-    avgTransitDays: 35, preferredCarriers: ['Maersk', 'MSC', 'CMA CGM'],
-    requiredDocuments: [
-      { type: 'bill_of_lading', required: true },
-      { type: 'commercial_invoice', required: true },
-      { type: 'packing_list', required: true },
-      { type: 'certificate_of_origin', required: true },
-      { type: 'import_declaration', required: true },
-      { type: 'single_administrative_document', required: true }
-    ],
-    estimatedDutyRate: 22,
-    popularityScore: 50
-  }
-];
-
-const SEED_COMPLIANCE_RULES = [
-  { country: 'Kenya', hsCode: '5209.39', ruleType: 'requires_license', description: 'Textile import permit required for commercial quantities exceeding 1000 meters', authority: 'Kenya Bureau of Standards (KEBS)', allowedWithDocuments: ['import_permit'] },
-  { country: 'Kenya', hsCode: '1006.30', ruleType: 'restricted', description: 'Rice imports subject to import declaration and quality inspection', authority: 'KRA Customs', allowedWithDocuments: ['import_declaration', 'phytosanitary_cert'] },
-  { country: 'Kenya', hsCode: '3004.90', ruleType: 'requires_license', description: 'Pharmaceutical imports require registration with Pharmacy and Poisons Board', authority: 'Pharmacy and Poisons Board (PPB)', allowedWithDocuments: ['import_permit', 'registration_cert'] },
-  { country: 'Kenya', hsCode: '8703.23', ruleType: 'requires_license', description: 'Motor vehicle imports require pre-shipment inspection and registration', authority: 'NTSA, KRA', allowedWithDocuments: ['pre_shipment_inspection', 'import_declaration'] },
-  { country: 'Nigeria', hsCode: '1006.30', ruleType: 'restricted', description: 'Rice imports subject to quota and import license requirements', authority: 'NAFDAC, Nigeria Customs Service', allowedWithDocuments: ['import_license', 'quota_allocation'] },
-  { country: 'Nigeria', hsCode: '3004.90', ruleType: 'requires_license', description: 'Pharmaceuticals require NAFDAC registration', authority: 'NAFDAC', allowedWithDocuments: ['nafdac_registration'] },
-  { country: 'Nigeria', hsCode: '0803.10', ruleType: 'requires_inspection', description: 'Plantains require phytosanitary certificate and port inspection', authority: 'Nigeria Agricultural Quarantine Service', allowedWithDocuments: ['phytosanitary_cert'] },
-  { country: 'Tanzania', hsCode: '1006.30', ruleType: 'restricted', description: 'Rice imports require permit from Ministry of Agriculture', authority: 'Tanzania Food and Drugs Authority (TFDA)', allowedWithDocuments: ['import_permit'] },
-  { country: 'Tanzania', hsCode: '7214.20', ruleType: 'requires_license', description: 'Steel imports require Tanzania Bureau of Standards verification', authority: 'TBS (Tanzania Bureau of Standards)', allowedWithDocuments: ['import_permit', 'quality_cert'] },
-  { country: 'Uganda', hsCode: '2523.29', ruleType: 'requires_license', description: 'Cement imports require Uganda National Bureau of Standards certification', authority: 'UNBS', allowedWithDocuments: ['import_permit', 'quality_cert'] },
-  { country: 'South Africa', hsCode: '1006.30', ruleType: 'requires_license', description: 'Rice imports require import permit from DALRRD', authority: 'Department of Agriculture, Land Reform and Rural Development', allowedWithDocuments: ['import_permit'] },
-  { country: 'South Africa', hsCode: '8703.23', ruleType: 'requires_license', description: 'Used motor vehicles require import permit and compliance with SABS standards', authority: 'SABS, ITAC', allowedWithDocuments: ['import_permit', 'compliance_cert'] },
-  { country: 'Kenya', hsCode: '7214.20', ruleType: 'requires_license', description: 'Steel products require KEBS quality certification', authority: 'KEBS', allowedWithDocuments: ['kebs_cert'] },
-  { country: 'Kenya', hsCode: '4011.20', ruleType: 'requires_certificate', description: 'Tire imports require KEBS quality mark', authority: 'KEBS', allowedWithDocuments: ['kebs_cert'] },
-  { country: 'Kenya', hsCode: '1511.10', ruleType: 'requires_license', description: 'Palm oil imports require registration with KEBS', authority: 'KEBS', allowedWithDocuments: ['import_permit', 'quality_cert'] },
-  { country: 'Rwanda', hsCode: '2523.29', ruleType: 'requires_license', description: 'Cement imports require Rwanda Standards Board certification', authority: 'RSB (Rwanda Standards Board)', allowedWithDocuments: ['import_permit'] },
-  { country: 'Uganda', hsCode: '1006.30', ruleType: 'requires_license', description: 'Rice imports require UNBS quality certification', authority: 'UNBS', allowedWithDocuments: ['import_permit', 'phytosanitary_cert'] },
-  { country: 'Nigeria', hsCode: '8517.13', ruleType: 'requires_certificate', description: 'Smartphones require SON (Standards Organization of Nigeria) certification', authority: 'SON', allowedWithDocuments: ['son_cert'] },
-  { country: 'Nigeria', hsCode: '8703.23', ruleType: 'restricted', description: 'Vehicles must be less than 15 years old for import into Nigeria', authority: 'Nigeria Customs Service', allowedWithDocuments: [] },
-  { country: 'Kenya', hsCode: '4403.11', ruleType: 'requires_license', description: 'Timber imports require phytosanitary certificate and KFS approval', authority: 'Kenya Forest Service (KFS)', allowedWithDocuments: ['phytosanitary_cert', 'import_permit'] }
-];
-
-const SEED_TRADE_AGREEMENTS = [
-  {
-    name: 'African Continental Free Trade Area (AfCFTA)',
-    shortName: 'AfCFTA',
-    type: 'multilateral',
-    memberCountries: ['Kenya', 'Nigeria', 'Tanzania', 'Uganda', 'Rwanda', 'South Africa', 'Ethiopia', 'Egypt', 'Ghana', "Côte d'Ivoire", 'Senegal', 'Zambia', 'Zimbabwe', 'Botswana', 'Namibia', 'Morocco', 'Tunisia', 'Mauritius', 'Cameroon', 'Kenya'],
-    description: 'Pan-African trade agreement establishing a single continental market for goods and services. 90% of tariff lines will be liberalized over 5-10 years.',
-    keyBenefits: [
-      'Duty-free access for 90% of product categories',
-      'Reduced non-tariff barriers',
-      'Simplified customs procedures',
-      'Rules of origin framework for qualifying products'
-    ],
-    rulesOfOrigin: {
-      description: 'Goods must originate from an AfCFTA member state, with at least 35% local content value',
-      localContentRequirement: 35,
-      productSpecificRules: [
-        { category: 'textiles', rule: 'Fabric must be woven in AfCFTA member state' },
-        { category: 'vehicles', rule: 'At least 40% local content by value' },
-        { category: 'electronics', rule: 'At least 30% local content by value' }
-      ]
-    },
-    dutyReductionSchedule: {
-      immediateDutyFree: ['non-sensitive', 'some industrial goods'],
-      phasedReduction: [
-        { category: 'sensitive industrial goods', yearsToZero: 5, currentRate: 10 },
-        { category: 'agricultural products', yearsToZero: 10, currentRate: 15 }
-      ],
-      excludedProducts: ['weapons', 'ammunition', 'military equipment']
-    },
-    documentation: {
-      requiresCertificateOfOrigin: true,
-      certificateOfOriginFormat: 'AfCFTA Certificate of Origin',
-      additionalDocuments: ['Commercial invoice', 'Packing list', 'Bill of lading']
-    },
-    isActive: true,
-    effectiveDate: new Date('2021-01-01')
-  },
-  {
-    name: 'East African Community Customs Union',
-    shortName: 'EAC',
-    type: 'regional',
-    memberCountries: ['Kenya', 'Tanzania', 'Uganda', 'Rwanda', 'Burundi', 'South Sudan', 'DR Congo'],
-    description: 'Customs union among East African Community partners. Goods originating from EAC member states trade duty-free.',
-    keyBenefits: [
-      'Duty-free trade on goods originating from EAC member states',
-      'Common external tariff for non-EAC imports',
-      'Simplified trade documentation',
-      'One-stop border posts'
-    ],
-    rulesOfOrigin: {
-      description: 'Goods must be produced within the EAC with at least 30% local content for third-country materials',
-      localContentRequirement: 30,
-      productSpecificRules: [
-        { category: 'textiles', rule: 'Fabric woven in EAC from yarn originating in EAC' },
-        { category: 'agricultural', rule: 'Wholly produced in EAC member state' }
-      ]
-    },
-    dutyReductionSchedule: {
-      immediateDutyFree: ['all originating goods within EAC'],
-      phasedReduction: [],
-      excludedProducts: ['arms and ammunition']
-    },
-    documentation: {
-      requiresCertificateOfOrigin: true,
-      certificateOfOriginFormat: 'EAC Certificate of Origin (Form EAC-CO)',
-      additionalDocuments: ['Commercial invoice', 'Packing list']
-    },
-    isActive: true,
-    effectiveDate: new Date('2005-01-01')
-  },
-  {
-    name: 'COMESA Free Trade Area',
-    shortName: 'COMESA',
-    type: 'regional',
-    memberCountries: ['Kenya', 'Uganda', 'Rwanda', 'Burundi', 'Ethiopia', 'Eritrea', 'Djibouti', 'DR Congo', 'Zambia', 'Zimbabwe', 'Malawi', 'Mauritius', 'Seychelles', 'Comoros', 'Madagascar', 'Egypt', 'Libya', 'Sudan', 'Tunisia'],
-    description: 'Free trade area among COMESA member states. Tariffs eliminated on goods originating from member states.',
-    keyBenefits: [
-      'Zero duty on originating goods from COMESA members',
-      'Common external tariff applied to non-COMESA imports',
-      'Trade facilitation measures including simplified customs procedures',
-      'Dispute resolution mechanism'
-    ],
-    rulesOfOrigin: {
-      description: 'Goods must have at least 35% local content or sufficient processing in a COMESA member state',
-      localContentRequirement: 35,
-      productSpecificRules: [
-        { category: 'textiles', rule: 'Fabric woven in COMESA from yarn originating in COMESA' },
-        { category: 'agricultural', rule: 'Wholly produced in COMESA' }
-      ]
-    },
-    dutyReductionSchedule: {
-      immediateDutyFree: ['all originating goods from COMESA member states'],
-      phasedReduction: [],
-      excludedProducts: []
-    },
-    documentation: {
-      requiresCertificateOfOrigin: true,
-      certificateOfOriginFormat: 'COMESA Certificate of Origin',
-      additionalDocuments: ['Commercial invoice', 'Packing list']
-    },
-    isActive: true,
-    effectiveDate: new Date('2000-10-31')
-  },
-  {
-    name: 'SADC Free Trade Area',
-    shortName: 'SADC',
-    type: 'regional',
-    memberCountries: ['South Africa', 'Botswana', 'Namibia', 'Lesotho', 'Eswatini', 'Zimbabwe', 'Zambia', 'Malawi', 'Mozambique', 'Tanzania', 'DR Congo', 'Mauritius', 'Seychelles', 'Madagascar', 'Comoros'],
-    description: 'Free trade area aimed at creating a fully integrated regional economy. Substantial progress on tariff liberalization among SADC members.',
-    keyBenefits: [
-      'Tariff reductions on goods originating from SADC members',
-      'Trade facilitation programs',
-      'Standards harmonization',
-      'Simplified customs procedures'
-    ],
-    rulesOfOrigin: {
-      description: 'Goods must have at least 35% local content in SADC member states',
-      localContentRequirement: 35,
-      productSpecificRules: []
-    },
-    dutyReductionSchedule: {
-      immediateDutyFree: ['manufactured goods', 'processed agricultural products'],
-      phasedReduction: [
-        { category: 'sensitive products', yearsToZero: 8, currentRate: 15 },
-        { category: 'automotive', yearsToZero: 12, currentRate: 20 }
-      ],
-      excludedProducts: ['certain agricultural products', 'used goods']
-    },
-    documentation: {
-      requiresCertificateOfOrigin: true,
-      certificateOfOriginFormat: 'SADC Certificate of Origin (Form SADC-CO)',
-      additionalDocuments: ['Commercial invoice', 'Transport document']
-    },
-    isActive: true,
-    effectiveDate: new Date('2008-08-17')
-  }
-];
-
-const SEED_DOCUMENT_TEMPLATES = [
-  {
-    type: 'commercial_invoice',
-    country: 'general',
-    name: 'Standard Commercial Invoice',
-    description: 'Standard commercial invoice for international trade shipments',
-    fields: [
-      { fieldName: 'invoiceNumber', label: 'Invoice Number', type: 'text', required: true, autoFill: true, autoFillField: 'shipmentId' },
-      { fieldName: 'date', label: 'Date', type: 'date', required: true, autoFill: true, autoFillField: 'createdAt' },
-      { fieldName: 'sellerName', label: 'Seller Name', type: 'text', required: true },
-      { fieldName: 'sellerAddress', label: 'Seller Address', type: 'text', required: true },
-      { fieldName: 'buyerName', label: 'Buyer Name', type: 'text', required: true },
-      { fieldName: 'buyerAddress', label: 'Buyer Address', type: 'text', required: true },
-      { fieldName: 'billToName', label: 'Bill To Name', type: 'text' },
-      { fieldName: 'shipToName', label: 'Ship To Name', type: 'text' },
-      { fieldName: 'incoterm', label: 'Incoterm', type: 'select', required: true, options: ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'] },
-      { fieldName: 'originCountry', label: 'Country of Origin', type: 'text', required: true },
-      { fieldName: 'destinationCountry', label: 'Destination Country', type: 'text', required: true },
-      { fieldName: 'portOfLoading', label: 'Port of Loading', type: 'text', required: true },
-      { fieldName: 'portOfDischarge', label: 'Port of Discharge', type: 'text', required: true },
-      { fieldName: 'vesselFlight', label: 'Vessel/Flight Number', type: 'text' },
-      { fieldName: 'itemDescription', label: 'Item Description', type: 'text', required: true },
-      { fieldName: 'hsCode', label: 'HS Code', type: 'text', required: true },
-      { fieldName: 'quantity', label: 'Quantity', type: 'number', required: true },
-      { fieldName: 'unit', label: 'Unit', type: 'text' },
-      { fieldName: 'unitPrice', label: 'Unit Price (USD)', type: 'currency', required: true },
-      { fieldName: 'totalAmount', label: 'Total Amount (USD)', type: 'currency', required: true },
-      { fieldName: 'currency', label: 'Currency', type: 'text' },
-      { fieldName: 'paymentTerms', label: 'Payment Terms', type: 'text' },
-      { fieldName: 'remarks', label: 'Remarks', type: 'text' }
-    ],
-    sections: [
-      { title: 'Header Information', order: 1, fields: ['invoiceNumber', 'date'] },
-      { title: 'Parties', order: 2, fields: ['sellerName', 'sellerAddress', 'buyerName', 'buyerAddress', 'billToName', 'shipToName'] },
-      { title: 'Transport Details', order: 3, fields: ['incoterm', 'originCountry', 'destinationCountry', 'portOfLoading', 'portOfDischarge', 'vesselFlight'] },
-      { title: 'Goods Description', order: 4, fields: ['itemDescription', 'hsCode', 'quantity', 'unit', 'unitPrice', 'totalAmount', 'currency'] },
-      { title: 'Terms', order: 5, fields: ['paymentTerms', 'remarks'] }
-    ],
-    isActive: true
-  },
-  {
-    type: 'packing_list',
-    country: 'general',
-    name: 'Standard Packing List',
-    description: 'Packing list detailing contents of each package in shipment',
-    fields: [
-      { fieldName: 'documentNumber', label: 'Document Number', type: 'text', required: true, autoFill: true, autoFillField: 'shipmentId' },
-      { fieldName: 'date', label: 'Date', type: 'date', required: true, autoFill: true, autoFillField: 'createdAt' },
-      { fieldName: 'sellerName', label: 'Seller Name', type: 'text', required: true },
-      { fieldName: 'buyerName', label: 'Buyer Name', type: 'text', required: true },
-      { fieldName: 'incoterm', label: 'Incoterm', type: 'select', options: ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'] },
-      { fieldName: 'packageCount', label: 'Number of Packages', type: 'number', required: true },
-      { fieldName: 'totalNetWeight', label: 'Total Net Weight (kg)', type: 'number', required: true },
-      { fieldName: 'totalGrossWeight', label: 'Total Gross Weight (kg)', type: 'number', required: true },
-      { fieldName: 'totalVolume', label: 'Total Volume (m³)', type: 'number' },
-      { fieldName: 'markingsNumbers', label: 'Marks & Numbers', type: 'text' },
-      { fieldName: 'packageDetails', label: 'Package Details (JSON)', type: 'text' }
-    ],
-    sections: [
-      { title: 'Header', order: 1, fields: ['documentNumber', 'date'] },
-      { title: 'Parties', order: 2, fields: ['sellerName', 'buyerName'] },
-      { title: 'Package Summary', order: 3, fields: ['packageCount', 'totalNetWeight', 'totalGrossWeight', 'totalVolume', 'markingsNumbers', 'packageDetails'] }
-    ],
-    isActive: true
-  },
-  {
-    type: 'certificate_of_origin',
-    country: 'general',
-    name: 'Standard Certificate of Origin',
-    description: 'Certificate of Origin for duty preference claims',
-    fields: [
-      { fieldName: 'certificateNumber', label: 'Certificate Number', type: 'text', required: true },
-      { fieldName: 'exporterName', label: 'Exporter Name', type: 'text', required: true },
-      { fieldName: 'consigneeName', label: 'Consignee Name', type: 'text', required: true },
-      { fieldName: 'transportDetails', label: 'Transport Details', type: 'text' },
-      { fieldName: 'originCountry', label: 'Country of Origin', type: 'text', required: true },
-      { fieldName: 'destinationCountry', label: 'Destination Country', type: 'text', required: true },
-      { fieldName: 'tradeAgreement', label: 'Trade Agreement (if applicable)', type: 'select', options: ['AfCFTA', 'EAC', 'COMESA', 'SADC', 'General / None'] },
-      { fieldName: 'blNumber', label: 'Bill of Lading Number', type: 'text' },
-      { fieldName: 'itemDetails', label: 'Item Details (JSON)', type: 'text', required: true },
-      { fieldName: 'originCriterion', label: 'Origin Criterion', type: 'select', required: true, options: ['Wholly obtained', 'Sufficiently processed (≥35% local)', 'Sufficiently processed (≥30% local for EAC)'] }
-    ],
-    sections: [
-      { title: 'Certificate Info', order: 1, fields: ['certificateNumber', 'exporterName', 'consigneeName'] },
-      { title: 'Transport & Origin', order: 2, fields: ['transportDetails', 'originCountry', 'destinationCountry', 'tradeAgreement', 'blNumber'] },
-      { title: 'Goods & Origin', order: 3, fields: ['itemDetails', 'originCriterion'] }
-    ],
-    isActive: true
-  },
-  {
-    type: 'bill_of_lading',
-    country: 'general',
-    name: 'Standard Bill of Lading',
-    description: 'Ocean Bill of Lading for containerized cargo',
-    fields: [
-      { fieldName: 'blNumber', label: 'Bill of Lading Number', type: 'text', required: true },
-      { fieldName: 'shipperName', label: 'Shipper Name', type: 'text', required: true },
-      { fieldName: 'consigneeName', label: 'Consignee Name', type: 'text', required: true },
-      { fieldName: 'notifyParty', label: 'Notify Party', type: 'text' },
-      { fieldName: 'vesselName', label: 'Vessel Name', type: 'text', required: true },
-      { fieldName: 'voyageNumber', label: 'Voyage Number', type: 'text' },
-      { fieldName: 'portOfLoading', label: 'Port of Loading', type: 'text', required: true },
-      { fieldName: 'portOfDischarge', label: 'Port of Discharge', type: 'text', required: true },
-      { fieldName: 'placeOfDelivery', label: 'Place of Delivery', type: 'text' },
-      { fieldName: 'containerNumbers', label: 'Container Numbers', type: 'text', required: true },
-      { fieldName: 'sealNumbers', label: 'Seal Numbers', type: 'text' },
-      { fieldName: 'containerType', label: 'Container Type', type: 'select', options: ['20ft', '40ft', '40ft HC', '45ft', '20ft Reefer', '40ft Reefer', 'LCL'] },
-      { fieldName: 'grossWeight', label: 'Gross Weight (kg)', type: 'number', required: true },
-      { fieldName: 'cargoVolume', label: 'Cargo Volume (m³)', type: 'number' },
-      { fieldName: 'numberOfPackages', label: 'Number of Packages', type: 'number', required: true },
-      { fieldName: 'descriptionOfGoods', label: 'Description of Goods', type: 'text', required: true },
-      { fieldName: 'hsCode', label: 'HS Code', type: 'text' },
-      { fieldName: 'freightCharge', label: 'Freight Charge', type: 'currency' },
-      { fieldName: 'freightPayableAt', label: 'Freight Payable At', type: 'text' },
-      { fieldName: 'placeOfIssue', label: 'Place of Issue', type: 'text' },
-      { fieldName: 'dateOfIssue', label: 'Date of Issue', type: 'date', required: true }
-    ],
-    sections: [
-      { title: 'Document Info', order: 1, fields: ['blNumber', 'dateOfIssue', 'placeOfIssue'] },
-      { title: 'Parties', order: 2, fields: ['shipperName', 'consigneeName', 'notifyParty'] },
-      { title: 'Voyage Details', order: 3, fields: ['vesselName', 'voyageNumber', 'portOfLoading', 'portOfDischarge', 'placeOfDelivery'] },
-      { title: 'Cargo Details', order: 4, fields: ['containerNumbers', 'sealNumbers', 'containerType', 'numberOfPackages', 'grossWeight', 'cargoVolume', 'descriptionOfGoods', 'hsCode'] },
-      { title: 'Freight', order: 5, fields: ['freightCharge', 'freightPayableAt'] }
-    ],
-    isActive: true
-  },
-  {
-    type: 'import_declaration',
-    country: 'Kenya',
-    name: 'Kenya Import Declaration (KRA Customs Entry)',
-    description: 'Kenya Revenue Authority customs entry declaration for imported goods',
-    fields: [
-      { fieldName: 'entryNumber', label: 'Entry Number', type: 'text', required: true },
-      { fieldName: 'importerName', label: 'Importer Name/Company', type: 'text', required: true },
-      { fieldName: 'importerPIN', label: 'KRA PIN', type: 'text', required: true },
-      { fieldName: 'customsAgentCode', label: 'Customs Agent Code', type: 'text' },
-      { fieldName: 'countryOfOrigin', label: 'Country of Origin', type: 'text', required: true },
-      { fieldName: 'countryOfExport', label: 'Country of Export', type: 'text', required: true },
-      { fieldName: 'portOfEntry', label: 'Port of Entry', type: 'text', required: true },
-      { fieldName: 'blNumber', label: 'Bill of Lading/AWB Number', type: 'text', required: true },
-      { fieldName: 'hsCode', label: 'HS Code (10-digit)', type: 'text', required: true },
-      { fieldName: 'productDescription', label: 'Product Description', type: 'text', required: true },
-      { fieldName: 'quantity', label: 'Quantity', type: 'number', required: true },
-      { fieldName: 'unit', label: 'Unit of Measure', type: 'text', required: true },
-      { fieldName: 'cifValue', label: 'CIF Value (KSh)', type: 'currency', required: true },
-      { fieldName: 'dutyRate', label: 'Duty Rate (%)', type: 'number', required: true },
-      { fieldName: 'dutyAmount', label: 'Duty Amount (KSh)', type: 'currency' },
-      { fieldName: 'vatAmount', label: 'VAT Amount (KSh)', type: 'currency' },
-      { fieldName: 'exciseAmount', label: 'Excise Duty (KSh)', type: 'currency' },
-      { fieldName: 'totalTaxes', label: 'Total Taxes & Duties (KSh)', type: 'currency' },
-      { fieldName: 'containerNumbers', label: 'Container Numbers', type: 'text' },
-      { fieldName: 'sealNumber', label: 'Seal Number', type: 'text' },
-      { fieldName: 'declarantName', label: 'Declarant Name', type: 'text', required: true },
-      { fieldName: 'declarationDate', label: 'Declaration Date', type: 'date', required: true }
-    ],
-    sections: [
-      { title: 'Entry Details', order: 1, fields: ['entryNumber', 'declarationDate', 'declarantName'] },
-      { title: 'Importer Information', order: 2, fields: ['importerName', 'importerPIN', 'customsAgentCode'] },
-      { title: 'Shipment Details', order: 3, fields: ['countryOfOrigin', 'countryOfExport', 'portOfEntry', 'blNumber', 'containerNumbers', 'sealNumber'] },
-      { title: 'Goods Details', order: 4, fields: ['hsCode', 'productDescription', 'quantity', 'unit'] },
-      { title: 'Valuation & Duties', order: 5, fields: ['cifValue', 'dutyRate', 'dutyAmount', 'vatAmount', 'exciseAmount', 'totalTaxes'] }
-    ],
-    isActive: true
-  },
-  {
-    type: 'single_administrative_document',
-    country: 'EAC',
-    name: 'EAC Single Administrative Document',
-    description: 'Common customs declaration form for EAC member states',
-    fields: [
-      { fieldName: 'documentReference', label: 'Document Reference', type: 'text', required: true },
-      { fieldName: 'declarationType', label: 'Declaration Type', type: 'select', required: true, options: ['Import', 'Export', 'Transit', 'Warehouse'] },
-      { fieldName: 'declarantName', label: 'Declarant Name', type: 'text', required: true },
-      { fieldName: 'declarantID', label: 'Declarant Tax ID', type: 'text', required: true },
-      { fieldName: 'importerExporterName', label: 'Importer/Exporter Name', type: 'text', required: true },
-      { fieldName: 'importerExporterID', label: 'Importer/Exporter Tax ID', type: 'text', required: true },
-      { fieldName: 'originCountry', label: 'Country of Origin', type: 'text', required: true },
-      { fieldName: 'exportCountry', label: 'Country of Export', type: 'text', required: true },
-      { fieldName: 'destinationCountry', label: 'Destination Country', type: 'text', required: true },
-      { fieldName: 'transportMode', label: 'Transport Mode', type: 'select', required: true, options: ['Sea', 'Air', 'Road', 'Rail', 'Inland Waterway'] },
-      { fieldName: 'containerNumbers', label: 'Container Numbers', type: 'text' },
-      { fieldName: 'hsCode', label: 'HS Code (10-digit)', type: 'text', required: true },
-      { fieldName: 'productDescription', label: 'Product Description', type: 'text', required: true },
-      { fieldName: 'quantity', label: 'Quantity', type: 'number', required: true },
-      { fieldName: 'grossWeight', label: 'Gross Weight (kg)', type: 'number', required: true },
-      { fieldName: 'netWeight', label: 'Net Weight (kg)', type: 'number', required: true },
-      { fieldName: 'invoiceAmount', label: 'Invoice Amount', type: 'currency', required: true },
-      { fieldName: 'invoiceCurrency', label: 'Invoice Currency', type: 'text', required: true },
-      { fieldName: 'freightCharges', label: 'Freight Charges', type: 'currency' },
-      { fieldName: 'insuranceCharges', label: 'Insurance Charges', type: 'currency' },
-      { fieldName: 'cifValue', label: 'CIF Value', type: 'currency', required: true },
-      { fieldName: 'declarationDate', label: 'Declaration Date', type: 'date', required: true }
-    ],
-    sections: [
-      { title: 'Declaration Info', order: 1, fields: ['documentReference', 'declarationType', 'declarationDate'] },
-      { title: 'Parties', order: 2, fields: ['declarantName', 'declarantID', 'importerExporterName', 'importerExporterID'] },
-      { title: 'Route & Transport', order: 3, fields: ['originCountry', 'exportCountry', 'destinationCountry', 'transportMode', 'containerNumbers'] },
-      { title: 'Goods Description', order: 4, fields: ['hsCode', 'productDescription', 'quantity', 'grossWeight', 'netWeight'] },
-      { title: 'Valuation', order: 5, fields: ['invoiceAmount', 'invoiceCurrency', 'freightCharges', 'insuranceCharges', 'cifValue'] }
-    ],
-    isActive: true
-  }
-];
 
 // ===== INITIALIZATION =====
 
@@ -1556,6 +896,124 @@ async function estimateClearanceDays(country, hsCode) {
   return estimates[country] || 7;
 }
 
+// ===== APIFY-POWERED TARIFF & TRADE DATA =====
+
+/**
+ * Look up live tariff data for an HS code using Apify web crawling.
+ * Falls back to the local cache if the crawl fails.
+ * @param {string} hsCode - Harmonized System code
+ * @param {string} country - Destination/origin country
+ * @returns {Promise<Object|null>} Tariff data if found
+ */
+async function apifyLookupTariffData(hsCode, country) {
+  try {
+    logger.info(`Customs Engine: Apify tariff lookup for HS ${hsCode} in ${country}`);
+
+    const tariffData = await apifyService.lookupTariffData(hsCode, country);
+
+    if (!tariffData) {
+      logger.info('Customs Engine: No Apify tariff data found — using local cache');
+      return null;
+    }
+
+    // If we got data back, cache it locally for future use
+    if (tariffData.data && tariffData.data.length > 0) {
+      const extracted = tariffData.data[0];
+
+      // Build a tariff schedule entry from scraped data
+      const tariffEntry = {
+        hsCode,
+        country,
+        originCountry: null, // Will be filled by the caller
+        baseDutyRate: extracted.dutyRate || extracted.tariffRate || null,
+        vatRate: extracted.vatRate || extracted.vat || extracted.taxRate || null,
+        preferentialRate: extracted.preferentialRate || null,
+        tradeAgreement: extracted.tradeAgreement
+          ? { name: extracted.tradeAgreement, shortName: extracted.tradeAgreementCode }
+          : null,
+        otherTaxes: extracted.otherTaxes || [],
+        exciseDuty: extracted.exciseDuty || null,
+        source: 'apify',
+        lastCrawled: new Date(),
+        isActive: true,
+      };
+
+      return tariffEntry;
+    }
+
+    return null;
+  } catch (error) {
+    logger.error('Customs Engine: Apify tariff lookup error:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Crawl for trade agreement data using Apify and cache locally.
+ * @param {string} country - Country to look up agreements for
+ * @returns {Promise<Array>}
+ */
+async function apifyCrawlTradeAgreements(country) {
+  try {
+    logger.info(`Customs Engine: Apify crawling trade agreements for ${country}`);
+
+    const agreements = await apifyService.crawlTradeAgreements(country);
+
+    if (!agreements || agreements.length === 0) {
+      logger.info('Customs Engine: No Apify trade agreement data found');
+      return [];
+    }
+
+    return agreements.map((item) => ({
+      name: item.name || item.agreementName || 'Unknown',
+      shortName: item.shortName || item.code || '',
+      type: item.type || item.agreementType || 'FTA',
+      memberCountries: item.memberCountries || [country],
+      keyBenefits: item.keyBenefits || [],
+      rulesOfOrigin: item.rulesOfOrigin
+        ? { localContentRequirement: item.rulesOfOrigin.localContent }
+        : null,
+      documentation: item.documentation
+        ? { requiresCertificateOfOrigin: true }
+        : null,
+      source: 'apify',
+      retrievedAt: new Date().toISOString(),
+    }));
+  } catch (error) {
+    logger.error('Customs Engine: Apify trade agreement crawl error:', error.message);
+    return [];
+  }
+}
+
+/**
+ * Verify a customs document by crawling the relevant government portal for requirements.
+ * @param {string} documentType - Type of document (e.g. 'commercial_invoice', 'certificate_of_origin')
+ * @param {string} country - Destination country
+ * @returns {Promise<Object|null>}
+ */
+async function apifyVerifyDocumentRequirements(documentType, country) {
+  try {
+    const searchQuery = `${country} ${documentType.replace(/_/g, ' ')} requirements customs`;
+    const results = await apifyService.scrapeMarketNews(searchQuery, 3);
+
+    if (!results || results.length === 0) return null;
+
+    return {
+      documentType,
+      country,
+      sources: results.map((r) => ({
+        title: r.title,
+        url: r.url,
+        snippet: r.snippet,
+      })),
+      retrievedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    logger.error('Customs Engine: Apify document verification error:', error.message);
+    return null;
+  }
+}
+
 // ===== CATEGORIES / METADATA =====
 
 /**
@@ -1608,5 +1066,9 @@ module.exports = {
   getCompanyShipments,
   getCategories,
   getServiceStatus,
-  shutdownCustomsEngineService
+  shutdownCustomsEngineService,
+  // Apify-powered
+  apifyLookupTariffData,
+  apifyCrawlTradeAgreements,
+  apifyVerifyDocumentRequirements,
 };

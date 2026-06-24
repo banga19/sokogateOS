@@ -1,0 +1,76 @@
+# ──────────────────────────────────────────────
+# .dockerignore — SokogateOS
+# Excludes files from Docker build context to speed up builds
+# and prevent cache invalidation from irrelevant changes.
+# ──────────────────────────────────────────────
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (installed fresh inside the container)
+node_modules
+
+# Environment files (contain secrets — never ship to a container)
+.env
+.env.development
+.env.production
+.env.local
+.env.*.local
+
+# Test & CI (not needed at runtime)
+tests/
+coverage/
+jest.config.js
+
+# Documentation (not needed at runtime)
+docs/
+*.md
+README.md
+PLAN.md
+ARCHITECTURE.md
+CACHING_CDN.md
+CICD_VERSION_CONTROL.md
+FRONTEND_ARCHITECTURE.md
+SYSTEM_ARCHITECTURE.md
+SYSTEM_DESIGN.md
+HOSTING_CLOUD_STRATEGY.md
+RATE_LIMITING.md
+ERROR_TRACKING_LOGGING.md
+AGENT_ENGINE_RESEARCH_SUMMARY.md
+COST_UPDATE.txt
+API.md
+
+# Scripts & tooling (not needed at runtime)
+scripts/
+.eslintrc.json
+eslint.config.js
+.prettierrc
+.prettierignore
+tsconfig.json
+
+# AI configuration (not needed at runtime)
+.claude/
+.claude-flow/
+.swarm/
+.kilo/
+.worktrees/
+
+# Docker files (not needed in the build context)
+Dockerfile
+docker-compose.yml
+
+# Logs & data (development only)
+logs/
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+*.pid
+
+# Build artifacts
+dist/

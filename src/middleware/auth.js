@@ -48,6 +48,15 @@ async function authenticate(req, res, next) {
       });
     }
 
+    // Check token version — invalidates tokens after logout
+    const currentVersion = user.tokenVersion || 0;
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion < currentVersion) {
+      return res.status(401).json({
+        success: false,
+        error: 'Token has been revoked. Please login again.'
+      });
+    }
+
     // Attach user info to request
     req.user = {
       id: user._id,

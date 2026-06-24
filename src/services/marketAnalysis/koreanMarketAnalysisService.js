@@ -3,6 +3,7 @@
 
 const logger = require('../../utils/logger');
 const { DocumentProcessingPipeline } = require('../../ingestion/processors/documentProcessingPipeline');
+const apifyService = require('../apifyService');
 
 // Mock Korean market data (in reality, this would come from APIs, databases, or ML models)
 const koreanMarketData = {
@@ -571,6 +572,77 @@ class KoreanMarketAnalysisService {
     }
 
     return steps;
+  }
+
+  /**
+   * Scrape live pricing data for a product from Korean e-commerce platforms via Apify.
+   * @param {string} productName - Product to search for
+   * @param {string} [marketplace='coupang'] - Korean marketplace (coupang, gmarket, etc.)
+   * @returns {Promise<Array>} Pricing data results
+   */
+  async scrapeKoreanPricingData(productName, marketplace = 'coupang') {
+    try {
+      logger.info(`KoreanMarketAnalysis: Scraping pricing for "${productName}" on ${marketplace}`);
+
+      const results = await apifyService.scrapePricingData({
+        product: productName,
+        marketplace,
+        maxResults: 10,
+      });
+
+      if (!results || results.length === 0) {
+        logger.info('KoreanMarketAnalysis: No pricing data returned from Apify');
+        return [];
+      }
+
+      return results.map((item) => ({
+        title: item.title || item.name || 'Unknown',
+        price: item.price || item.currentPrice || null,
+        currency: item.currency || 'KRW',
+        seller: item.seller || item.store || 'Unknown',
+        url: item.url || item.productUrl || '',
+        rating: item.rating || item.averageRating || null,
+        reviewCount: item.reviewsCount || item.reviewCount || 0,
+        availability: item.availability || item.stockStatus || 'unknown',
+        scrapedAt: new Date().toISOString(),
+        source: marketplace,
+      }));
+    } catch (error) {
+      logger.error('KoreanMarketAnalysis: Error scraping Korean pricing:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Scrape the latest Korean market news and trends via Apify.
+   * @param {string} [topic] - Optional specific topic to search for
+   * @param {number} [count=5] - Number of news items to fetch
+   * @returns {Promise<Array>} News items
+   */
+  async scrapeKoreanMarketNews(topic, count = 5) {
+    try {
+      const searchTopic = topic || 'Korea import market trade Africa 2025';
+      logger.info(`KoreanMarketAnalysis: Scraping news for "${searchTopic}"`);
+
+      const results = await apifyService.scrapeMarketNews(searchTopic, count);
+
+      if (!results || results.length === 0) {
+        logger.info('KoreanMarketAnalysis: No news results from Apify');
+        return [];
+      }
+
+      return results.map((item) => ({
+        title: item.title || 'No title',
+        url: item.url || item.link || '',
+        snippet: item.snippet || item.description || '',
+        source: item.source || item.displayLink || 'Unknown',
+        date: item.date || item.publishedDate || null,
+        scrapedAt: new Date().toISOString(),
+      }));
+    } catch (error) {
+      logger.error('KoreanMarketAnalysis: Error scraping Korean market news:', error);
+      return [];
+    }
   }
 
   /**

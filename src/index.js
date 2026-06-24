@@ -2,7 +2,6 @@ const express = require('express');
 // Load environment variables from .env and then .env.development (override)
 require('dotenv').config();
 require('dotenv').config({ path: '.env.development', override: true });
-console.log('Dotenv loaded, KAFKA_BROKERS:', process.env.KAFKA_BROKERS); // DEBUG
 const helmet = require('helmet');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const connectDB = require('./config/database');
@@ -14,6 +13,8 @@ const langchainOrchestrator = require('./services/langchainOrchestrator');
 const { HermesAgent } = require('./services/hermes/hermesAgent');
 const agentService = require('./services/agentService');
 const { cloudflareService } = require('./services/cloudflareService');
+const toolRegistry = require('./services/toolRegistry');
+const composioService = require('./services/composioService');
 
 // Phase 1 Services
 const watiService = require('./services/watiService');
@@ -26,6 +27,10 @@ const { startCustomsEngineService } = require('./services/customsEngineService')
 // Payment Adapters
 const { startKRWPaymentAdapter } = require('./ingestion/adapters/krwPaymentAdapter');
 
+// Middleware
+const { notFoundHandler, globalErrorHandler } = require('./middleware/errorHandler');
+const { SentryService, sentryErrorHandler, sentryTracingHandler } = require('./services/error/sentryService');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -33,9 +38,15 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
 // ===== SECURITY MIDDLEWARE =====
+// Sentry tracing handler — captures request context for performance monitoring
+app.use(sentryTracingHandler());
 app.use(helmet());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// CORS — use dedicated middleware (supports comma-separated FRONTEND_URL, proper Vary header)
+const corsMiddleware = require('./middleware/cors');
+app.use(corsMiddleware);
 
 // Rate limiting
 const authRateLimiter = new RateLimiterMemory({
@@ -76,156 +87,104 @@ app.use('/api/v1', (req, res, next) => {
     });
 });
 
-// CORS - allow frontend in development
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
-});
+// Apply rate limiting to all other API routes (admin, teams, agents, tools, etc.)
+const apiRoutes = ['/api/admin', '/api/teams', '/api/agents', '/api/tools', '/api/whatsapp', '/api/trust',
+                   '/api/customs', '/api/contacts', '/api/accounts', '/api/sequences', '/api/enrollments'];
+for (const route of apiRoutes) {
+  app.use(route, (req, res, next) => {
+    apiRateLimiter
+      .consume(req.ip)
+      .then(() => next())
+      .catch((err) => {
+        if (err instanceof Error) {
+          logger.warn(`Rate limiter error on ${route}:`, err.message);
+          return next();
+        }
+        res.status(429).json({ success: false, error: 'Too many requests. Please try again later.' });
+      });
+  });
+}
 
 // Track engagement for all requests
 const { trackEngagement } = require('./middleware/analytics/tracking');
 app.use(trackEngagement);
 
-// Health check route (unauthenticated)
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.0',
-    features: {
-      auth: true,
-      qme: true,
-      kafka: true,
-      selfImprovingLoop: true,
-    },
-  });
-});
+// Health check routes (unauthenticated)
+const healthRoutes = require('./routes/health');
+app.use('/health', healthRoutes);
 
 // Initialize services
 const startServer = async () => {
   try {
     logger.info('SokogateOS: Starting server...');
 
-    // Connect to database
-    try {
-      await connectDB();
-      logger.info('SokogateOS: Database connection initialized');
-    } catch (dbError) {
-      logger.warn(
-        'SokogateOS: Database connection failed (continuing without DB):',
-        dbError.message
-      );
-      // Continue without database in development
-    }
-
-    // Initialize QMe task runner
-    try {
-      const qmeInitialized = await qme.initialize();
-      if (qmeInitialized) {
-        logger.info('SokogateOS: QMe task runner initialized');
-        qme.startDashboard().catch((err) => {
-          logger.warn('SokogateOS: QMe dashboard start (non-critical):', err.message);
+    // Independent service initialization (parallelizable — no dependencies between them)
+    const initResults = await Promise.allSettled([
+      // Non-critical services
+      connectDB().then(() => ({ name: 'Database' })),
+      qme.initialize().then((initialized) => ({ name: 'QMe', initialized })).catch((e) => ({ name: 'QMe', error: e.message })),
+      langchainOrchestrator.initializeLangChain().then(() => ({ name: 'LangChain' })),
+      Promise.resolve().then(async () => {
+        const hermesAgent = new HermesAgent({
+          config: {
+            analysisInterval: 3600000,
+            optimizationInterval: 7200000,
+            complianceInterval: 86400000,
+            intelligenceInterval: 21600000,
+          },
         });
-      } else {
-        logger.info('SokogateOS: QMe task runner initialization skipped');
-      }
-    } catch (qmeError) {
-      logger.warn(
-        'SokogateOS: QMe initialization failed (continuing without QMe):',
-        qmeError.message
-      );
-      // Continue without QMe
-    }
-
-    // Initialize LangChain orchestrator
-    try {
-      await langchainOrchestrator.initializeLangChain();
-      logger.info('SokogateOS: LangChain orchestrator initialized');
-    } catch (langchainError) {
-      logger.warn(
-        'SokogateOS: LangChain initialization failed (continuing without LangChain):',
-        langchainError.message
-      );
-    }
-
-    // Initialize Hermes agent system
-    try {
-      const hermesAgent = new HermesAgent({
-        config: {
-          analysisInterval: 3600000, // 1 hour
-          optimizationInterval: 7200000, // 2 hours
-          complianceInterval: 86400000, // 24 hours
-          intelligenceInterval: 21600000, // 6 hours
-        },
-      });
-
-      await hermesAgent.initialize();
-      logger.info('SokogateOS: Hermes agent system initialized');
-
-      // Start scheduled runs (every 5 minutes by default)
-      hermesAgent.startScheduledRuns();
-
-      // Make available for potential API routes
-      app.locals.hermesAgent = hermesAgent;
-    } catch (hermesError) {
-      logger.warn(
-        'SokogateOS: Hermes initialization failed (continuing without Hermes):',
-        hermesError.message
-      );
-    }
-
-    // Initialize agent service
-    try {
-      await agentService.initialize();
-      logger.info('SokogateOS: Agent service initialized');
-      // Make agent service available for potential API routes
-      app.locals.agentService = agentService;
-    } catch (agentServiceError) {
-      logger.error('SokogateOS: Agent service initialization failed:', agentServiceError.message);
-      throw agentServiceError; // This is critical for the agent engine
-    }
-
-    // Initialize Cloudflare service
-    try {
-      await cloudflareService.initialize();
-      logger.info('SokogateOS: Cloudflare service initialized');
-      // Make Cloudflare service available for potential API routes
-      app.locals.cloudflareService = cloudflareService;
-
-      // Apply Cloudflare-specific headers middleware
-      app.use(cloudflareService.getHeadersMiddleware());
-    } catch (cloudflareError) {
-      logger.warn(
-        'SokogateOS: Cloudflare initialization failed (continuing without Cloudflare):',
-        cloudflareError.message
-      );
-      // Continue without Cloudflare - not critical for basic operation
-    }
-
-    // Initialize Kafka
-    try {
-      await initKafkaProducer();
-      await initKafkaConsumer([
+        await hermesAgent.initialize();
+        hermesAgent.startScheduledRuns();
+        app.locals.hermesAgent = hermesAgent;
+        return { name: 'Hermes' };
+      }),
+      Promise.resolve().then(() => {
+        const status = toolRegistry.getServiceStatus();
+        const configured = composioService.isConfigured();
+        app.locals.toolRegistry = toolRegistry;
+        app.locals.composioService = composioService;
+        return { name: 'ToolRegistry', totalTools: status.totalTools, composioConfigured: configured };
+      }),
+      cloudflareService.initialize().then(() => ({ name: 'Cloudflare' })),
+      initKafkaProducer().then(() => initKafkaConsumer([
         'product.updated',
         'order.created',
         'inventory.changed',
         'supplier.risk.updated',
         'customer.feedback.received',
         'document.processed',
-      ]);
-      logger.info('SokogateOS: Kafka initialized');
-    } catch (kafkaError) {
-      logger.warn(
-        'SokogateOS: Kafka initialization failed (continuing without Kafka):',
-        kafkaError.message
-      );
-      // Continue without Kafka
+      ])).then(() => ({ name: 'Kafka' })),
+    ]);
+
+    for (const result of initResults) {
+      if (result.status === 'fulfilled' && result.value) {
+        const svcName = result.value.name;
+        if (result.value.error) {
+          logger.warn(`SokogateOS: ${svcName} initialization failed (continuing):`, result.value.error);
+        } else {
+          const detail = svcName === 'QMe' && result.value.initialized === false
+            ? 'skipped'
+            : svcName === 'ToolRegistry'
+              ? `initialized — ${result.value.totalTools} tools, Composio=${result.value.composioConfigured}`
+              : 'initialized';
+          logger.info(`SokogateOS: ${svcName} ${detail}`);
+        }
+        if (svcName === 'Cloudflare' && result.value.error === undefined) {
+          try {
+            app.use(cloudflareService.getHeadersMiddleware());
+          } catch (_) {}
+        }
+      }
+    }
+
+    // Critical service initialization (throws on failure — must succeed)
+    try {
+      await agentService.initialize();
+      logger.info('SokogateOS: Agent service initialized');
+      app.locals.agentService = agentService;
+    } catch (agentServiceError) {
+      logger.error('SokogateOS: Agent service initialization failed:', agentServiceError.message);
+      throw agentServiceError;
     }
 
     // Start all background services
@@ -275,8 +234,9 @@ const startServer = async () => {
     ];
 
     // Start all services and log individual successes/failures
-    for (const startPromise of serviceStarts) {
-      startPromise
+    // Wrap with Promise.resolve() to handle functions that return non-Promise values
+    for (const maybePromise of serviceStarts) {
+      Promise.resolve(maybePromise)
         .then(() => {
           // Service started successfully
         })
@@ -312,7 +272,6 @@ const startServer = async () => {
 
       app.use('/api/auth', authRoutes);
       app.use('/api/v1', apiRoutes);
-      app.use('/api', apiRoutes);
 
       // Phase 1 Routes: WhatsApp Commerce Co-pilot & Supplier Trust Network
       const whatsappRoutes = require('./routes/whatsapp');
@@ -325,15 +284,15 @@ const startServer = async () => {
       const customsEngineRoutes = require('./routes/customsEngine');
       app.use('/api/customs', customsEngineRoutes);
 
-// Phase 2 Routes: CRM (Contacts, Accounts, Sequences, Enrollments)
-const contactsRoutes = require('./routes/contacts');
-const accountsRoutes = require('./routes/accounts');
-const sequencesRoutes = require('./routes/sequences');
-const enrollmentsRoutes = require('./routes/enrollments');
-app.use('/api/contacts', contactsRoutes);
-app.use('/api/accounts', accountsRoutes);
-app.use('/api/sequences', sequencesRoutes);
-app.use('/api/enrollments', enrollmentsRoutes);
+      // Phase 2 Routes: CRM (Contacts, Accounts, Sequences, Enrollments)
+      const contactsRoutes = require('./routes/contacts');
+      const accountsRoutes = require('./routes/accounts');
+      const sequencesRoutes = require('./routes/sequences');
+      const enrollmentsRoutes = require('./routes/enrollments');
+      app.use('/api/contacts', contactsRoutes);
+      app.use('/api/accounts', accountsRoutes);
+      app.use('/api/sequences', sequencesRoutes);
+      app.use('/api/enrollments', enrollmentsRoutes);
 
       const teamsRoutes = require('./routes/teams');
       const adminRoutes = require('./routes/admin');
@@ -341,6 +300,16 @@ app.use('/api/enrollments', enrollmentsRoutes);
       app.use('/api/admin', adminRoutes);
 
       logger.info('SokogateOS: API routes configured');
+
+      // Register tool routes
+      try {
+        const toolRoutes = require('./routes/tools');
+        app.use('/api/tools', toolRoutes);
+        logger.info('SokogateOS: Tool routes configured');
+      } catch (toolRoutesError) {
+        logger.error('SokogateOS: Failed to setup tool routes:', toolRoutesError.message);
+        // Don't throw here as tool routes are not critical
+      }
 
       // Register agent routes
       try {
@@ -444,6 +413,23 @@ app.use('/api/enrollments', enrollmentsRoutes);
         res.status(500).json({ success: false, error: err.message });
       }
     });
+
+    // Root route
+    app.get('/', (req, res) => {
+      res.status(200).json({ success: true, name: 'sokogateos', status: 'running' });
+    });
+
+    // Set up Sentry Express integration lazily (avoids circular dependency)
+    SentryService.setupExpressIntegration(app);
+
+    // 404 handler — must come after all routes
+    app.use(notFoundHandler);
+
+    // Sentry error handler — must come before global error handler
+    app.use(sentryErrorHandler());
+
+    // Global error handler — must come last
+    app.use(globalErrorHandler);
 
     // Start server
     app.listen(PORT, () => {

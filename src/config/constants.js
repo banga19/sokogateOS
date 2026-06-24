@@ -11,7 +11,7 @@ module.exports = {
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
     postgres: {
       user: process.env.POSTGRES_USER || 'sokogate',
-      password: process.env.POSTGRES_PASSWORD || 'sokogate',
+      password: () => { const v = process.env.POSTGRES_PASSWORD; if (!v) throw new Error('POSTGRES_PASSWORD must be set in production'); return v; },
       db: process.env.POSTGRES_DB || 'sokogate',
       host: process.env.POSTGRES_HOST || 'localhost',
       port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
@@ -19,8 +19,8 @@ module.exports = {
   },
 
   auth: {
-    jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
-    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    jwtSecret: () => { const v = process.env.JWT_SECRET; if (!v) throw new Error('JWT_SECRET must be set'); return v; },
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   },
@@ -42,7 +42,7 @@ module.exports = {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10),
     minioEndpoint: process.env.MINIO_ENDPOINT || 'http://localhost:9000',
     minioAccessKey: process.env.MINIO_ROOT_USER || 'sokogate_access',
-    minioSecretKey: process.env.MINIO_ROOT_PASSWORD || 'change-me',
+    minioSecretKey: () => { const v = process.env.MINIO_ROOT_PASSWORD; if (!v) throw new Error('MINIO_ROOT_PASSWORD must be set in production'); return v; },
     bucketName: process.env.MINIO_BUCKET || 'sokogateos-recordings',
   },
 
@@ -58,6 +58,8 @@ module.exports = {
   external: {
     posthogApiKey: process.env.POSTHOG_API_KEY || '',
     posthogHost: process.env.POSTHOG_HOST || 'https://app.posthog.com',
+    apifyApiKey: process.env.APIFY_API_KEY || '',
+    composioApiKey: process.env.COMPOSIO_API_KEY || '',
   },
 
   features: {

@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const Role = require('../models/role');
 const logger = require('../utils/logger');
 
+function hasPrototypeKey(obj) {
+  return obj && typeof obj === 'object' && ['__proto__', 'constructor', 'prototype'].some((k) => Object.prototype.hasOwnProperty.call(obj, k));
+}
+
 const SYSTEM_ROLES = [
   { slug: 'super_admin', name: 'Super Admin', permissions: [{ domain: '*', actions: ['*'] }] },
   {
@@ -102,6 +106,9 @@ class AdminService {
     if (patch.slug) throw new Error('Cannot change role slug — create a new role.');
     const role = await Role.findOne({ _id: roleId, companyId });
     if (!role) throw new Error('Role not found.');
+    if (hasPrototypeKey(patch)) {
+      throw new Error('Invalid request payload');
+    }
     Object.assign(role, patch);
     await role.save();
     return role;
@@ -125,6 +132,51 @@ class AdminService {
     delete safe.password;
     logger.info(`AdminService: assigned role "${roleSlug}" to user ${userId} by ${assignedBy}`);
     return safe;
+  }
+
+  async inviteUser(companyId, invitedBy, { email, name, role, teamIds }) {
+    // In a full implementation, this would:
+    // 1. Check if user already exists
+    // 2. If exists, add to company
+    // 3. If not, create invitation token and send email
+    logger.info(
+      `AdminService: invited user ${email} (${name}) to company ${companyId} by ${invitedBy}`
+    );
+    return {
+      _id: new mongoose.Types.ObjectId().toString(),
+      email,
+      name,
+      role: role || 'member',
+      teamIds: teamIds || [],
+      companyId,
+      invitedBy,
+      status: 'pending',
+      createdAt: new Date(),
+    };
+  }
+
+  async platformStats() {
+    // Return aggregate platform statistics
+    const User = require('../models/user');
+    const Team = require('../models/team');
+    const Account = require('../models/account');
+
+    const [totalUsers, totalTeams, totalAccounts] = await Promise.all([
+      User.countDocuments({ isActive: true }),
+      Team.countDocuments({ isActive: true }),
+      Account.countDocuments({ isActive: true }),
+    ]);
+
+    return { totalUsers, totalTeams, totalAccounts };
+  }
+
+  async health() {
+    return {
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+    };
   }
 }
 

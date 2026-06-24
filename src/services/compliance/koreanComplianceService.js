@@ -3,6 +3,7 @@
 
 const logger = require('../../utils/logger');
 const DocumentProcessingPipeline = require('../../ingestion/processors/documentProcessingPipeline');
+const apifyService = require('../apifyService');
 
 /**
  * Korean Compliance Checker - validates products for Korean market entry
@@ -353,6 +354,82 @@ class KoreanComplianceService {
 
 
     return false;
+  }
+
+  /**
+   * Validate a Korean Business Registration Number (BRN) using Apify.
+   * Returns company details, tax info, and verification status.
+   * @param {string} brn - 10-digit Korean BRN
+   * @returns {Promise<Object|null>}
+   */
+  async apifyValidateKoreanBRN(brn) {
+    try {
+      logger.info(`KoreanCompliance: Validating BRN ${brn} via Apify`);
+
+      const result = await apifyService.validateKoreanBRN(brn);
+
+      if (!result) {
+        logger.info('KoreanCompliance: No BRN validation result from Apify');
+        return null;
+      }
+
+      return {
+        brn: brn,
+        isValid: result.isValid || result.status === 'valid' || false,
+        companyName: result.companyName || result.company_name || '',
+        representativeName: result.representative || result.ceoName || '',
+        businessType: result.businessType || result.business_type || '',
+        businessCategory: result.businessCategory || result.business_category || '',
+        address: result.address || result.companyAddress || '',
+        taxStatus: result.taxStatus || result.tax_status || '',
+        registrationDate: result.registrationDate || result.registration_date || null,
+        lastVerified: new Date().toISOString(),
+        source: 'apify',
+      };
+    } catch (error) {
+      logger.error('KoreanCompliance: Apify BRN validation error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Enrich Korean company data using Apify.
+   * Searches public Korean business directories for company information.
+   * @param {string} companyName - Korean company name to look up
+   * @returns {Promise<Object|null>}
+   */
+  async apifyGetKoreanCompanyInfo(companyName) {
+    try {
+      logger.info(`KoreanCompliance: Looking up Korean company "${companyName}" via Apify`);
+
+      const results = await apifyService.searchKoreanCompany(companyName);
+
+      if (!results || results.length === 0) {
+        logger.info('KoreanCompliance: No company data from Apify');
+        return null;
+      }
+
+      const company = results[0];
+
+      return {
+        companyName: company.companyName || company.name || '',
+        brn: company.brn || company.businessNumber || '',
+        address: company.address || '',
+        phone: company.phone || '',
+        industry: company.industry || company.businessType || '',
+        employeeCount: company.employeeCount || null,
+        revenue: company.revenue || null,
+        website: company.website || '',
+        representative: company.representative || company.ceo || '',
+        registrationDate: company.registrationDate || null,
+        status: company.status || company.companyStatus || '',
+        source: 'apify',
+        retrievedAt: new Date().toISOString(),
+      };
+    } catch (error) {
+      logger.error('KoreanCompliance: Apify Korean company lookup error:', error);
+      return null;
+    }
   }
 
   /**

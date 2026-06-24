@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const cs = require('../services/contactService');
 const as = require('../services/accountService');
-const auth = require('../middleware/auth');
-const rbac = require('../middleware/rbac');
+const { authenticate } = require('../middleware/auth');
+const { rbacAuthorize: rbac } = require('../middleware/rbac');
 
-router.use(auth);
+router.use(authenticate);
 
 router.get('/', rbac('contacts', 'read'), async (req, res) => {
   try {

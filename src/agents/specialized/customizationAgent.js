@@ -20,7 +20,14 @@ class CustomizationAgent extends BaseAgent {
 
   async initialize() {
     await super.initialize();
-    logger.info(`CustomizationAgent ${this.id} initialized`);
+
+    // Discover and load available tools from the unified tool registry
+    await this.loadTools();
+
+    logger.info(
+      `CustomizationAgent ${this.id} initialized with ${this.capabilities.length} capabilities + ` +
+      `${this.availableTools.totalCount} available tools`
+    );
   }
 
   async processTask(task) {
@@ -33,7 +40,13 @@ class CustomizationAgent extends BaseAgent {
         return await this.performQualityCheck(task.payload);
       case 'branding_request':
         return await this.handleBrandingRequest(task.payload);
+      case 'execute_tool':
+        return await this.executeTool(task.payload.toolName, task.payload.params);
       default:
+        // Check if the task type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === task.type)) {
+          return await this.executeTool(task.type, task.payload || {});
+        }
         throw new Error(`Unsupported task type for CustomizationAgent: ${task.type}`);
     }
   }

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ss = require('../services/sequenceService');
-const auth = require('../middleware/auth');
-const rbac = require('../middleware/rbac');
+const { authenticate } = require('../middleware/auth');
+const { rbacAuthorize: rbac } = require('../middleware/rbac');
 
-router.use(auth);
+router.use(authenticate);
 
 router.get('/', rbac('sequences', 'read'), async (req, res) => {
   try {

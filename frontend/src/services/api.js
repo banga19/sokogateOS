@@ -170,7 +170,9 @@ export const customsAPI = {
 
 // ============ HEALTH ============
 export const healthAPI = {
-  check: () => api.get('/health')
+  check: () => api.get('/health'),
+  checkLive: () => api.get('/health/live'),
+  listChecks: () => api.get('/health/checks')
 }
 
 export default api

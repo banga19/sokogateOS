@@ -3,7 +3,13 @@ const logger = require('../utils/logger');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    // In development, use a short timeout so the server starts quickly
+    // even when MongoDB is not running
+    const opts =
+      process.env.NODE_ENV === 'development'
+        ? { serverSelectionTimeoutMS: 3000 }
+        : {};
+    const conn = await mongoose.connect(process.env.MONGODB_URI, opts);
     logger.info(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {

@@ -664,6 +664,7 @@ async function createSourcingFromWhatsApp(message, nlpResult) {
 function generateMpesaPaymentLink(amount, phoneNumber, reference) {
   // In production, this would call Safaricom's M-Pesa API
   // For now, return a formatted payment request
+  const paybill = process.env.MPESA_SHORTCODE || 'XXXXXX';
   return {
     success: true,
     paymentRequest: {
@@ -672,7 +673,7 @@ function generateMpesaPaymentLink(amount, phoneNumber, reference) {
       currency: 'KES',
       phoneNumber: phoneNumber,
       reference: reference || `INV-${Date.now()}`,
-      instructions: `Send KES ${amount.toLocaleString()} to PayBill XXXXXX via M-Pesa. Account: ${reference || 'SOKOGATE-' + Date.now()}`,
+      instructions: `Send KES ${amount.toLocaleString()} to PayBill ${paybill} via M-Pesa. Account: ${reference || 'SOKOGATE-' + Date.now()}`,
       paymentLink: null // In production, this would be an M-Pesa STK Push URL
     }
   };

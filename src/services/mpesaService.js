@@ -163,10 +163,11 @@ async function handlePaymentCallback(callbackData) {
 
 // Generate M-Pesa payment QR code link
 function generatePaymentQr(amount, reference) {
+  const paybill = process.env.MPESA_SHORTCODE || 'XXXXXX';
   return {
     success: true,
-    qrData: `PAYBILL:XXXXXX:ACCOUNT:${reference || 'SOKOGATE'}:AMOUNT:${amount}`,
-    instructions: `1. Go to M-Pesa → Lipa na M-Pesa → PayBill\n2. Business Number: XXXXXX\n3. Account: ${reference || 'SOKOGATE-' + Date.now()}\n4. Amount: KES ${amount.toLocaleString()}\n5. Enter PIN and confirm`
+    qrData: `PAYBILL:${paybill}:ACCOUNT:${reference || 'SOKOGATE'}:AMOUNT:${amount}`,
+    instructions: `1. Go to M-Pesa → Lipa na M-Pesa → PayBill\n2. Business Number: ${paybill}\n3. Account: ${reference || 'SOKOGATE-' + Date.now()}\n4. Amount: KES ${amount.toLocaleString()}\n5. Enter PIN and confirm`
   };
 }
 

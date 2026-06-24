@@ -4,6 +4,7 @@
 const { v4: uuidv4 } = require('uuid');
 const AgentMemory = require('./agentMemory');
 const AgentCommunication = require('./communication');
+const toolRegistry = require('../services/toolRegistry');
 const logger = require('../utils/logger');
 
 class BaseAgent {
@@ -27,6 +28,8 @@ class BaseAgent {
     };
     this.memory = new AgentMemory(this.id);
     this.communication = new AgentCommunication(this.id);
+    this.toolRegistry = toolRegistry;
+    this.availableTools = { local: [], apify: [], composio: [], all: [], totalCount: 0 };
     this.isInitialized = false;
   }
 
@@ -77,6 +80,32 @@ class BaseAgent {
     } catch (error) {
       logger.warn(`Could not load initial knowledge for agent ${this.id}:`, error);
       // Continue without initial knowledge - not fatal
+    }
+  }
+
+  /**
+   * Discover available tools from the unified tool registry for this agent type.
+   * Populates this.availableTools with local, Apify, and Composio tool definitions.
+   * @param {string} [userId='system'] - User/company ID for tool access
+   * @returns {Promise<void>}
+   */
+  async loadTools(userId = 'system') {
+    try {
+      const tools = await this.toolRegistry.getToolsForAgent(this.type, userId);
+      this.availableTools = {
+        local: tools.local || [],
+        apify: tools.apify || [],
+        composio: tools.composio || [],
+        all: tools.all || [],
+        totalCount: tools.totalCount || 0,
+      };
+      logger.info(
+        `Agent ${this.id} (${this.type}): Loaded ${this.availableTools.totalCount} tools ` +
+        `(${tools.local.length} local, ${tools.apify.length} apify, ${tools.composio.length} composio)`
+      );
+    } catch (error) {
+      logger.warn(`Agent ${this.id} (${this.type}): Could not load tools:`, error.message);
+      // Continue without tools — not fatal
     }
   }
 
@@ -240,6 +269,193 @@ class BaseAgent {
     return await this.processTask(task);
   }
 
+  // ============================================================
+  //  Tool Execution
+  //  These methods allow agents to execute tools from the unified
+  //  tool registry, routing to the appropriate service (local,
+  //  Apify, or Composio) based on the tool's provider field.
+  // ============================================================
+
+  /**
+   * Execute a registered tool by name with the given parameters.
+   * Looks up the tool in this.availableTools, routes to the correct
+   * service (local service, Apify, or Composio), and returns the result.
+   *
+   * @param {string} toolName - Name of the tool to execute
+   * @param {Object} params   - Parameters to pass to the tool
+   * @returns {Promise<Object>} Execution result
+   * @throws {Error} If the tool is not found or execution fails
+   */
+  async executeTool(toolName, params = {}) {
+    logger.info(`Agent ${this.id} (${this.type}): Executing tool "${toolName}"`);
+
+    // 1. Find the tool in the agent's available tools
+    const tool = this.availableTools.all.find((t) => t.name === toolName);
+    if (!tool) {
+      throw new Error(
+        `Agent ${this.id} (${this.type}): Tool "${toolName}" not found in registry. ` +
+        `Available: [${this.availableTools.all.map((t) => t.name).join(', ')}]`
+      );
+    }
+
+    // 2. Route to the appropriate provider
+    return this._routeToolExecution(tool, params);
+  }
+
+  /**
+   * Route a tool execution to the correct provider handler.
+   * @param {Object} tool   - Tool definition from the registry
+   * @param {Object} params - Execution parameters
+   * @returns {Promise<Object>}
+   * @private
+   */
+  async _routeToolExecution(tool, params) {
+    const { provider } = tool;
+
+    switch (provider) {
+      case 'local':
+        return this._executeLocalTool(tool, params);
+      case 'apify':
+        return this._executeApifyTool(tool, params);
+      case 'composio':
+        return this._executeComposioTool(tool, params);
+      default:
+        throw new Error(
+          `Agent ${this.id}: Unknown tool provider "${provider}" for tool "${tool.name}"`
+        );
+    }
+  }
+
+  // ── Tool name → service method map ──
+  // Maps each registered tool name to a [serviceModule, methodName] pair.
+  // Services are required lazily so we only load what's needed at runtime.
+  static get TOOL_EXECUTORS() {
+    return {
+      // ── Customs Engine (local) ──
+      hs_classify:        ['customsEngineService',    'classifyProduct'],
+      duty_calculate:     ['customsEngineService',    'calculateDuties'],
+      compliance_check:   ['customsEngineService',    'checkCompliance'],
+      route_optimize:     ['customsEngineService',    'findOptimalRoute'],
+
+      // ── Supplier Trust (local) ──
+      supplier_search:    ['supplierTrustService',    'searchSuppliers'],
+
+      // ── Korean Compliance (local) ──
+      korean_compliance_check: ['koreanComplianceService', 'checkCompliance'],
+
+      // ── Korean Market Analysis (local) ──
+      korean_market_fit:  ['koreanMarketAnalysisService', 'analyzeMarketFit'],
+
+      // ── Apify tools ──
+      supplier_enrich:    ['apifyService',            'enrichCompanyData'],
+      supplier_discover:  ['apifyService',            'searchSuppliers'],
+      pricing_scrape:     ['apifyService',            'scrapePricingData'],
+      market_news:        ['apifyService',            'scrapeMarketNews'],
+      website_crawl:      ['apifyService',            'crawlWebsite'],
+      tariff_lookup:      ['apifyService',            'lookupTariffData'],
+      korean_brn_validate: ['apifyService',           'validateKoreanBRN'],
+      korean_pricing_scrape: ['apifyService',         'scrapePricingData'],
+
+      // ── Composio tools (routed via composioService) ──
+      send_email:         ['composioService',         '_executeComposioAction'],
+      send_slack_message: ['composioService',         '_executeComposioAction'],
+    };
+  }
+
+  /**
+   * Execute a local-service tool (provider === 'local').
+   * Requires the service module and calls the mapped method.
+   * @param {Object} tool   - Tool definition
+   * @param {Object} params - Execution params
+   * @returns {Promise<Object>}
+   * @private
+   */
+  async _executeLocalTool(tool, params) {
+    const executor = this.constructor.TOOL_EXECUTORS[tool.name];
+    if (!executor) {
+      // Fallback: try the tool's service name directly
+      try {
+        const service = require(`../services/${tool.service}`);
+        if (typeof service.processTask === 'function') {
+          return await service.processTask({ type: tool.name, payload: params });
+        }
+        throw new Error(`Service ${tool.service} has no processTask method`);
+      } catch (e) {
+        throw new Error(
+          `Agent ${this.id}: No executor mapping for local tool "${tool.name}". ` +
+          `Service "${tool.service}" error: ${e.message}`
+        );
+      }
+    }
+
+    const [serviceName, methodName] = executor;
+    const service = require(`../services/${serviceName}`);
+
+    if (typeof service[methodName] !== 'function') {
+      throw new Error(
+        `Agent ${this.id}: Method "${methodName}" not found on service "${serviceName}" ` +
+        `for tool "${tool.name}"`
+      );
+    }
+
+    logger.debug(`Agent ${this.id}: Calling ${serviceName}.${methodName}()`);
+    return await service[methodName](params);
+  }
+
+  /**
+   * Execute an Apify-powered tool (provider === 'apify').
+   * Routes through the apifyService.
+   * @param {Object} tool   - Tool definition
+   * @param {Object} params - Execution params
+   * @returns {Promise<Object>}
+   * @private
+   */
+  async _executeApifyTool(tool, params) {
+    const executor = this.constructor.TOOL_EXECUTORS[tool.name];
+    if (!executor) {
+      throw new Error(
+        `Agent ${this.id}: No executor mapping for Apify tool "${tool.name}"`
+      );
+    }
+
+    const [serviceName, methodName] = executor;
+    const service = require(`../services/${serviceName}`);
+
+    if (typeof service[methodName] !== 'function') {
+      throw new Error(
+        `Agent ${this.id}: Method "${methodName}" not found on service "${serviceName}" ` +
+        `for Apify tool "${tool.name}"`
+      );
+    }
+
+    logger.debug(`Agent ${this.id}: Calling Apify ${serviceName}.${methodName}()`);
+    return await service[methodName](params);
+  }
+
+  /**
+   * Execute a Composio-powered tool (provider === 'composio').
+   * Routes through composioService.executeTool with mapped action name.
+   * @param {Object} tool   - Tool definition
+   * @param {Object} params - Execution params
+   * @returns {Promise<Object>}
+   * @private
+   */
+  async _executeComposioTool(tool, params) {
+    const composio = require('../services/composioService');
+    const actionMap = {
+      send_email: 'GMAIL_SEND_EMAIL',
+      send_slack_message: 'SLACK_POST_MESSAGE',
+    };
+    const action = actionMap[tool.name] || tool.name.toUpperCase().replace(/\s+/g, '_');
+
+    logger.debug(`Agent ${this.id}: Calling composioService.executeTool(${action})`);
+    return await composio.executeTool(action, {
+      userId: params.userId || 'system',
+      arguments: params,
+      connectedAccountId: params.connectedAccountId,
+    });
+  }
+
   /**
    * Handle a command (system control, etc.)
    * @param {Object} command - The command to handle
@@ -313,7 +529,14 @@ class BaseAgent {
       capabilities: this.capabilities,
       state: { ...this.state },
       isInitialized: this.isInitialized,
-      memoryStats: this.memory.getStats()
+      memoryStats: this.memory.getStats(),
+      tools: {
+        totalCount: this.availableTools.totalCount,
+        local: this.availableTools.local.length,
+        apify: this.availableTools.apify.length,
+        composio: this.availableTools.composio.length,
+        names: this.availableTools.all.map((t) => t.name),
+      },
     };
   }
 

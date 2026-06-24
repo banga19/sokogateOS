@@ -4,9 +4,9 @@
 const ChatAgent = require('./chatAgent');
 const SourcingAgent = require('./specialized/sourcingAgent');
 const CustomizationAgent = require('./specialized/customizationAgent');
-const LogisticsAgent = require('./specialized/logisticsAgent');
-const ComplianceAgent = require('./specialized/complianceAgent');
-const NegotiationAgent = require('./specialized/negotiationAgent');
+const { LogisticsAgent } = require('./specialized/logisticsAgent');
+const { ComplianceAgent } = require('./specialized/complianceAgent');
+const { NegotiationAgent } = require('./specialized/negotiationAgent');
 
 module.exports = {
   ChatAgent,

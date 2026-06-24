@@ -29,7 +29,14 @@ class SourcingAgent extends BaseAgent {
    */
   async initialize() {
     await super.initialize();
-    logger.info(`SourcingAgent ${this.id} initialized with capabilities: ${this.capabilities.join(', ')}`);
+
+    // Discover and load available tools from the unified tool registry
+    await this.loadTools();
+
+    logger.info(
+      `SourcingAgent ${this.id} initialized with ${this.capabilities.length} capabilities + ` +
+      `${this.availableTools.totalCount} available tools`
+    );
   }
 
   /**
@@ -51,7 +58,13 @@ class SourcingAgent extends BaseAgent {
         return await this.analyzeMarket(task.payload);
       case 'supplier_relationship':
         return await this.manageSupplierRelationship(task.payload);
+      case 'execute_tool':
+        return await this.executeTool(task.payload.toolName, task.payload.params);
       default:
+        // Check if the task type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === task.type)) {
+          return await this.executeTool(task.type, task.payload || {});
+        }
         throw new Error(`Unsupported task type for SourcingAgent: ${task.type}`);
     }
   }
@@ -73,13 +86,24 @@ class SourcingAgent extends BaseAgent {
         return await this.getMarketTrends(query.payload);
       case 'pricing_data':
         return await this.getPricingData(query.payload);
+      case 'execute_tool':
+        return await this.executeTool(query.payload.toolName, query.payload.params);
       default:
+        // Check if the query type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === query.type)) {
+          return await this.executeTool(query.type, query.payload || {});
+        }
         return {
           agentId: this.id,
           agentType: this.type,
           timestamp: new Date().toISOString(),
           message: 'Query type not handled by SourcingAgent',
-          suggestedActions: ['product_info', 'supplier_info', 'market_trends', 'pricing_data']
+          suggestedActions: ['product_info', 'supplier_info', 'market_trends', 'pricing_data'],
+          availableTools: this.availableTools.all.map((t) => ({
+            name: t.name,
+            provider: t.provider,
+            description: t.description,
+          })),
         };
     }
   }

@@ -2,15 +2,15 @@
 // Tests the AdminService functionality
 
 // Mock dependencies
-jest.mock('../src/models/role');
-jest.mock('../src/models/user');
-jest.mock('../src/models/company');
-jest.mock('../src/utils/logger');
+jest.mock('../../src/models/role');
+jest.mock('../../src/models/user');
+jest.mock('../../src/models/company');
+jest.mock('../../src/utils/logger');
 
-const Role = require('../src/models/role');
-const User = require('../src/models/user');
-const Company = require('../src/models/company');
-const AdminService = require('../src/services/adminService');
+const Role = require('../../src/models/role');
+const User = require('../../src/models/user');
+const Company = require('../../src/models/company');
+const AdminService = require('../../src/services/adminService');
 
 describe('AdminService', () => {
   let adminService;
@@ -43,13 +43,13 @@ describe('AdminService', () => {
       ];
 
       Role.findOneAndUpdate.mockImplementation((query, update, options) => {
-        // Simulate finding nothing and upserting
-        return Promise.resolve({ lean: () => Promise.resolve({ ...update, ...query }) });
+        // Simulate finding nothing and upserting — return a query-like object with .lean()
+        return { lean: () => Promise.resolve({ ...update, ...query }) };
       });
 
       const result = await adminService.ensureSystemRoles();
 
-      expect(Role.findOneAndUpdate).toHaveBeenCalledTimes(3); // super_admin, company_admin, sales_rep, sdr, manager (5 total from SYSTEM_ROLES)
+      expect(Role.findOneAndUpdate).toHaveBeenCalledTimes(5); // super_admin, company_admin, sales_rep, sdr, manager
       expect(result).toHaveLength(5); // SYSTEM_ROLES length
     });
 
@@ -65,10 +65,7 @@ describe('AdminService', () => {
       };
 
       Role.findOneAndUpdate.mockImplementation((query, update, options) => {
-        return Promise.resolve({
-          lean: () =>
-            Promise.resolve({ ...update, ...query, _id: query._id || 'existing-role-id' }),
-        });
+        return { lean: () => Promise.resolve({ ...update, ...query, _id: query._id || 'existing-role-id' }) };
       });
 
       const result = await adminService.ensureSystemRoles();
@@ -166,7 +163,7 @@ describe('AdminService', () => {
       Role.findOne.mockResolvedValue({ slug: 'test-role' });
 
       await expect(adminService.createRole(mockCompanyId, roleData)).rejects.toThrow(
-        'Role "\\"test-role\\"" already exists in this company.'
+        'Role "test-role" already exists in this company.'
       );
 
       expect(Role.findOne).toHaveBeenCalledWith({ companyId: mockCompanyId, slug: 'test-role' });
@@ -270,14 +267,8 @@ describe('AdminService', () => {
     test('should throw error when trying to delete a system role', async () => {
       const roleId = 'system-role-id';
 
-      // Mock Role.findOne to return a system role
-      const systemRole = {
-        _id: roleId,
-        isSystem: true,
-        companyId: mockCompanyId,
-      };
-
-      Role.findOne.mockResolvedValue(systemRole);
+      // Service queries with $ne: true, so a system role returns null
+      Role.findOne.mockResolvedValue(null);
 
       await expect(adminService.deleteRole(roleId, mockCompanyId)).rejects.toThrow(
         'Role not found or is a system role (cannot delete).'
@@ -323,7 +314,7 @@ describe('AdminService', () => {
       Role.findOne.mockResolvedValue(null);
 
       await expect(adminService.assignRole(userId, roleSlug, assignedBy)).rejects.toThrow(
-        'Role "\\"non-existent-role\\"" not found.'
+        'Role "non-existent-role" not found.'
       );
 
       expect(Role.findOne).toHaveBeenCalledWith({ slug: 'non-existent-role', isActive: true });

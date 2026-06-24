@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+logs/
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+*.pid
+.swarm/
+.claude-flow/
+.claude/
+agentdb.rvf
+agentdb.rvf.lock

@@ -30,7 +30,14 @@ class ComplianceAgent extends BaseAgent {
    */
   async initialize() {
     await super.initialize();
-    logger.info(`ComplianceAgent ${this.id} initialized with capabilities: ${this.capabilities.join(', ')}`);
+
+    // Discover and load available tools from the unified tool registry
+    await this.loadTools();
+
+    logger.info(
+      `ComplianceAgent ${this.id} initialized with ${this.capabilities.length} capabilities + ` +
+      `${this.availableTools.totalCount} available tools`
+    );
   }
 
   /**
@@ -54,7 +61,13 @@ class ComplianceAgent extends BaseAgent {
         return await this.checkTradeCompliance(task.payload);
       case 'sanctions_screening':
         return await this.screenSanctions(task.payload);
+      case 'execute_tool':
+        return await this.executeTool(task.payload.toolName, task.payload.params);
       default:
+        // Check if the task type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === task.type)) {
+          return await this.executeTool(task.type, task.payload || {});
+        }
         throw new Error(`Unsupported task type for ComplianceAgent: ${task.type}`);
     }
   }
@@ -76,13 +89,24 @@ class ComplianceAgent extends BaseAgent {
         return await this.getCertificates(query.payload);
       case 'risk_factors':
         return await this.getRiskFactors(query.payload);
+      case 'execute_tool':
+        return await this.executeTool(query.payload.toolName, query.payload.params);
       default:
+        // Check if the query type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === query.type)) {
+          return await this.executeTool(query.type, query.payload || {});
+        }
         return {
           agentId: this.id,
           agentType: this.type,
           timestamp: new Date().toISOString(),
           message: 'Query type not handled by ComplianceAgent',
-          suggestedActions: ['regulations', 'requirements', 'certificates', 'risk_factors']
+          suggestedActions: ['regulations', 'requirements', 'certificates', 'risk_factors'],
+          availableTools: this.availableTools.all.map((t) => ({
+            name: t.name,
+            provider: t.provider,
+            description: t.description,
+          })),
         };
     }
   }

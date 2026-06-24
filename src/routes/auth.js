@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const authService = require('../services/authService');
 const { authenticate } = require('../middleware/auth');
+const { trackEngagement } = require('../middleware/analytics/tracking');
 const logger = require('../utils/logger');
 
 // Rate limiting helper (simple in-memory implementation)
@@ -50,8 +51,10 @@ router.post('/register', rateLimit(5, 15 * 60 * 1000), async (req, res) => {
   try {
     const result = await authService.register(req.body);
     // Track sign-up after successful user creation
-    req.user = result.user;
-    await trackSignUp(req, res, () => {});
+    try {
+      req.user = result.user;
+      await trackEngagement(req, res, () => {});
+    } catch { /* non-critical tracking failure */ }
     res.status(201).json({
       success: true,
       data: result
@@ -82,8 +85,10 @@ router.post('/login', rateLimit(10, 15 * 60 * 1000), async (req, res) => {
     const result = await authService.login(email, password);
     // Track activation for verified users
     if (result.user && result.user.isEmailVerified) {
-      req.user = result.user;
-      await trackActivation(req, res, () => {});
+      try {
+        req.user = result.user;
+        await trackEngagement(req, res, () => {});
+      } catch { /* non-critical tracking failure */ }
     }
     res.status(200).json({
       success: true,
@@ -199,6 +204,20 @@ router.post('/change-password', authenticate, async (req, res) => {
       });
     }
 
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password must be at least 8 characters with at least one letter and one number'
+      });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password must be different from current password'
+      });
+    }
+
     const result = await authService.changePassword(req.user.id, currentPassword, newPassword);
     res.status(200).json({
       success: true,
@@ -249,6 +268,14 @@ router.post('/accept-terms', authenticate, async (req, res) => {
     const { version } = req.body;
     const userId = req.user.id;
 
+    // Validate version format — must be semver-like (e.g., "1.0", "2.1.3")
+    if (version !== undefined && !isValidVersion(version)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid terms version format. Expected format: "X.Y" or "X.Y.Z"'
+      });
+    }
+
     const result = await authService.acceptTerms(userId, version);
     // Track terms acceptance as an engagement event
     // This could be extended to a specific terms acceptance tracking if needed
@@ -277,6 +304,13 @@ router.post('/reset-password/:token', async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'New password is required'
+      });
+    }
+
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters with at least one letter and one number'
       });
     }
 

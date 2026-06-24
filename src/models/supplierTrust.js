@@ -144,6 +144,7 @@ const supplierTrustSchema = new Schema({
 
   // Metadata
   isActive: { type: Boolean, default: true },
+  lastApifyEnrichment: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, {

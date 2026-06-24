@@ -30,7 +30,14 @@ class NegotiationAgent extends BaseAgent {
    */
   async initialize() {
     await super.initialize();
-    logger.info(`NegotiationAgent ${this.id} initialized with capabilities: ${this.capabilities.join(', ')}`);
+
+    // Discover and load available tools from the unified tool registry
+    await this.loadTools();
+
+    logger.info(
+      `NegotiationAgent ${this.id} initialized with ${this.capabilities.length} capabilities + ` +
+      `${this.availableTools.totalCount} available tools`
+    );
   }
 
   /**
@@ -54,7 +61,13 @@ class NegotiationAgent extends BaseAgent {
         return await this.mitigateRisk(task.payload);
       case 'deal_closure':
         return await this.closeDeal(task.payload);
+      case 'execute_tool':
+        return await this.executeTool(task.payload.toolName, task.payload.params);
       default:
+        // Check if the task type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === task.type)) {
+          return await this.executeTool(task.type, task.payload || {});
+        }
         throw new Error(`Unsupported task type for NegotiationAgent: ${task.type}`);
     }
   }

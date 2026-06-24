@@ -3,7 +3,7 @@
 
 const koreanMarketAnalysisService = require('../../../../services/marketAnalysis/koreanMarketAnalysisService');
 const logger = require('../../../../utils/logger');
-const auth = require('../../../middleware/auth');
+const auth = require('../../../../middleware/auth');
 
 /**
  * Get top import categories in Korea

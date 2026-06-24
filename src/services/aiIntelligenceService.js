@@ -6,8 +6,16 @@ const logger = require('../utils/logger');
 const Feedback = require('../models/feedback');
 const Sourcing = require('../models/sourcing');
 
+const serviceRunner = require('../utils/serviceRunner');
+
 // Service state
 let consumer = null;
+
+// ── Bounded caches (prevent unbounded memory growth) ──
+const MAX_LEARNING_MODELS = 5000;
+const MAX_INSIGHTS = 1000;
+const MAX_PATTERN_HISTORY = 500;
+
 let learningModels = new Map();
 let insightsCache = new Map();
 let patternHistory = [];
@@ -89,8 +97,7 @@ function setupMessageHandlers() {
 
 // Handle product update with real pattern analysis
 function handleProductUpdate(productData) {
-  const features = extractProductFeatures(productData);
-  updateModel('product_cluster', productData.productId, features);
+  const features = extractProductFeatures(productData);    boundedMap(learningModels, `product_cluster_${productData.productId}`, features, MAX_LEARNING_MODELS);
   detectAnomalies('product', productData);
   generateInsight('product_insight', {
     productId: productData.productId,
@@ -142,13 +149,13 @@ function handleShipmentEvent(shipmentData) {
 
 // Handle order created with demand forecasting
 function handleOrderCreated(orderData) {
-  updateModel('demand_forecast', orderData.productId, orderData);
+  boundedMap(learningModels, `demand_forecast_${orderData.productId}`, orderData, MAX_LEARNING_MODELS);
   analyzePattern('order', orderData);
 }
 
 // Handle inventory change with optimization
 function handleInventoryChange(inventoryData) {
-  updateModel('inventory_opt', inventoryData.productId, inventoryData);
+  boundedMap(learningModels, `inventory_opt_${inventoryData.productId}`, inventoryData, MAX_LEARNING_MODELS);
   if (inventoryData.quantity < (inventoryData.reorderPoint || 20)) {
     generateInsight('inventory_alert', {
       productId: inventoryData.productId,
@@ -163,7 +170,7 @@ function handleInventoryChange(inventoryData) {
 
 // Handle supplier risk with recommendations
 function handleSupplierRiskUpdate(supplierData) {
-  updateModel('supplier_risk', supplierData.supplierId, supplierData);
+  boundedMap(learningModels, `supplier_risk_${supplierData.supplierId}`, supplierData, MAX_LEARNING_MODELS);
   generateInsight('supplier_risk', {
     supplierId: supplierData.supplierId,
     riskScore: supplierData.riskScore || 0.5,
@@ -175,7 +182,7 @@ function handleSupplierRiskUpdate(supplierData) {
 
 // Handle customer feedback with sentiment analysis
 function handleCustomerFeedback(feedbackData) {
-  updateModel('sentiment', feedbackData.productId || 'general', feedbackData);
+  boundedMap(learningModels, `sentiment_${feedbackData.productId || 'general'}`, feedbackData, MAX_LEARNING_MODELS);
   const sentiment = analyzeSentiment(feedbackData.comments || '');
   generateInsight('feedback_insight', {
     feedbackId: feedbackData.feedbackId,
@@ -192,7 +199,7 @@ function handleCustomerFeedback(feedbackData) {
 
 // Handle customer profile updates
 function handleCustomerProfileUpdate(profileData) {
-  updateModel('segmentation', profileData.customerId, profileData);
+  boundedMap(learningModels, `segmentation_${profileData.customerId}`, profileData, MAX_LEARNING_MODELS);
   generateInsight('customer_insight', {
     customerId: profileData.customerId,
     tier: profileData.tier,
@@ -205,7 +212,7 @@ function handleCustomerProfileUpdate(profileData) {
 // Handle document processing with knowledge extraction
 function handleDocumentProcessed(documentData) {
   const knowledge = extractKnowledge(documentData);
-  updateModel('knowledge_base', documentData.documentId, knowledge);
+  boundedMap(learningModels, `knowledge_base_${documentData.documentId}`, knowledge, MAX_LEARNING_MODELS);
 }
 
 // Feature extraction
@@ -245,9 +252,9 @@ function extractKeyTopics(comments) {
 function analyzePattern(type, data) {
   patternHistory.push({ type, data, timestamp: new Date() });
 
-  // Keep last 1000 patterns
-  if (patternHistory.length > 1000) {
-    patternHistory = patternHistory.slice(-500);
+  // Keep bounded — avoid O(n) splice on every push
+  if (patternHistory.length > MAX_PATTERN_HISTORY * 2) {
+    patternHistory = patternHistory.slice(-MAX_PATTERN_HISTORY);
   }
 }
 
@@ -340,16 +347,7 @@ function extractCategories(content) {
   return categories;
 }
 
-// Model management
-function updateModel(modelType, key, data) {
-  const modelKey = `${modelType}_${key}`;
-  learningModels.set(modelKey, {
-    data,
-    timestamp: Date.now(),
-    lastRetrained: Date.now(),
-    updateCount: (learningModels.get(modelKey)?.updateCount || 0) + 1
-  });
-}
+
 
 // Insight generation with deduplication
 function generateInsight(type, data) {
@@ -364,14 +362,8 @@ function generateInsight(type, data) {
     id: dedupKey
   };
 
-  insightsCache.set(dedupKey, insight);
+  boundedMap(insightsCache, dedupKey, insight, MAX_INSIGHTS);
   logger.debug(`AI Intelligence: Generated ${type} insight`);
-
-  // Limit cache size
-  if (insightsCache.size > 2000) {
-    const keys = Array.from(insightsCache.keys()).sort();
-    for (let i = 0; i < 200; i++) insightsCache.delete(keys[i]);
-  }
 }
 
 // Get recent insights for API queries
@@ -430,42 +422,72 @@ async function loadFeedbackForTraining() {
   }
 }
 
-// Learning cycles
+// Bounded map helper: auto-evict oldest entries when size exceeds limit
+function boundedMap(map, key, value, maxSize) {
+  if (map.size >= maxSize) {
+    // Evict the oldest entry (Map preserves insertion order)
+    const firstKey = map.keys().next().value;
+    map.delete(firstKey);
+  }
+  map.set(key, value);
+}
+
+// Learning cycles (using ServiceRunner for managed intervals)
 function startLearningCycles() {
   // Hourly model retraining
-  setInterval(async () => {
-    logger.info('AI Intelligence: Starting model retraining cycle');
-    await loadFeedbackForTraining();
-    logger.info(`AI Intelligence: Retraining complete - ${learningModels.size} models active`);
-  }, 3600000);
+  serviceRunner.start(
+    'ai-retraining',
+    async () => {
+      logger.info('AI Intelligence: Starting model retraining cycle');
+      await loadFeedbackForTraining();
+      logger.info(`AI Intelligence: Retraining complete - ${learningModels.size} models active`);
+    },
+    3600000,
+    { immediate: false, silentErrors: true },
+  );
 
   // Every 30 minutes - generate periodic insights
-  setInterval(() => {
-    generateInsight('system_status', {
-      modelsActive: learningModels.size,
-      insightsGenerated: insightsCache.size,
-      patternsAnalyzed: patternHistory.length,
-      accuracyRate: accuracyTracker.total > 0
-        ? Math.round((accuracyTracker.correct / accuracyTracker.total) * 100) + '%'
-        : 'N/A',
-      recommendation: 'System is learning and improving continuously'
-    });
-  }, 1800000);
+  serviceRunner.start(
+    'ai-insight-generation',
+    () => {
+      generateInsight('system_status', {
+        modelsActive: learningModels.size,
+        insightsGenerated: insightsCache.size,
+        patternsAnalyzed: patternHistory.length,
+        accuracyRate: accuracyTracker.total > 0
+          ? Math.round((accuracyTracker.correct / accuracyTracker.total) * 100) + '%'
+          : 'N/A',
+        recommendation: 'System is learning and improving continuously',
+      });
+    },
+    1800000,
+    { silentErrors: true },
+  );
 
-  // Cleanup old insights every 5 minutes
-  setInterval(() => {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    for (const [key, insight] of insightsCache.entries()) {
-      if (new Date(insight.timestamp).getTime() < cutoff) {
-        insightsCache.delete(key);
+  // Cleanup old insights every 5 minutes (runs on tick, not scan-all)
+  serviceRunner.start(
+    'ai-cache-cleanup',
+    () => {
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      const toDelete = [];
+      for (const [key, insight] of insightsCache.entries()) {
+        if (new Date(insight.timestamp).getTime() < cutoff) {
+          toDelete.push(key);
+        }
       }
-    }
-  }, 300000);
+      // Batch delete to minimize Map churn
+      for (const key of toDelete) insightsCache.delete(key);
+      logger.debug(`AI Intelligence: Cache cleanup removed ${toDelete.length} stale insights`);
+    },
+    300000,
+    { silentErrors: true },
+  );
 }
 
 // Graceful shutdown
 function shutdown() {
   if (consumer) consumer.close(() => logger.info('AI Intelligence Service: Kafka consumer closed'));
+  serviceRunner.dispose();
 }
 
 process.on('SIGINT', shutdown);

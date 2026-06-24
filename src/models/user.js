@@ -97,6 +97,12 @@ const userSchema = new Schema({
     default: false
   },
 
+  // Token version for JWT invalidation on logout/password change
+  tokenVersion: {
+    type: Number,
+    default: 0
+  },
+
   // Terms & Conditions acceptance (Polsia-style consent layer)
   termsAccepted: {
     type: Boolean,

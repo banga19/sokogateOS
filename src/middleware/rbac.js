@@ -1,7 +1,7 @@
 const Role = require('../models/role');
 const logger = require('../utils/logger');
 
-async function rbacAuthorize(domain, action, options = {}) {
+function rbacAuthorize(domain, action, options = {}) {
   const requireOwnership = options.requireOwnership || false;
 
   return async (req, res, next) => {

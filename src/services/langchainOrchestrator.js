@@ -260,8 +260,11 @@ async function runTaskWithRAG(taskName, taskData, agentId = 'unknown') {
 
     // Store learning pattern if task was successful
     await storeLearningPattern(`${taskName}-success-${Date.now()}`, {} );
+
+    return taskResult;
   } catch (error) {
-    logger.error('Failed to store learning pattern:', error.message);
+    logger.error(`runTaskWithRAG failed for ${taskName}:`, error.message);
+    throw error;
   }
 }
 
@@ -281,18 +284,6 @@ function runTaskScript(taskName, taskData) {
     timestamp: new Date().toISOString(),
     data: taskData
   };
-}
-
-/**
- * Execute a task with RAG enhancement
- * @param {string} taskName - Name of the task to execute
- * @param {Object} taskData - Data for the task
- * @param {string} agentId - ID of the agent executing the task
- * @returns {Promise<Object>} Task execution result
- */
-async function runTaskWithRAG(taskName, taskData, agentId = 'unknown') {
-  // This function is already defined above, keeping for export
-  // The actual implementation is above
 }
 
 // Export functions

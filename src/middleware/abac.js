@@ -1,7 +1,7 @@
 // ABAC Middleware for sokogateOS
 // Integrates Attribute-Based Access Control with existing authentication system
 
-const ABACPolicyEngine = require('../abac/policyEngine');
+const { ABACPolicyEngine } = require('../abac/policyEngine');
 const logger = require('../utils/logger');
 
 // Initialize ABAC policy engine
@@ -45,8 +45,15 @@ function loadDefaultPolicies() {
       if (!request.resource || !request.resource.companyId) return true;
 
       // Check if resource belongs to user's company
-      return request.subject.companyId &&
-             request.resource.companyId.equals(request.subject.companyId);
+      // Safely compare regardless of string vs ObjectId type
+      if (!request.subject.companyId) return false;
+      const resCompany = request.resource.companyId;
+      const subCompany = request.subject.companyId;
+      // Handle both ObjectId (.equals) and string comparison
+      if (typeof resCompany === 'object' && typeof resCompany.equals === 'function') {
+        return resCompany.equals(subCompany);
+      }
+      return resCompany.toString() === subCompany.toString();
     },
     description: 'Users can only access data belonging to their company'
   });
@@ -140,6 +147,7 @@ function abacAuthorize(options = {}) {
       }
 
       // Build ABAC request context
+      // Build ABAC request context — explicitly pick attributes, never spread raw headers
       const abacRequest = {
         subject: {
           id: req.user.id,
@@ -151,25 +159,28 @@ function abacAuthorize(options = {}) {
           permissions: req.user.permissions || {}
         },
         resource: {
-          // Extract resource information from request
           id: req.params.id || null,
           companyId: req.params.companyId ||
                    (req.body && req.body.companyId) ||
-                   (req.query && req.query.companyId) || null,
-          // Add other resource attributes as needed
-          ...(req.body || {}),
-          ...(req.query || {}),
-          ...(req.params || {})
+                   (req.query && req.query.companyId) || null
         },
         action: action,
         environment: {
           ipAddress: req.ip || req.connection.remoteAddress,
           userAgent: req.get('User-Agent'),
-          timestamp: new Date().toISOString(),
-          // Add any other environmental attributes
-          ...(req.headers || {})
+          timestamp: new Date().toISOString()
         }
       };
+
+      // Add known safe, non-sensitive body fields if present
+      if (req.body && typeof req.body === 'object') {
+        const safeResourceFields = ['name', 'description', 'businessType', 'productCategory', 'area'];
+        for (const field of safeResourceFields) {
+          if (req.body[field] !== undefined) {
+            abacRequest.resource[field] = req.body[field];
+          }
+        }
+      }
 
       // Evaluate access using ABAC engine
       const accessGranted = abacEngine.evaluate(abacRequest);

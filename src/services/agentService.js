@@ -1,16 +1,20 @@
 // Agent Service for sokogateOS Autonomous AI Agent Engine
-// Initializes and manages the agent system, integrating with Self-Improving Loop and LangChain Orchestrator
+// Initializes and manages the agent system, integrating with Self-Improving Loop,
+// LangChain Orchestrator, and the unified Tool Registry (Apify + Composio).
 
 const AgentManager = require('../agents/agentManager');
 const { ChatAgent, SourcingAgent, CustomizationAgent, LogisticsAgent, ComplianceAgent, NegotiationAgent } = require('../agents');
 const logger = require('../utils/logger');
 const selfImprovingLoop = require('../engine/selfImprovingLoop');
 const langchainOrchestrator = require('./langchainOrchestrator');
+const toolRegistry = require('./toolRegistry');
+const composioService = require('./composioService');
 
 class AgentService {
   constructor() {
     this.agentManager = new AgentManager();
     this.isInitialized = false;
+    this.toolRegistry = toolRegistry;
   }
 
   /**
@@ -110,6 +114,33 @@ class AgentService {
   }
 
   /**
+   * Get tools available for a specific agent type from the unified registry.
+   * Combines local, Apify, and Composio-provided tools.
+   * @param {string} agentType - Agent type (sourcing, logistics, compliance, etc.)
+   * @param {string} [userId='system'] - User/company ID for Composio tool access
+   * @returns {Promise<Object>} { local, apify, composio, all } tool sets
+   */
+  async getToolsForAgent(agentType, userId = 'system') {
+    return this.toolRegistry.getToolsForAgent(agentType, userId);
+  }
+
+  /**
+   * Get the tool registry instance
+   * @returns {Object} - The tool registry
+   */
+  getToolRegistry() {
+    return this.toolRegistry;
+  }
+
+  /**
+   * Get Composio service instance
+   * @returns {Object} - The Composio service
+   */
+  getComposioService() {
+    return composioService;
+  }
+
+  /**
    * Spawn an agent of the specified type
    * @param {string} type - Type of agent to spawn
    * @param {Object} options - Agent configuration options
@@ -142,7 +173,11 @@ class AgentService {
     if (!this.isInitialized) {
       return { error: 'Agent service not initialized' };
     }
-    return this.agentManager.getStats();
+    return {
+      ...this.agentManager.getStats(),
+      toolRegistry: this.toolRegistry.getServiceStatus(),
+      composio: composioService.getServiceStatus(),
+    };
   }
 
   /**

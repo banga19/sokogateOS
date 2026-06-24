@@ -1,146 +1,221 @@
-let kafka;
-try {
-  kafka = require('kafka-node');
-} catch {
-  kafka = null;
-}
+// Kafka client — kafkajs (unified with src/agents/communication.js)
+// Provides backward-compatible wrappers around the kafkajs promise API
+// so that existing consumers using callback/event patterns continue to work.
+
+const { Kafka, logLevel } = require('kafkajs');
 const logger = require('../utils/logger');
 
-console.log('In kafka.js module, KAFKA_BROKERS:', process.env.KAFKA_BROKERS); // DEBUG
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-let producer;
-let consumer;
+function getBrokers() {
+  const raw = process.env.KAFKA_BROKERS;
+  if (!raw || raw.trim() === '') {
+    logger.warn('KAFKA_BROKERS is not set or empty, defaulting to localhost:9092 for development');
+    return ['localhost:9092'];
+  }
+  return raw
+    .trim()
+    .split(',')
+    .map((s) => s.trim());
+}
 
-// Initialize Kafka producer
-const initKafkaProducer = () => {
-  return new Promise((resolve, reject) => {
-    // Get and validate KAFKA_BROKERS
-    let kafkaHost = process.env.KAFKA_BROKERS;
-    if (!kafkaHost || kafkaHost.trim() === '') {
-      logger.warn('KAFKA_BROKERS is not set or is empty, defaulting to localhost:9092 for development');
-      kafkaHost = 'localhost:9092';
-    } else {
-      kafkaHost = kafkaHost.trim();
-    }
-    logger.info('KAFKA_BROKERS (using): ' + kafkaHost);
-    if (!kafka) {
-      logger.warn('kafka-node not installed — running without Kafka');
-      resolve({
-        send: (payloads, cb) => { if (cb) cb(null, {}); },
-        close: (cb) => { if (cb) cb(); }
-      });
-      return;
-    }
-    try {
-      // Try to create the Kafka client
-      const client = new kafka.Client(kafkaHost);
-      producer = new kafka.Producer(client);
+// Lazily-created singleton so both producer & consumer share the same client.
+let _client = null;
 
-      producer.on('ready', () => {
-        logger.info('Kafka Producer connected');
-        resolve(producer);
-      });
+function getClient() {
+  if (!_client) {
+    _client = new Kafka({
+      clientId: 'sokogateos',
+      brokers: getBrokers(),
+      logLevel: logLevel.ERROR,
+      // Allow connection to succeed even if brokers aren't reachable yet
+      retry: { retries: 1 },
+    });
+  }
+  return _client;
+}
 
-      producer.on('error', (err) => {
-        logger.error('Kafka Producer error:', err);
-        // Don't reject, allow degraded mode
-        logger.warn('Kafka Producer error but continuing in degraded mode:', err);
-        // Create a mock producer
-        producer = {
-          send: (payloads, cb) => {
-            logger.debug('Mock Kafka Producer: Would send payloads:', payloads);
-            if (cb) cb(null, {});
-          },
-          close: (cb) => {
-            if (cb) cb();
-          }
-        };
-        resolve(producer); // Resolve with the mock producer
-      });
-    } catch (err) {
-      logger.error('Failed to create Kafka Producer client:', err);
-      // Don't reject, allow degraded mode
-      logger.warn('Failed to create Kafka Producer but continuing in degraded mode:', err);
-      // Create a mock producer that logs but doesn't actually send
-      producer = {
-        send: (payloads, cb) => {
-          logger.debug('Mock Kafka Producer: Would send payloads:', payloads);
-          if (cb) cb(null, {});
-        },
-        close: (cb) => {
-          if (cb) cb();
-        }
-      };
-      resolve(producer);
-    }
-  });
+// ---------------------------------------------------------------------------
+// Mock objects (degraded mode)
+// ---------------------------------------------------------------------------
+
+function mockProducer() {
+  return {
+    send: (payloads, cb) => {
+      logger.debug('Mock Kafka Producer: Would send payloads:', JSON.stringify(payloads));
+      if (cb) cb(null, {});
+    },
+    close: (cb) => {
+      if (cb) cb(null);
+    },
+  };
+}
+
+function mockConsumer() {
+  const self = {
+    on: (_event, _handler) => {
+      logger.debug(`Mock Kafka Consumer: registered handler for event '${_event}'`);
+      return self;
+    },
+    close: (cb) => {
+      if (cb) cb(null);
+    },
+  };
+  return self;
+}
+
+// ---------------------------------------------------------------------------
+// initKafkaProducer — returns an object compatible with the old kafka-node API
+// ---------------------------------------------------------------------------
+
+const initKafkaProducer = async () => {
+  try {
+    const client = getClient();
+    const raw = client.producer();
+    await raw.connect();
+    logger.info('Kafka Producer connected (kafkajs)');
+
+    // Backward-compatible wrapper
+    const wrapped = {
+      /**
+       * Legacy callback-based send.
+       * payloads :: [{ topic: string, messages: string | string[], partition?: number }]
+       */
+      send: (payloads, cb) => {
+        Promise.all(
+          (payloads || []).map((p) => {
+            const msgs = Array.isArray(p.messages)
+              ? p.messages.map((m) => (typeof m === 'string' ? { value: m } : m))
+              : typeof p.messages === 'string'
+                ? [{ value: p.messages }]
+                : p.messages || [];
+            return raw.send({ topic: p.topic, messages: msgs });
+          }),
+        )
+          .then((res) => {
+            if (cb) cb(null, res);
+          })
+          .catch((err) => {
+            logger.warn('Kafka producer send error:', err.message);
+            if (cb) cb(err);
+          });
+      },
+
+      /**
+       * Legacy callback-based close.
+       */
+      close: (cb) => {
+        raw
+          .disconnect()
+          .then(() => {
+            if (cb) cb(null);
+          })
+          .catch((err) => {
+            logger.warn('Kafka producer disconnect error:', err.message);
+            if (cb) cb(err);
+          });
+      },
+
+      // Expose the raw kafkajs producer for advanced / new code
+      _raw: raw,
+    };
+
+    return wrapped;
+  } catch (err) {
+    logger.error('Failed to create Kafka Producer:', err.message);
+    logger.warn('Continuing in degraded mode without Kafka producer');
+    return mockProducer();
+  }
 };
 
-// Initialize Kafka consumer
-const initKafkaConsumer = (topics) => {
-  return new Promise((resolve, reject) => {
-    // Get and validate KAFKA_BROKERS
-    let kafkaHost = process.env.KAFKA_BROKERS;
-    if (!kafkaHost || kafkaHost.trim() === '') {
-      logger.warn('KAFKA_BROKERS is not set or is empty, defaulting to localhost:9092 for development');
-      kafkaHost = 'localhost:9092';
-    } else {
-      kafkaHost = kafkaHost.trim();
+// ---------------------------------------------------------------------------
+// initKafkaConsumer — returns an object compatible with kafka-node Consumer API
+// ---------------------------------------------------------------------------
+
+const initKafkaConsumer = async (topics) => {
+  try {
+    const client = getClient();
+    const groupId = process.env.KAFKA_CONSUMER_GROUP || 'sokogateos-group';
+    const raw = client.consumer({ groupId });
+    await raw.connect();
+
+    // Subscribe to all requested topics
+    for (const topic of topics) {
+      await raw.subscribe({ topic, fromBeginning: false });
     }
-    logger.info('KAFKA_BROKERS for consumer (using): ' + kafkaHost);
-    try {
-      // Try to create the Kafka client
-      const client = new kafka.Client(kafkaHost);
-      consumer = new kafka.Consumer(client, topics.map(topic => ({ topic, partition: 0 })), {
-        autoCommit: false
-      });
+    logger.info(`Kafka Consumer connected (kafkajs) — subscribed to: ${topics.join(', ')}`);
 
-      consumer.on('message', (message) => {
-        logger.info(`Received message from ${message.topic}: ${message.value}`);
-        // Message handling will be implemented in service layers
-      });
+    // Wrapper state
+    let messageHandler = null;
+    let consumerStarted = false;
 
-      consumer.on('error', (err) => {
-        logger.error('Kafka Consumer error:', err);
-        // Don't reject, allow degraded mode
-        logger.warn('Kafka Consumer error but continuing in degraded mode:', err);
-        // Create a mock consumer
-        consumer = {
-          on: (event, cb) => {
-            // Mock event handler
-            if (event === 'message' || event === 'error') {
-              // Don't actually register the callback for mock
-            }
-            return consumer;
-          },
-          close: (cb) => {
-            if (cb) cb();
+    const wrapped = {
+      /**
+       * Legacy event-based handler registration.
+       * Supported events: 'message', 'error'
+       */
+      on: (event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler;
+
+          // Start the run loop only once, when the first handler is attached.
+          if (!consumerStarted) {
+            consumerStarted = true;
+            raw
+              .run({
+                eachMessage: async ({ topic, partition, message }) => {
+                  if (!messageHandler) return;
+                  // Deliver a message shape close to kafka-node's format
+                  // (value as a string for backward compat)
+                  messageHandler({
+                    topic,
+                    partition,
+                    value: message.value ? message.value.toString() : '',
+                    offset: message.offset,
+                    key: message.key ? message.key.toString() : null,
+                  });
+                },
+              })
+              .catch((runErr) => {
+                logger.error('Kafka consumer run error:', runErr.message);
+              });
           }
-        };
-        resolve(consumer); // Resolve with the mock consumer
-      });
-
-      resolve(consumer);
-    } catch (err) {
-      logger.error('Failed to create Kafka Consumer client:', err);
-      // Don't reject, allow degraded mode
-      logger.warn('Failed to create Kafka Consumer but continuing in degraded mode:', err);
-      // Create a mock consumer that logs but doesn't actually receive
-      consumer = {
-        on: (event, cb) => {
-          // Mock event handler
-          if (event === 'message' || event === 'error') {
-            // Don't actually register the callback for mock
-          }
-          return consumer;
-        },
-        close: (cb) => {
-          if (cb) cb();
+        } else if (event === 'error') {
+          // kafkajs consumer errors surface via raw.on('consumer.crash', …).
+          // We let the caller register their own handler on the raw consumer
+          // if they need it.
+          logger.debug('Consumer error handler registered (deferred to kafkajs)');
         }
-      };
-      resolve(consumer);
-    }
-  });
+        return wrapped; // allow chaining
+      },
+
+      /**
+       * Legacy callback-based close.
+       */
+      close: (cb) => {
+        raw
+          .disconnect()
+          .then(() => {
+            if (cb) cb(null);
+          })
+          .catch((err) => {
+            logger.warn('Kafka consumer disconnect error:', err.message);
+            if (cb) cb(err);
+          });
+      },
+
+      // Expose the raw kafkajs consumer for advanced / new code
+      _raw: raw,
+    };
+
+    return wrapped;
+  } catch (err) {
+    logger.error('Failed to create Kafka Consumer:', err.message);
+    logger.warn('Continuing in degraded mode without Kafka consumer');
+    return mockConsumer();
+  }
 };
 
 module.exports = { initKafkaProducer, initKafkaConsumer };

@@ -1,9 +1,9 @@
 // Export Readiness Score (ERS) Controller for SokogateOS
 // Exposes ERS calculation functionality through API endpoints
 
-const ersService = require('../../../services/ers/ersService');
-const logger = require('../../../utils/logger');
-const auth = require('../../../middleware/auth');
+const ersService = require('../../../../services/ers/ersService');
+const logger = require('../../../../utils/logger');
+const auth = require('../../../../middleware/auth');
 
 /**
  * Get ERS for the authenticated user's company

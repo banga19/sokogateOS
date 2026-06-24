@@ -3,7 +3,7 @@
 
 const koreanComplianceService = require('../../../../services/compliance/koreanComplianceService');
 const logger = require('../../../../utils/logger');
-const auth = require('../../../middleware/auth');
+const auth = require('../../../../middleware/auth');
 
 /**
  * Check Korean compliance for a specific product

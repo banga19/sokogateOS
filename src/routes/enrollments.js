@@ -3,10 +3,10 @@ const router = express.Router();
 const Enrollment = require('../models/enrollment');
 const Sequence = require('../models/sequence');
 const Contact = require('../models/contact');
-const auth = require('../middleware/auth');
-const rbac = require('../middleware/rbac');
+const { authenticate } = require('../middleware/auth');
+const { rbacAuthorize: rbac } = require('../middleware/rbac');
 
-router.use(auth);
+router.use(authenticate);
 
 router.post('/', rbac('enrollments', 'write'), async (req, res) => {
   try {

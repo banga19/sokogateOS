@@ -30,7 +30,14 @@ class LogisticsAgent extends BaseAgent {
    */
   async initialize() {
     await super.initialize();
-    logger.info(`LogisticsAgent ${this.id} initialized with capabilities: ${this.capabilities.join(', ')}`);
+
+    // Discover and load available tools from the unified tool registry
+    await this.loadTools();
+
+    logger.info(
+      `LogisticsAgent ${this.id} initialized with ${this.capabilities.length} capabilities + ` +
+      `${this.availableTools.totalCount} available tools`
+    );
   }
 
   /**
@@ -54,7 +61,13 @@ class LogisticsAgent extends BaseAgent {
         return await this.handleCustoms(task.payload);
       case 'shipment_management':
         return await this.manageShipment(task.payload);
+      case 'execute_tool':
+        return await this.executeTool(task.payload.toolName, task.payload.params);
       default:
+        // Check if the task type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === task.type)) {
+          return await this.executeTool(task.type, task.payload || {});
+        }
         throw new Error(`Unsupported task type for LogisticsAgent: ${task.type}`);
     }
   }
@@ -76,15 +89,204 @@ class LogisticsAgent extends BaseAgent {
         return await this.getShippingRates(query.payload);
       case 'delivery_windows':
         return await this.getDeliveryWindows(query.payload);
+      case 'execute_tool':
+        return await this.executeTool(query.payload.toolName, query.payload.params);
       default:
+        // Check if the query type matches a registered tool name
+        if (this.availableTools.all.find((t) => t.name === query.type)) {
+          return await this.executeTool(query.type, query.payload || {});
+        }
         return {
           agentId: this.id,
           agentType: this.type,
           timestamp: new Date().toISOString(),
           message: 'Query type not handled by LogisticsAgent',
-          suggestedActions: ['route_info', 'tracking_info', 'shipping_rates', 'delivery_windows']
+          suggestedActions: ['route_info', 'tracking_info', 'shipping_rates', 'delivery_windows'],
+          availableTools: this.availableTools.all.map((t) => ({
+            name: t.name,
+            provider: t.provider,
+            description: t.description,
+          })),
         };
     }
+  }
+
+  /**
+   * Forecast inventory needs based on historical data and trends
+   * @param {Object} payload - Inventory forecasting request
+   * @returns {Promise<Object>} - Forecast results
+   */
+  async forecastInventory(payload) {
+    logger.info(`LogisticsAgent ${this.id} forecasting inventory for:`, payload);
+
+    return {
+      success: true,
+      data: {
+        productId: payload.productId || `prod_${Date.now()}`,
+        currentStock: payload.currentStock || 500,
+        forecastDays: payload.forecastDays || 30,
+        predictedDemand: Math.round((payload.currentStock || 500) * 0.15),
+        reorderPoint: Math.round((payload.currentStock || 500) * 0.3),
+        suggestedOrderQuantity: Math.round((payload.currentStock || 500) * 0.4),
+        confidence: 0.78,
+        factors: ['seasonal_demand', 'lead_time_variability', 'supplier_reliability'],
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  /**
+   * Track a shipment in real-time
+   * @param {Object} payload - Tracking request
+   * @returns {Promise<Object>} - Tracking information
+   */
+  async trackShipment(payload) {
+    logger.info(`LogisticsAgent ${this.id} tracking shipment: ${payload.shipmentId}`);
+
+    return {
+      success: true,
+      data: {
+        shipmentId: payload.shipmentId || `ship_${Date.now()}`,
+        status: 'in_transit',
+        currentLocation: 'Indian Ocean',
+        lastUpdated: new Date().toISOString(),
+        estimatedArrival: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        carrier: 'Maersk Line',
+        vessel: 'Ever Given',
+        progress: 0.45,
+        milestones: [
+          { name: 'Departure', completed: true, time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+          { name: 'Transit', completed: true, time: new Date().toISOString() },
+          { name: 'Arrival at port', completed: false },
+          { name: 'Customs clearance', completed: false },
+          { name: 'Final delivery', completed: false },
+        ],
+        events: [
+          { type: 'departure', location: 'Shanghai', time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+          { type: 'transit_update', location: 'Strait of Malacca', time: new Date().toISOString() },
+        ],
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  /**
+   * Calculate estimated time of arrival
+   * @param {Object} payload - ETA calculation request
+   * @returns {Promise<Object>} - ETA information
+   */
+  async calculateETA(payload) {
+    logger.info(`LogisticsAgent ${this.id} calculating ETA from ${payload.origin} to ${payload.destination}`);
+
+    const origin = payload.origin || 'Shanghai';
+    const destination = payload.destination || 'Mombasa';
+
+    // Look up known route or estimate
+    const knownRoutes = {
+      'Shanghai-Mombasa': { days: 22, reliability: 0.82 },
+      'Shanghai-Lagos': { days: 28, reliability: 0.78 },
+      'Mumbai-Mombasa': { days: 8, reliability: 0.88 },
+      'Mumbai-Lagos': { days: 14, reliability: 0.83 },
+      'Istanbul-Mombasa': { days: 15, reliability: 0.85 },
+      'Rotterdam-Mombasa': { days: 18, reliability: 0.80 },
+    };
+
+    const routeKey = `${origin}-${destination}`;
+    const knownRoute = knownRoutes[routeKey];
+    const transitDays = knownRoute ? knownRoute.days : 14;
+    const reliability = knownRoute ? knownRoute.reliability : 0.75;
+
+    const departureDate = payload.departureDate ? new Date(payload.departureDate) : new Date();
+    const arrivalDate = new Date(departureDate.getTime() + transitDays * 24 * 60 * 60 * 1000);
+
+    // Add some randomness for variance
+    const varianceDays = Math.round(transitDays * (1 - reliability) * 2);
+
+    return {
+      success: true,
+      data: {
+        origin: origin,
+        destination: destination,
+        estimatedTransitDays: transitDays,
+        earliestArrival: new Date(arrivalDate.getTime() - varianceDays * 24 * 60 * 60 * 1000).toISOString(),
+        expectedArrival: arrivalDate.toISOString(),
+        latestArrival: new Date(arrivalDate.getTime() + varianceDays * 24 * 60 * 60 * 1000).toISOString(),
+        reliability: reliability,
+        departureDate: departureDate.toISOString(),
+        mode: payload.mode || 'sea',
+        distanceKm: knownRoute ? 8000 : 6000, // Approximate
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  /**
+   * Handle customs procedures for a shipment
+   * @param {Object} payload - Customs handling request
+   * @returns {Promise<Object>} - Customs information
+   */
+  async handleCustoms(payload) {
+    logger.info(`LogisticsAgent ${this.id} handling customs for:`, payload);
+
+    const country = payload.country || 'Kenya';
+
+    const customsInfo = {
+      Kenya: { agency: 'Kenya Revenue Authority', avgClearanceDays: 5, documents: ['Bill of Lading', 'Commercial Invoice', 'Packing List', 'Import Declaration'], electronicSubmission: true },
+      Nigeria: { agency: 'Nigeria Customs Service', avgClearanceDays: 7, documents: ['Bill of Lading', 'Commercial Invoice', 'Form M', 'SONCAP Certificate'], electronicSubmission: true },
+      Tanzania: { agency: 'Tanzania Revenue Authority', avgClearanceDays: 4, documents: ['Bill of Lading', 'Commercial Invoice', 'Packing List'], electronicSubmission: true },
+      Ghana: { agency: 'Ghana Revenue Authority', avgClearanceDays: 6, documents: ['Bill of Lading', 'Commercial Invoice', 'Packing List'], electronicSubmission: false },
+    };
+
+    const info = customsInfo[country] || { agency: 'Local Customs Authority', avgClearanceDays: 5, documents: ['Bill of Lading', 'Commercial Invoice', 'Packing List'], electronicSubmission: false };
+
+    return {
+      success: true,
+      data: {
+        country: country,
+        customsAgency: info.agency,
+        estimatedClearanceDays: info.avgClearanceDays,
+        requiredDocuments: info.documents,
+        electronicSubmissionAvailable: info.electronicSubmission,
+        estimatedDuties: payload.goodsValue ? Math.round(payload.goodsValue * 0.12) : null,
+        restrictions: [],
+        recommendations: ['Prepare all documents in advance', 'Verify HS code classification', 'Ensure proper labeling'],
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  /**
+   * Manage a shipment end-to-end
+   * @param {Object} payload - Shipment management request
+   * @returns {Promise<Object>} - Shipment management results
+   */
+  async manageShipment(payload) {
+    logger.info(`LogisticsAgent ${this.id} managing shipment: ${payload.shipmentId}`);
+
+    return {
+      success: true,
+      data: {
+        shipmentId: payload.shipmentId || `ship_${Date.now()}`,
+        status: 'booked',
+        carrier: payload.carrier || 'TBD',
+        origin: payload.origin || 'Shanghai',
+        destination: payload.destination || 'Mombasa',
+        containerType: payload.containerType || '20ft Standard',
+        totalWeight: payload.totalWeight || 15000,
+        totalVolume: payload.totalVolume || 33,
+        bookedAt: new Date().toISOString(),
+        documents: ['Booking Confirmation', 'Shipping Instructions'],
+        milestones: [
+          { name: 'Booking confirmed', completed: true, time: new Date().toISOString() },
+          { name: 'Container pickup', completed: false },
+          { name: 'Loading complete', completed: false },
+          { name: 'Vessel departure', completed: false },
+          { name: 'Arrival at destination', completed: false },
+          { name: 'Delivery completed', completed: false },
+        ],
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
 
   /**

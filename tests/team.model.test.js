@@ -1,4 +1,6 @@
 // Team Model Test
+let capturedSchema = null;
+
 jest.mock('mongoose', () => {
   const mockSchema = function(obj) {
     this.paths = {};
@@ -36,23 +38,40 @@ jest.mock('mongoose', () => {
     ObjectId: () => ({ toString: () => 'mock-id' })
   };
   
+  // Capture the schema when model is called
+  const modelMock = jest.fn((name, schema) => {
+    capturedSchema = schema;
+    return {};
+  });
+  
   return {
     Schema: mockSchema,
-    model: jest.fn()
+    model: modelMock
   };
 });
 
+// Load the module — this triggers mongoose.model with the schema
 const Team = require('../src/models/team');
+
 describe('Team Model', () => {
-  let teamSchema;
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
   test('should have required name field', () => {
-    // Access the schema from the first call to model
-    const mongoose = require('mongoose');
-    expect(mongoose.model.mock.calls.length).toBeGreaterThan(0);
-    teamSchema = mongoose.model.mock.calls[0][1];
-    expect(teamSchema.paths.name.options.required).toBe(true);
+    expect(capturedSchema).not.toBeNull();
+    expect(capturedSchema.paths.name.options.required).toBe(true);
+  });
+
+  test('should have required companyId field', () => {
+    expect(capturedSchema.paths.companyId.options.required).toBe(true);
+  });
+
+  test('should have required ownerId field', () => {
+    expect(capturedSchema.paths.ownerId.options.required).toBe(true);
+  });
+
+  test('should set isActive default to true', () => {
+    expect(capturedSchema.paths.isActive.options.default).toBe(true);
+  });
+
+  test('should have members as an array', () => {
+    expect(capturedSchema.paths.members).toBeDefined();
   });
 });

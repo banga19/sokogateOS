@@ -8,11 +8,27 @@ const Feedback = require('../models/feedback');
 const { HermesAgent } = require('../services/hermes/hermesAgent');
 const logger = require('../utils/logger');
 
-// Token configuration
-const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || '24h';
+// Token configuration — NO hardcoded fallbacks for security secrets
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || '15m';
 const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRY || '7d';
-const JWT_SECRET = process.env.JWT_SECRET || 'sokogate-os-dev-secret-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'sokogate-os-refresh-secret-change-in-production';
+
+function requireSecret(name) {
+  const val = process.env[name];
+  if (!val) {
+    if (NODE_ENV === 'production') {
+      throw new Error(`FATAL: ${name} environment variable is required in production`);
+    }
+    // Development fallback — warn but allow startup
+    logger.warn(`${name} environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.`);
+    return `dev-only-${name}-fallback-do-not-use-in-production`;
+  }
+  return val;
+}
+
+const JWT_SECRET = requireSecret('JWT_SECRET');
+const JWT_REFRESH_SECRET = requireSecret('JWT_REFRESH_SECRET');
 
 // Register a new user
 async function register(userData) {
@@ -180,8 +196,9 @@ async function login(email, password) {
       throw Object.assign(new Error('Invalid email or password'), { statusCode: 401 });
     }
 
-    // Update last login
+    // Update last login and invalidate previous sessions
     user.lastLoginAt = new Date();
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save({ validateBeforeSave: false });
 
     // Generate tokens
@@ -199,11 +216,11 @@ async function login(email, password) {
   }
 }
 
-// Refresh access token
-async function refreshToken(refreshToken) {
+// Refresh access token — implements refresh token rotation
+async function refreshToken(refreshTokenValue) {
   try {
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshTokenValue, JWT_REFRESH_SECRET, { algorithms: ['HS256'] });
 
     // Find user
     const user = await User.findById(decoded.id);
@@ -211,13 +228,30 @@ async function refreshToken(refreshToken) {
       throw Object.assign(new Error('Invalid refresh token'), { statusCode: 401 });
     }
 
+    // Check token version — if user logged out, tokenVersion was incremented
+    const currentVersion = user.tokenVersion || 0;
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion < currentVersion) {
+      logger.warn(`Auth Service: Refresh token reuse detected for user ${user.email} — possible token theft`);
+      // Invalidate all tokens by incrementing version again
+      user.tokenVersion = currentVersion + 1;
+      await user.save({ validateBeforeSave: false });
+      throw Object.assign(new Error('Token has been revoked. Please login again.'), { statusCode: 401 });
+    }
+
     // Check if password was changed after token was issued
     if (user.isPasswordChangedAfter(decoded.iat)) {
       throw Object.assign(new Error('Token is no longer valid. Please login again.'), { statusCode: 401 });
     }
 
-    // Generate new tokens
+    // Rotate the refresh token FIRST — invalidate old version before issuing new tokens
+    // This prevents a race where an old refresh token could be used between generation and save
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await user.save({ validateBeforeSave: false });
+
+    // Generate new tokens with the incremented version
     const tokens = generateTokens(user);
+
+    logger.debug(`Auth Service: Token rotated for user ${user.email}`);
 
     return {
       user: sanitizeUser(user),
@@ -232,13 +266,12 @@ async function refreshToken(refreshToken) {
   }
 }
 
-// Logout (invalidate tokens)
+// Logout (invalidate all tokens by incrementing tokenVersion)
 async function logout(userId) {
   try {
-    // In a production system, you'd add the token to a blacklist or
-    // maintain a token version number in the user document.
-    // For now, we just log the action as clients should discard their tokens.
-    logger.info(`Auth Service: User logged out: ${userId}`);
+    // Increment tokenVersion to invalidate all existing JWTs
+    await User.findByIdAndUpdate(userId, { $inc: { tokenVersion: 1 } });
+    logger.info(`Auth Service: User logged out (tokens invalidated): ${userId}`);
     return { message: 'Logout successful' };
   } catch (error) {
     logger.error('Auth Service: Logout failed:', error);
@@ -260,8 +293,9 @@ async function changePassword(userId, currentPassword, newPassword) {
       throw Object.assign(new Error('Current password is incorrect'), { statusCode: 401 });
     }
 
-    // Update password
+    // Update password and invalidate all previous sessions
     user.password = newPassword;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
     logger.info(`Auth Service: Password changed for user: ${user.email}`);
@@ -302,7 +336,8 @@ async function requestPasswordReset(email) {
 
     return {
       message: 'If the email exists, a reset link has been sent.',
-      resetToken // In production, only return this in development mode
+      // Only return the reset token in development mode — prevents token leak in production
+      ...(process.env.NODE_ENV !== 'production' && { resetToken }),
     };
   } catch (error) {
     logger.error('Auth Service: Password reset request failed:', error);
@@ -323,8 +358,9 @@ async function resetPassword(resetToken, newPassword) {
       throw Object.assign(new Error('Invalid or expired reset token'), { statusCode: 400 });
     }
 
-    // Update password
+    // Update password and invalidate all previous tokens
     user.password = newPassword;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
@@ -410,23 +446,27 @@ async function acceptTerms(userId, mandatedVersion = '1.0') {
   }
 }
 
-// Generate JWT tokens
+// Generate JWT tokens (includes tokenVersion for revocation)
 function generateTokens(user) {
+  const tokenVersion = user.tokenVersion || 0;
+
   const payload = {
     id: user._id,
     email: user.email,
     role: user.role,
-    companyId: user.companyId
+    companyId: user.companyId,
+    tokenVersion
   };
 
   const accessToken = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRY
+    expiresIn: ACCESS_TOKEN_EXPIRY,
+    algorithm: 'HS256'
   });
 
   const refreshToken = jwt.sign(
-    { id: user._id },
+    { id: user._id, tokenVersion },
     JWT_REFRESH_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRY }
+    { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: 'HS256' }
   );
 
   return {
@@ -436,10 +476,12 @@ function generateTokens(user) {
   };
 }
 
-// Verify and decode access token
+// Verify and decode access token (also checks token version)
 function verifyAccessToken(token) {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+    // tokenVersion check is done in the middleware via DB lookup
+    return decoded;
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       throw Object.assign(new Error('Access token expired'), { statusCode: 401 });

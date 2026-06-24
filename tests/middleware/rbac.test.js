@@ -1,14 +1,14 @@
 // RBAC Middleware Test for SokogateOS
 // Tests the RBAC authorization middleware
 
-jest.mock('../src/models/role');
-jest.mock('../src/models/user');
-jest.mock('../src/utils/logger');
+jest.mock('../../src/models/role');
+jest.mock('../../src/models/user');
+jest.mock('../../src/utils/logger');
 
-const Role = require('../src/models/role');
-const User = require('../src/models/user');
-const logger = require('../src/utils/logger');
-const { rbacAuthorize } = require('../src/middleware/rbac');
+const Role = require('../../src/models/role');
+const User = require('../../src/models/user');
+const logger = require('../../src/utils/logger');
+const { rbacAuthorize } = require('../../src/middleware/rbac');
 
 describe('RBAC Middleware', () => {
   let req, res, next;
@@ -63,7 +63,7 @@ describe('RBAC Middleware', () => {
     };
 
     beforeEach(() => {
-      Role.findOne.mockResolvedValue(mockRoleDoc);
+      Role.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(mockRoleDoc) });
     });
 
     test('should allow access when permission exists', async () => {
@@ -95,7 +95,9 @@ describe('RBAC Middleware', () => {
     });
 
     test('should deny access when role not found', async () => {
-      Role.findOne.mockResolvedValue(null);
+      Role.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+      // Middleware falls through to User.findById path when roleDoc is null
+      User.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(null) });
 
       const middleware = rbacAuthorize('users', 'read');
       await middleware(req, res, next);
@@ -109,13 +111,13 @@ describe('RBAC Middleware', () => {
     });
 
     test('should fall back to user permissions when role not found in Role collection', async () => {
-      Role.findOne.mockResolvedValue(null); // Role not found in Role collection
+      Role.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) }); // Role not found in Role collection
 
       const mockFullUser = {
         id: 'user-id-123',
         hasPermission: jest.fn().mockReturnValue(true), // User has permission
       };
-      User.findById.mockResolvedValue(mockFullUser);
+      User.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(mockFullUser) });
 
       const middleware = rbacAuthorize('users', 'read');
       await middleware(req, res, next);
@@ -127,13 +129,13 @@ describe('RBAC Middleware', () => {
     });
 
     test('should deny access when user has no permission in fallback', async () => {
-      Role.findOne.mockResolvedValue(null); // Role not found
+      Role.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) }); // Role not found
 
       const mockFullUser = {
         id: 'user-id-123',
         hasPermission: jest.fn().mockReturnValue(false), // User lacks permission
       };
-      User.findById.mockResolvedValue(mockFullUser);
+      User.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(mockFullUser) });
 
       const middleware = rbacAuthorize('users', 'read');
       await middleware(req, res, next);
@@ -155,7 +157,7 @@ describe('RBAC Middleware', () => {
     };
 
     beforeEach(() => {
-      Role.findOne.mockResolvedValue(mockRoleDoc);
+      Role.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(mockRoleDoc) });
     });
 
     test('should allow access for super_admin even with requireOwnership', async () => {
@@ -190,6 +192,7 @@ describe('RBAC Middleware', () => {
 
     test('should allow access when user owns the resource (body.userId match)', async () => {
       req.user.role = 'member';
+      req.params.id = 'user-id-123';
       req.body.userId = 'user-id-123'; // Same as req.user.id
 
       const middleware = rbacAuthorize('users', 'update', { requireOwnership: true });
@@ -200,6 +203,7 @@ describe('RBAC Middleware', () => {
 
     test('should allow access when user owns the resource (body.ownerId match)', async () => {
       req.user.role = 'member';
+      req.params.id = 'user-id-123';
       req.body.ownerId = 'user-id-123'; // Same as req.user.id
 
       const middleware = rbacAuthorize('users', 'update', { requireOwnership: true });
@@ -228,21 +232,22 @@ describe('RBAC Middleware', () => {
       req.user.role = 'member';
       req.params.id = 'different-user-id';
 
-      const middleware = rbacAuthorize('users', 'update', { requireOwnership: false });
+      // Use 'delete' action which is not in the mockRoleDoc permissions
+      const middleware = rbacAuthorize('users', 'delete', { requireOwnership: false });
       await middleware(req, res, next);
 
       // Should fail on permissions, not ownership
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        error: 'Missing permission: users.update',
+        error: 'Missing permission: users.delete',
       });
     });
   });
 
   describe('error handling', () => {
     test('should handle errors in Role.findOne', async () => {
-      Role.findOne.mockRejectedValue(new Error('Database error'));
+      Role.findOne.mockReturnValue({ lean: jest.fn().mockRejectedValue(new Error('Database error')) });
 
       const middleware = rbacAuthorize('users', 'read');
       await middleware(req, res, next);
@@ -256,8 +261,7 @@ describe('RBAC Middleware', () => {
     });
 
     test('should handle errors in User.findById', async () => {
-      Role.findOne.mockResolvedValue(null); // Force fallback to user permissions
-      User.findById.mockRejectedValue(new Error('Database error'));
+      User.findById.mockReturnValue({ select: jest.fn().mockRejectedValue(new Error('Database error')) });
 
       const middleware = rbacAuthorize('users', 'read');
       await middleware(req, res, next);

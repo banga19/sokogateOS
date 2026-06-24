@@ -155,7 +155,7 @@ class AnalysisAgent extends BaseAgent {
       case 'database_metrics':
         return await this._collectDatabaseMetrics();
       case 'api_logs':
-        return await self._collectApiLogs();
+        return await this._collectApiLogs();
       case 'qme_metrics':
         return await this._collectQMeMetrics();
       default:
@@ -299,7 +299,7 @@ class AnalysisAgent extends BaseAgent {
         case 'usage_patterns':
           return await this._analyzeUsagePatterns(rawData);
         case 'error_trends':
-          return await self._analyzeErrorTrends(rawData);
+          return await this._analyzeErrorTrends(rawData);
         case 'user_behavior':
           return await this._analyzeUserBehavior(rawData);
         case 'system_health':

@@ -519,7 +519,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const competitor of competitorData.competitors) {
         insights.push({
           topic: `market_share_${competitor.name.toLowerCase().replace(/\s+/g, '_')}`,
-          description: `{competitor.name} market share: ${(competitor.marketShare * 100).toFixed(1)}%`,
+          description: `${competitor.name} market share: ${(competitor.marketShare * 100).toFixed(1)}%`,
           source: 'competitor_websites',
           confidence: 0.7
         });
@@ -530,7 +530,7 @@ class MarketIntelligenceAgent extends BaseAgent {
     if (competitorData.priceCompetitiveness !== undefined) {
       insights.push({
         topic: 'price_competitiveness',
-        description: `Price competitiveness score: {(competitorData.priceCompetitiveness * 100).toFixed(1)}%`,
+        description: `Price competitiveness score: ${(competitorData.priceCompetitiveness * 100).toFixed(1)}%`,
         source: 'competitor_websites',
         confidence: 0.75
       });
@@ -543,7 +543,7 @@ class MarketIntelligenceAgent extends BaseAgent {
         for (const feature of gaps.behind) {
           insights.push({
             topic: `feature_gap_${feature.toLowerCase().replace(/\s+/g, '_')}`,
-            description: `Competitive disadvantage: {feature}`,
+            description: `Competitive disadvantage: ${feature}`,
             source: 'competitor_websites',
             priority: 'high',
             confidence: 0.8
@@ -578,7 +578,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const complaint of feedbackData.commonComplaints) {
         insights.push({
           topic: `customer_complaint_${complaint.toLowerCase().replace(/\s+/g, '_')}`,
-          description: `Common customer complaint: {complaint}`,
+          description: `Common customer complaint: ${complaint}`,
           source: 'customer_feedback',
           priority: 'medium',
           confidence: 0.75
@@ -590,7 +590,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const praise of feedbackData.commonPraises) {
         insights.push({
           topic: `customer_praise_${praise.toLowerCase().replace(/\s+/g, '_')}`,
-          description: `Common customer praise: {praise}`,
+          description: `Common customer praise: ${praise}`,
           source: 'customer_feedback',
           confidence: 0.7
         });
@@ -600,22 +600,21 @@ class MarketIntelligenceAgent extends BaseAgent {
     // Analyze NPS score
     if (feedbackData.npsScore !== undefined) {
       insights.push({
-        topic: 'net_promoter_score',
-        description: `Net Promoter Score: {feedbackData.npsScore}`,
-        source: 'customer_feedback',
-        confidence: 0.8
-      });
-    }
+        topic: 'net_promoter_score',          description: `Net Promoter Score: ${feedbackData.npsScore}`,
+          source: 'customer_feedback',
+          confidence: 0.8
+        });
+      }
 
-    // Analyze web analytics for behavior insights
-    if (webData.bounceRate !== undefined && webData.bounceRate > 0.5) {
-      insights.push({
-        topic: 'high_bounce_rate',
-        description: `High bounce rate detected: {(webData.bounceRate * 100).toFixed(1)}%`,
-        source: 'web_analytics',
-        priority: 'medium',
-        confidence: 0.7
-      });
+      // Analyze web analytics for behavior insights
+      if (webData.bounceRate !== undefined && webData.bounceRate > 0.5) {
+        insights.push({
+          topic: 'high_bounce_rate',
+          description: `High bounce rate detected: ${(webData.bounceRate * 100).toFixed(1)}%`,
+          source: 'web_analytics',
+          priority: 'medium',
+          confidence: 0.7
+        });
     }
 
     return {
@@ -643,7 +642,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const competitor of competitorData.competitors) {
         insights.push({
           topic: `competitor_pricing_${competitor.name.toLowerCase().replace(/\s+/g, '_')}`,
-          description: `{competitor.name} average price: ${competitor.avgPrice.toFixed(2)} USD`,
+          description: `${competitor.name} average price: ${competitor.avgPrice.toFixed(2)} USD`,
           source: 'competitor_websites',
           confidence: 0.75
         });
@@ -694,32 +693,31 @@ class MarketIntelligenceAgent extends BaseAgent {
     // Analyze historical sales trends
     if (salesData.salesGrowthRate !== undefined) {
       insights.push({
-        topic: 'historical_sales_trend',
-        description: `Historical sales growth rate: {(salesData.salesGrowthRate * 100).toFixed(1)}%`,
-        source: 'internal_sales',
-        confidence: 0.8
-      });
-    }
+        topic: 'historical_sales_trend',          description: `Historical sales growth rate: ${(salesData.salesGrowthRate * 100).toFixed(1)}%`,
+          source: 'internal_sales',
+          confidence: 0.8
+        });
+      }
 
-    // Analyze economic indicators for demand impact
-    if (economicData.gdpGrowth && economicData.gdpGrowth.kenya !== undefined) {
-      const gdpImpact = economicData.gdpGrowth.kenya > 0 ? 'positive' : 'negative';
-      insights.push({
-        topic: 'gdp_demand_correlation',
-        description: `Kenya GDP growth ({ (economicData.gdpGrowth.kenya * 100).toFixed(1)}%) expected to have {gdpImpact} impact on demand`,
-        source: 'economic_indicators',
-        confidence: 0.7
-      });
-    }
+      // Analyze economic indicators for demand impact
+      if (economicData.gdpGrowth && economicData.gdpGrowth.kenya !== undefined) {
+        const gdpImpact = economicData.gdpGrowth.kenya > 0 ? 'positive' : 'negative';
+        insights.push({
+          topic: 'gdp_demand_correlation',
+          description: `Kenya GDP growth (${(economicData.gdpGrowth.kenya * 100).toFixed(1)}%) expected to have ${gdpImpact} impact on demand`,
+          source: 'economic_indicators',
+          confidence: 0.7
+        });
+      }
 
-    // Analyze industry forecasts
-    if (industryData.growthForecast !== undefined) {
-      insights.push({
-        topic: 'industry_demand_forecast',
-        description: `Industry demand forecast: {(industryData.growthForecast * 100).toFixed(1)}% growth`,
-        source: 'industry_reports',
-        confidence: 0.75
-      });
+      // Analyze industry forecasts
+      if (industryData.growthForecast !== undefined) {
+        insights.push({
+          topic: 'industry_demand_forecast',
+          description: `Industry demand forecast: ${(industryData.growthForecast * 100).toFixed(1)}% growth`,
+          source: 'industry_reports',
+          confidence: 0.75
+        });
     }
 
     return {
@@ -748,7 +746,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const topic of newsData.trendingTopics) {
         insights.push({
           topic: `opportunity_${topic.toLowerCase().replace(/\s+/g, '_')}`,
-          description: `Emerging opportunity: {topic}`,
+          description: `Emerging opportunity: ${topic}`,
           source: 'news_feeds',
           priority: 'medium',
           confidence: 0.6
@@ -761,7 +759,7 @@ class MarketIntelligenceAgent extends BaseAgent {
       for (const trend of industryData.keyTrends) {
         insights.push({
           topic: `industry_opportunity_${trend.toLowerCase().replace(/\s+/g, '_')}`,
-          description: `Industry trend opportunity: {trend}`,
+          description: `Industry trend opportunity: ${trend}`,
           source: 'industry_reports',
           confidence: 0.7
         });
@@ -771,11 +769,10 @@ class MarketIntelligenceAgent extends BaseAgent {
     // Analyze social media for opportunity signals
     if (socialData.mentions && socialData.mentions > 100) {
       insights.push({
-        topic: 'social_media_buzz',
-        description: `High social media buzz detected: {socialData.mentions} mentions`,
-        source: 'social_media',
-        confidence: 0.65
-      });
+        topic: 'social_media_buzz',          description: `High social media buzz detected: ${socialData.mentions} mentions`,
+          source: 'social_media',
+          confidence: 0.65
+        });
     }
 
     return {

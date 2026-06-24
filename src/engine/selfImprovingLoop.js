@@ -7,7 +7,7 @@ const Sourcing = require('../models/sourcing');
 const Logistics = require('../models/logistics/logistics');
 const logger = require('../utils/logger');
 
-// Engine state
+// ── Engine state ──
 let isRunning = false;
 let loopInterval = null;
 let improvementMetrics = {
@@ -17,12 +17,14 @@ let improvementMetrics = {
   accuracyHistory: [],
   improvementRate: 0,
   startedAt: null,
-  lastLoopAt: null
+  lastLoopAt: null,
 };
 
 // Model accuracy tracking per domain
 const modelAccuracy = new Map();
-const modelPredictions = new Map();
+
+// ── Tuning ──
+const MAX_ACCURACY_HISTORY = 100;  // Keep only last 100 entries to avoid unbounded growth
 
 /**
  * Start the self-improving loop engine
@@ -46,13 +48,11 @@ async function startLoopEngine(options = {}) {
   // Run immediately on start
   await runLoopCycle(batchSize);
 
-  // Schedule recurring cycles
-  loopInterval = setInterval(async () => {
-    try {
-      await runLoopCycle(batchSize);
-    } catch (error) {
+  // Schedule recurring cycles with error isolation
+  loopInterval = setInterval(() => {
+    runLoopCycle(batchSize).catch((error) => {
       logger.error('Self-Improving Loop: Cycle error:', error.message);
-    }
+    });
   }, intervalMs);
 
   return improvementMetrics;
@@ -244,19 +244,18 @@ async function retrainModels(analysis) {
     }
   }
 
-  // Mark all feedback as processed
-  await Feedback.updateMany(
-    { isProcessed: false },
-    {
-      isProcessed: true,
-      processedAt: new Date(),
-      'effectiveness.modelImproved': results.length > 0,
-      'effectiveness.retrainingTriggered': results.length > 0,
-      'effectiveness.improvementNotes': results.length > 0
-        ? `Retrained ${results.length} models in cycle ${improvementMetrics.totalLoopsCompleted + 1}`
-        : 'No retraining needed in this cycle'
-    }
-  );
+  // Mark all feedback as processed (single batched update)
+  const batchPayload = {
+    isProcessed: true,
+    processedAt: new Date(),
+    'effectiveness.modelImproved': results.length > 0,
+    'effectiveness.retrainingTriggered': results.length > 0,
+    'effectiveness.improvementNotes': results.length > 0
+      ? `Retrained ${results.length} models in cycle ${improvementMetrics.totalLoopsCompleted + 1}`
+      : 'No retraining needed in this cycle',
+  };
+
+  await Feedback.updateMany({ isProcessed: false }, batchPayload);
 
   return results;
 }
@@ -281,14 +280,18 @@ async function trackImprovements(retrainingResults) {
       improvements.push(improvement);
 
       // Store in accuracy history
-      improvementMetrics.accuracyHistory.push(improvement);
+      // Bounded history: avoid unbounded array growth
+    if (improvementMetrics.accuracyHistory.length >= MAX_ACCURACY_HISTORY) {
+      improvementMetrics.accuracyHistory.shift();
+    }
+    improvementMetrics.accuracyHistory.push(improvement);
 
-      // Calculate overall improvement rate
-      const recentHistory = improvementMetrics.accuracyHistory.slice(-20);
-      if (recentHistory.length >= 2) {
-        const totalImprovement = recentHistory.reduce((sum, item) => sum + item.improvement, 0);
-        improvementMetrics.improvementRate = Math.round((totalImprovement / recentHistory.length) * 100) / 100;
-      }
+    // Calculate overall improvement rate (only from recent entries)
+    const recentHistory = improvementMetrics.accuracyHistory.slice(-20);
+    if (recentHistory.length >= 2) {
+      const totalImprovement = recentHistory.reduce((sum, item) => sum + item.improvement, 0);
+      improvementMetrics.improvementRate = Math.round((totalImprovement / recentHistory.length) * 100) / 100;
+    }
     }
   }
 

@@ -2,15 +2,15 @@
 // Tests the TeamService functionality
 
 // Mock dependencies
-jest.mock('../src/models/team');
-jest.mock('../src/models/user');
-jest.mock('../src/models/company');
-jest.mock('../src/utils/logger');
+jest.mock('../../src/models/team');
+jest.mock('../../src/models/user');
+jest.mock('../../src/models/company');
+jest.mock('../../src/utils/logger');
 
-const Team = require('../src/models/team');
-const User = require('../src/models/user');
-const Company = require('../src/models/company');
-const TeamService = require('../src/services/teamService');
+const Team = require('../../src/models/team');
+const User = require('../../src/models/user');
+const Company = require('../../src/models/company');
+const TeamService = require('../../src/services/teamService');
 
 describe('TeamService', () => {
   let teamService;
@@ -165,7 +165,8 @@ describe('TeamService', () => {
       const mockUser = { companyId: mockCompanyId };
 
       Team.findById.mockResolvedValue(mockTeam);
-      User.findById.mockResolvedValue(mockUser);
+      // User.findById must return a query-like object with .select() for chaining
+      User.findById.mockReturnValue({ select: () => Promise.resolve(mockUser) });
 
       const result = await teamService.get(teamId, requesterId, requesterRole);
 
@@ -224,7 +225,7 @@ describe('TeamService', () => {
       const mockUser = { companyId: 'different-company-id' };
 
       Team.findById.mockResolvedValue(mockTeam);
-      User.findById.mockResolvedValue(mockUser);
+      User.findById.mockReturnValue({ select: () => Promise.resolve(mockUser) });
 
       await expect(teamService.get(teamId, requesterId, requesterRole)).rejects.toThrow(
         'Forbidden.'
@@ -375,13 +376,20 @@ describe('TeamService', () => {
         members: [{ userId: 'existing-user-id' }], // Already a member
       };
 
+      const mockTargetUser = {
+        _id: 'existing-user-id',
+        companyId: mockCompanyId,
+      };
+
       Team.findById.mockResolvedValue(mockTeam);
+      User.findById.mockResolvedValue(mockTargetUser);
 
       await expect(
         teamService.addMember(teamId, inviterId, inviterRole, newMemberData)
       ).rejects.toThrow('User is already a team member.');
 
       expect(Team.findById).toHaveBeenCalledWith(teamId);
+      expect(User.findById).toHaveBeenCalledWith('existing-user-id');
     });
 
     test('should throw error when inviter has insufficient permissions', async () => {

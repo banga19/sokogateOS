@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import middleware
-const { authenticate } = require('../../../middleware/auth');
+const { authenticate, scopeToCompany } = require('../../../middleware/auth');
 const { abacAuthorize } = require('../../../middleware/abac');
 const { validate, validators, sanitize } = require('../../../middleware/validation');
 

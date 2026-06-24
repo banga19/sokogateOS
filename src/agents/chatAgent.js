@@ -195,10 +195,10 @@ class ChatAgent extends BaseAgent {
   detectIntent(message) {
     const patterns = {
       sourcing: /\b(source|find|discover|procure|buy|purchase|supplier|vendor)\b/i,
-      customization: /\b(customiz|customise|brand|label|design|modify|spec)\b/i,
+      customization: /\b(customiz\w*|customise|brand|label|design|modify|spec)\b/i,
       logistics: /\b(ship|logistics|freight|deliver|cargo|container|route|track)\b/i,
-      compliance: /\b(compliance|regulat|certif|permit|license|customs|duty|tax)\b/i,
-      negotiation: /\b(negotiat|price|discount|deal|offer|contract|term)\b/i,
+      compliance: /\b(compliance|regulat\w*|certif\w*|permit|license|customs|duty|tax)\b/i,
+      negotiation: /\b(negotiat\w*|price|discount|deal|offer|contract|term)\b/i,
       greeting: /\b(hi|hello|hey|good\s*(morning|afternoon|evening))\b/i,
       help: /\b(help|support|guide|how\s*(to|do|can))\b/i,
       status: /\b(status|progress|update|what'?s\s*(up|new)|dashboard)\b/i

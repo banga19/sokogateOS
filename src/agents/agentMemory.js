@@ -1,38 +1,56 @@
 // Agent Memory Module for sokogateOS Autonomous AI Agent Engine
 // Provides persistent memory and knowledge retrieval for agents
+// Optimized: bounded caches, O(1) eviction, batched consolidation
 
 const logger = require('../utils/logger');
+
+// ── Tuning constants ──
+const MAX_SHORT_TERM = 100;
+const MAX_LONG_TERM = 1000;
+const CONSOLIDATION_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
 class AgentMemory {
   constructor(agentId) {
     this.agentId = agentId;
     this.shortTerm = new Map();
     this.longTerm = new Map();
-    this.maxShortTerm = 100;
+    this.maxShortTerm = MAX_SHORT_TERM;
   }
 
+  /**
+   * Store a value in memory.
+   * When short-term fills up, the OLDEST entry is evicted immediately
+   * (not after a full scan), preventing O(n) consolidate on every insert.
+   * @param {string} key
+   * @param {*} value
+   * @param {{ persist?: boolean }} [options]
+   */
   async store(key, value, options = {}) {
     const { persist = false } = options;
-    if (persist) {
-      this.longTerm.set(key, { value, timestamp: Date.now() });
-    } else {
-      this.shortTerm.set(key, { value, timestamp: Date.now() });
-      if (this.shortTerm.size >= this.maxShortTerm) {
-        await this.consolidate();
-      }
+    const target = persist ? this.longTerm : this.shortTerm;
+    // Use instance property (allows test overrides), fall back to constant
+    const maxSize = persist ? MAX_LONG_TERM : (this.maxShortTerm || MAX_SHORT_TERM);
+
+    // Bounded insert: evict oldest when at capacity and key is new
+    if (target.size >= maxSize && !target.has(key)) {
+      const oldestKey = target.keys().next().value;
+      target.delete(oldestKey);
     }
+
+    target.set(key, { value, timestamp: Date.now() });
   }
 
   async retrieve(key) {
-    if (this.shortTerm.has(key)) {
-      const entry = this.shortTerm.get(key);
-      entry.timestamp = Date.now();
-      return entry.value;
+    // Short-term is checked first (hot path)
+    const st = this.shortTerm.get(key);
+    if (st) {
+      st.timestamp = Date.now(); // LRU touch
+      return st.value;
     }
-    if (this.longTerm.has(key)) {
-      const entry = this.longTerm.get(key);
-      entry.timestamp = Date.now();
-      return entry.value;
+    const lt = this.longTerm.get(key);
+    if (lt) {
+      lt.timestamp = Date.now();
+      return lt.value;
     }
     return null;
   }
@@ -42,32 +60,61 @@ class AgentMemory {
     const results = [];
     const queryLower = query.toLowerCase();
 
-    const searchMap = (map, source) => {
-      for (const [key, entry] of map.entries()) {
-        if (key.toLowerCase().includes(queryLower) ||
-            (typeof entry.value === 'string' && entry.value.toLowerCase().includes(queryLower))) {
-          results.push({ key, value: entry.value, source, timestamp: entry.timestamp });
+    // Inline predicate to avoid per-item function call overhead
+    const matches = (key, value) =>
+      key.toLowerCase().includes(queryLower) ||
+      (typeof value === 'string' && value.toLowerCase().includes(queryLower));
+
+    if (includeShortTerm) {
+      for (const [key, entry] of this.shortTerm.entries()) {
+        if (matches(key, entry.value)) {
+          results.push({ key, value: entry.value, source: 'short-term', timestamp: entry.timestamp });
         }
       }
-    };
+    }
 
-    if (includeShortTerm) searchMap(this.shortTerm, 'short-term');
-    searchMap(this.longTerm, 'long-term');
-
-    return results.sort((a, b) => b.timestamp - a.timestamp);
-  }
-
-  async consolidate() {
-    const now = Date.now();
-    for (const [key, entry] of this.shortTerm.entries()) {
-      if (now - entry.timestamp > 5 * 60 * 1000) {
-        this.longTerm.set(key, entry);
-        this.shortTerm.delete(key);
+    for (const [key, entry] of this.longTerm.entries()) {
+      if (matches(key, entry.value)) {
+        results.push({ key, value: entry.value, source: 'long-term', timestamp: entry.timestamp });
       }
     }
-    if (this.longTerm.size > 1000) {
-      const sorted = [...this.longTerm.entries()].sort((a, b) => b[1].timestamp - a[1].timestamp);
-      this.longTerm = new Map(sorted.slice(0, 1000));
+
+    results.sort((a, b) => b.timestamp - a.timestamp);
+    return results;
+  }
+
+  /**
+   * Consolidate — move aged short-term entries to long-term.
+   * Now safely idempotent and will not throw even if called concurrently.
+   */
+  async consolidate() {
+    const now = Date.now();
+    const toMove = [];
+
+    // Phase 1: collect (mutate iterand in phase 2 to avoid concurrency issues)
+    for (const [key, entry] of this.shortTerm.entries()) {
+      if (now - entry.timestamp > CONSOLIDATION_AGE_MS) {
+        toMove.push([key, entry]);
+      }
+    }
+
+    // Phase 2: move
+    for (const [key, entry] of toMove) {
+      if (this.longTerm.size >= MAX_LONG_TERM) {
+        const oldest = this.longTerm.keys().next().value;
+        this.longTerm.delete(oldest);
+      }
+      this.longTerm.set(key, entry);
+      this.shortTerm.delete(key);
+    }
+
+    // Phase 3: trim long-term if still over limit (edge case)
+    if (this.longTerm.size > MAX_LONG_TERM) {
+      const excess = this.longTerm.size - MAX_LONG_TERM;
+      const keys = this.longTerm.keys();
+      for (let i = 0; i < excess; i++) {
+        this.longTerm.delete(keys.next().value);
+      }
     }
   }
 
@@ -80,7 +127,7 @@ class AgentMemory {
     return {
       shortTermSize: this.shortTerm.size,
       longTermSize: this.longTerm.size,
-      maxShortTerm: this.maxShortTerm
+      maxShortTerm: this.maxShortTerm,
     };
   }
 }
