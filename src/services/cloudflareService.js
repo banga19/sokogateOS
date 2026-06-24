@@ -20,6 +20,14 @@ class CloudflareService {
   }
 
   /**
+   * Initialize the Cloudflare service
+   * @returns {Promise<void>}
+   */
+  initialize() {
+    return Promise.resolve();
+  }
+
+  /**
    * Make a request to the Cloudflare API
    * @param {string} endpoint - API endpoint (without base URL)
    * @param {string} method - HTTP method (GET, POST, PUT, DELETE, PATCH)
