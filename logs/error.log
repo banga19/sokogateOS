@@ -427,3 +427,45 @@
 2026-06-13T09:24:36.941Z [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
 2026-06-13T09:24:36.993Z [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
 2026-06-13T09:24:39.661Z [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+2026-06-25 13:46:53.994 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:54.649 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.080 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.328 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.490 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.601 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.766 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)

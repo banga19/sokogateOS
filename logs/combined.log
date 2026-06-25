@@ -10487,3 +10487,245 @@ Testing agent initialization...
 2026-06-13T09:24:40.611Z [INFO]: Initializing SAP Product Adapter...
 2026-06-13T09:24:40.611Z [INFO]: SAP Product Adapter: Kafka producer connected
 2026-06-13T09:24:40.611Z [INFO]: SAP Product Adapter started successfully
+2026-06-25 13:46:30.128 [WARN]: JWT_SECRET environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.
+2026-06-25 13:46:30.329 [WARN]: JWT_REFRESH_SECRET environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.
+2026-06-25 13:46:29.955 [WARN]: JWT_SECRET environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.
+2026-06-25 13:46:30.247 [WARN]: JWT_REFRESH_SECRET environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.
+2026-06-25 13:46:27.624 [WARN]: JWT_SECRET environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.
+2026-06-25 13:46:27.900 [WARN]: JWT_REFRESH_SECRET environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.
+2026-06-25 13:46:27.969 [WARN]: [CORS] FRONTEND_URL not set. Allowing all origins for development. SET THIS IN PRODUCTION.
+2026-06-25 13:46:28.168 [INFO]: ABAC Policy Engine: Added policy "super_admin_full_access" (type: allow)
+2026-06-25 13:46:28.212 [INFO]: ABAC Policy Engine: Added policy "terms_required" (type: allow)
+2026-06-25 13:46:28.241 [INFO]: ABAC Policy Engine: Added policy "active_user_required" (type: allow)
+2026-06-25 13:46:28.254 [INFO]: ABAC Policy Engine: Added policy "company_scoping" (type: allow)
+2026-06-25 13:46:28.263 [INFO]: ABAC Policy Engine: Added policy "sourcing_create" (type: allow)
+2026-06-25 13:46:28.278 [INFO]: ABAC Policy Engine: Added policy "sourcing_approve" (type: allow)
+2026-06-25 13:46:28.287 [INFO]: ABAC Policy Engine: Added policy "logistics_track" (type: allow)
+2026-06-25 13:46:28.301 [INFO]: ABAC Policy Engine: Added policy "analytics_export" (type: allow)
+2026-06-25 13:46:28.329 [INFO]: ABAC Middleware: Default policies loaded
+2026-06-25 13:46:39.624 [WARN]: LangChain: No OPENAI_API_KEY - running in degraded mode
+2026-06-25 13:46:39.718 [WARN]: Ruflo memory: Not available, using fallback in-memory storage
+2026-06-25 13:46:53.448 [INFO]: Initializing AI Intelligence Service...
+2026-06-25 13:46:53.448 [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-25 13:46:53.448 [INFO]: ServiceRunner: Started "ai-retraining" (every 3600000ms)
+2026-06-25 13:46:53.448 [INFO]: ServiceRunner: Started "ai-insight-generation" (every 1800000ms)
+2026-06-25 13:46:53.448 [INFO]: ServiceRunner: Started "ai-cache-cleanup" (every 300000ms)
+2026-06-25 13:46:53.448 [INFO]: AI Intelligence Service started successfully
+2026-06-25 13:46:53.766 [INFO]: Initializing AI Intelligence Service...
+2026-06-25 13:46:53.766 [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-25 13:46:53.766 [WARN]: ServiceRunner: Service "ai-retraining" is already running — skipping
+2026-06-25 13:46:53.766 [WARN]: ServiceRunner: Service "ai-insight-generation" is already running — skipping
+2026-06-25 13:46:53.766 [WARN]: ServiceRunner: Service "ai-cache-cleanup" is already running — skipping
+2026-06-25 13:46:53.766 [INFO]: AI Intelligence Service started successfully
+2026-06-25 13:46:53.827 [INFO]: Initializing AI Intelligence Service...
+2026-06-25 13:46:53.827 [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-25 13:46:53.827 [WARN]: ServiceRunner: Service "ai-retraining" is already running — skipping
+2026-06-25 13:46:53.827 [WARN]: ServiceRunner: Service "ai-insight-generation" is already running — skipping
+2026-06-25 13:46:53.827 [WARN]: ServiceRunner: Service "ai-cache-cleanup" is already running — skipping
+2026-06-25 13:46:53.827 [INFO]: AI Intelligence Service started successfully
+2026-06-25 13:46:53.827 [DEBUG]: AI Intelligence: Processing product.updated
+2026-06-25 13:46:53.827 [DEBUG]: AI Intelligence: Generated product_insight insight
+2026-06-25 13:46:53.950 [INFO]: Initializing AI Intelligence Service...
+2026-06-25 13:46:53.950 [INFO]: AI Intelligence Service: Kafka consumer connected
+2026-06-25 13:46:53.950 [WARN]: ServiceRunner: Service "ai-retraining" is already running — skipping
+2026-06-25 13:46:53.950 [WARN]: ServiceRunner: Service "ai-insight-generation" is already running — skipping
+2026-06-25 13:46:53.950 [WARN]: ServiceRunner: Service "ai-cache-cleanup" is already running — skipping
+2026-06-25 13:46:53.950 [INFO]: AI Intelligence Service started successfully
+2026-06-25 13:46:53.950 [DEBUG]: AI Intelligence: Processing order.created
+2026-06-25 13:46:53.648 [INFO]: Initializing Sourcing Service...
+2026-06-25 13:46:53.648 [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-25 13:46:53.648 [INFO]: Sourcing Service: Kafka producer connected
+2026-06-25 13:46:53.648 [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:53.934 [INFO]: Initializing Sourcing Service...
+2026-06-25 13:46:53.934 [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-25 13:46:53.934 [INFO]: Sourcing Service: Kafka producer connected
+2026-06-25 13:46:53.934 [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:53.994 [INFO]: Initializing Sourcing Service...
+2026-06-25 13:46:53.994 [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-25 13:46:53.994 [INFO]: Sourcing Service: Kafka producer connected
+2026-06-25 13:46:53.994 [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:53.994 [DEBUG]: Sourcing Service received message on topic product.query.received: {"queryId":"QUERY-456","companyId":"company_123","query":"I need 1000 pieces of organic cotton fabric for t-shirts"}
+2026-06-25 13:46:53.994 [INFO]: Sourcing Service: Processing product query QUERY-456
+2026-06-25 13:46:53.994 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:54.245 [INFO]: Initializing Sourcing Service...
+2026-06-25 13:46:54.245 [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-25 13:46:54.245 [INFO]: Sourcing Service: Kafka producer connected
+2026-06-25 13:46:54.245 [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:54.245 [DEBUG]: Sourcing Service received message on topic product.catalog.updated: {"productId":"PROD-123","category":"textiles","subcategory":"fabric","updatedAt":"2026-06-25T10:46:54.245Z"}
+2026-06-25 13:46:54.245 [INFO]: Sourcing Service: Processing catalog update for product PROD-123
+2026-06-25 13:46:54.282 [INFO]: Initializing Sourcing Service...
+2026-06-25 13:46:54.282 [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-25 13:46:54.282 [INFO]: Sourcing Service: Kafka producer connected
+2026-06-25 13:46:54.282 [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:54.282 [DEBUG]: Sourcing Service received message on topic supplier.profile.updated: {"supplierId":"SUP-789","supplierName":"Textile Mills Ltd","capabilities":["cotton","polyester","blends"],"updatedAt":"2026-06-25T10:46:54.282Z"}
+2026-06-25 13:46:54.282 [INFO]: Sourcing Service: Processing supplier profile update for SUP-789
+2026-06-25 13:46:54.382 [INFO]: Initializing Sourcing Service...
+2026-06-25 13:46:54.382 [INFO]: Sourcing Service: Seeded 8 suppliers into knowledge base
+2026-06-25 13:46:54.382 [INFO]: Sourcing Service: Kafka producer connected
+2026-06-25 13:46:54.382 [INFO]: Sourcing Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:54.382 [DEBUG]: Sourcing Service received message on topic market.trend.updated: {"productCategory":"textiles","trend":"increasing","demandIndex":85,"priceIndex":72,"updatedAt":"2026-06-25T10:46:54.382Z"}
+2026-06-25 13:46:54.382 [INFO]: Sourcing Service: Processing market trend update for textiles
+2026-06-25 13:46:54.574 [INFO]: Checking Korean compliance for product: Test Cocoa Product
+2026-06-25 13:46:54.697 [INFO]: Checking Korean compliance for product: Test Coffee Product
+2026-06-25 13:46:54.733 [INFO]: Checking Korean compliance for product: Unknown Product
+2026-06-25 13:46:54.769 [INFO]: Checking Korean compliance for product: Test Sesame Product
+2026-06-25 13:46:54.822 [INFO]: Checking Korean compliance for product: Product 1
+2026-06-25 13:46:54.838 [INFO]: Checking Korean compliance for product: Product 2
+2026-06-25 13:46:54.189 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:54.189 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:54.189 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:54.615 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:54.615 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:54.615 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:54.649 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:54.649 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:54.649 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:54.649 [DEBUG]: Customization Service received message on topic customization.requested: {"requestId":"CUST-456","productId":"PROD-123","companyId":"company_123","customizationType":"color","specifications":{"color":"blue","material":"cotton"},"quantity":1000,"requestedAt":"2026-06-25T10:46:54.649Z"}
+2026-06-25 13:46:54.649 [INFO]: Customization Service: Processing customization request CUST-456
+2026-06-25 13:46:54.649 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.080 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:55.080 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:55.080 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:55.080 [DEBUG]: Customization Service received message on topic design.approved: {"designId":"DESIGN-789","requestId":"CUST-456","approved":true,"approvedBy":"design-team","approvedAt":"2026-06-25T10:46:55.080Z"}
+2026-06-25 13:46:55.080 [INFO]: Customization Service: Processing design approval for CUST-456
+2026-06-25 13:46:55.080 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.328 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:55.328 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:55.328 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:55.328 [DEBUG]: Customization Service received message on topic specification.updated: {"specId":"SPEC-001","requestId":"CUST-456","specifications":{"material":"organic cotton","color":"navy blue","size":"standard","weight":"200gsm"},"updatedAt":"2026-06-25T10:46:55.328Z"}
+2026-06-25 13:46:55.328 [INFO]: Customization Service: Processing specification update for CUST-456
+2026-06-25 13:46:55.328 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.490 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:55.490 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:55.490 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:55.490 [DEBUG]: Customization Service received message on topic material.selected: {"materialId":"MAT-123","requestId":"CUST-456","materialType":"organic cotton","supplierId":"SUP-789","quantity":1000,"unitPrice":5.5,"selectedAt":"2026-06-25T10:46:55.490Z"}
+2026-06-25 13:46:55.490 [INFO]: Customization Service: Processing material selection for CUST-456
+2026-06-25 13:46:55.490 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.601 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:55.601 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:55.601 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:55.601 [DEBUG]: Customization Service received message on topic pricing.updated: {"pricingId":"PRICE-456","requestId":"CUST-456","basePrice":15000,"discount":0.1,"tax":0.08,"totalPrice":14760,"currency":"USD","updatedAt":"2026-06-25T10:46:55.601Z"}
+2026-06-25 13:46:55.601 [INFO]: Customization Service: Processing pricing update for CUST-456
+2026-06-25 13:46:55.601 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.766 [INFO]: Initializing Customization Service...
+2026-06-25 13:46:55.766 [INFO]: Customization Service: Kafka producer connected
+2026-06-25 13:46:55.766 [INFO]: Customization Service: Kafka consumer connected and handlers set up
+2026-06-25 13:46:55.766 [DEBUG]: Customization Service received message on topic production.ready: {"batchId":"BATCH-789","requestId":"CUST-456","quantity":1000,"producedQuantity":980,"productionDate":"2026-06-25T10:46:55.766Z","estimatedDelivery":"2026-06-26T10:46:55.766Z","status":"completed"}
+2026-06-25 13:46:55.766 [INFO]: Customization Service: Processing production ready for CUST-456
+2026-06-25 13:46:55.766 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 13:46:55.720 [INFO]: Initializing Document Processing Pipeline...
+2026-06-25 13:46:55.720 [INFO]: Document Processing Pipeline: Kafka producer connected
+2026-06-25 13:46:55.720 [INFO]: Document Processing Pipeline started successfully
+2026-06-25 13:46:55.843 [INFO]: Initializing Document Processing Pipeline...
+2026-06-25 13:46:55.843 [INFO]: Document Processing Pipeline: Kafka producer connected
+2026-06-25 13:46:55.843 [INFO]: Document Processing Pipeline started successfully
+2026-06-25 13:46:56.404 [INFO]: Initializing Workflow Automation Service...
+2026-06-25 13:46:56.404 [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-25 13:46:56.404 [INFO]: Workflow Automation Service started successfully
+2026-06-25 13:46:56.497 [INFO]: Initializing Workflow Automation Service...
+2026-06-25 13:46:56.497 [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-25 13:46:56.497 [INFO]: Workflow Automation Service started successfully
+2026-06-25 13:46:56.538 [INFO]: Initializing Workflow Automation Service...
+2026-06-25 13:46:56.538 [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-25 13:46:56.538 [INFO]: Workflow Automation Service started successfully
+2026-06-25 13:46:56.538 [DEBUG]: Workflow Automation: Processing order.created {"orderId":"ORDER-456","productId":"PROD-123","quantity":2,"totalAmount":59.98}
+2026-06-25 13:46:56.538 [INFO]: Workflow Automation: Processing order ORDER-456
+2026-06-25 13:46:56.538 [INFO]: Workflow Automation: Executing step credit-check for workflow order-fulfillment
+2026-06-25 13:46:56.645 [INFO]: Initializing Workflow Automation Service...
+2026-06-25 13:46:56.645 [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-25 13:46:56.645 [INFO]: Workflow Automation Service started successfully
+2026-06-25 13:46:56.645 [DEBUG]: Workflow Automation: Processing inventory.changed {"productId":"PROD-123","quantity":5,"reorderPoint":10,"location":"Warehouse A"}
+2026-06-25 13:46:56.645 [INFO]: Workflow Automation: Processing inventory change for PROD-123
+2026-06-25 13:46:56.645 [INFO]: Workflow Automation: Executing step check-supplier-availability for workflow inventory-replenishment
+2026-06-25 13:46:56.701 [INFO]: Initializing Workflow Automation Service...
+2026-06-25 13:46:56.701 [INFO]: Workflow Automation Service: Kafka connections established
+2026-06-25 13:46:56.701 [INFO]: Workflow Automation Service started successfully
+2026-06-25 13:46:56.701 [DEBUG]: Workflow Automation: Processing supplier.risk.updated {"supplierId":"SUP-789","riskScore":0.3,"performanceRating":4.5}
+2026-06-25 13:46:56.701 [INFO]: Workflow Automation: Processing supplier risk update for SUP-789
+2026-06-25 13:46:56.701 [INFO]: Workflow Automation: Executing step assess-risk for workflow supplier-evaluation
+2026-06-25 13:46:56.637 [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-25 13:46:56.805 [INFO]: Initializing HubSpot CRM Adapter...
+2026-06-25 13:46:57.148 [INFO]: Initializing SAP Product Adapter...
+2026-06-25 13:46:56.969 [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-25 13:46:57.148 [INFO]: SAP Product Adapter: Kafka producer connected
+2026-06-25 13:46:57.148 [INFO]: SAP Product Adapter started successfully
+2026-06-25 13:46:57.197 [INFO]: Initializing SAP Product Adapter...
+2026-06-25 13:46:57.197 [INFO]: SAP Product Adapter: Kafka producer connected
+2026-06-25 13:46:57.197 [INFO]: SAP Product Adapter started successfully
+2026-06-25 13:46:56.969 [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-25 13:46:56.969 [INFO]: Flexport Logistics Adapter started successfully
+2026-06-25 13:46:57.082 [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-25 13:46:57.082 [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-25 13:46:57.082 [INFO]: Flexport Logistics Adapter started successfully
+2026-06-25 13:46:57.182 [INFO]: Initializing Flexport Logistics Adapter...
+2026-06-25 13:46:57.182 [INFO]: Flexport Logistics Adapter: Kafka producer connected
+2026-06-25 13:46:57.182 [INFO]: Flexport Logistics Adapter started successfully
+2026-06-25 13:46:56.637 [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-25 13:46:56.637 [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-25 13:46:56.750 [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-25 13:46:56.750 [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-25 13:46:56.750 [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-25 13:46:56.790 [INFO]: Initializing ShipBob Logistics Adapter...
+2026-06-25 13:46:56.790 [INFO]: ShipBob Logistics Adapter: Kafka producer connected
+2026-06-25 13:46:56.790 [INFO]: ShipBob Logistics Adapter started successfully
+2026-06-25 13:46:57.220 [INFO]: Initializing Oracle Product Adapter...
+2026-06-25 13:46:57.220 [INFO]: Oracle Product Adapter: Kafka producer connected
+2026-06-25 13:46:57.220 [INFO]: Oracle Product Adapter started successfully
+2026-06-25 13:46:57.267 [INFO]: Initializing Oracle Product Adapter...
+2026-06-25 13:46:57.267 [INFO]: Oracle Product Adapter: Kafka producer connected
+2026-06-25 13:46:57.267 [INFO]: Oracle Product Adapter started successfully
+2026-06-25 13:46:56.805 [INFO]: HubSpot CRM Adapter: Kafka producer connected
+2026-06-25 13:46:56.805 [INFO]: HubSpot CRM Adapter started successfully
+2026-06-25 13:46:57.010 [INFO]: Initializing HubSpot CRM Adapter...
+2026-06-25 13:46:57.010 [INFO]: HubSpot CRM Adapter: Kafka producer connected
+2026-06-25 13:46:57.010 [INFO]: HubSpot CRM Adapter started successfully
+2026-06-25 13:46:57.912 [INFO]: Initializing REST API Adapter...
+2026-06-25 13:46:57.912 [INFO]: REST API Adapter: Kafka producer connected
+2026-06-25 13:46:57.912 [INFO]: REST API Adapter started successfully
+2026-06-25 13:46:58.019 [INFO]: Initializing REST API Adapter...
+2026-06-25 13:46:58.019 [INFO]: REST API Adapter: Kafka producer connected
+2026-06-25 13:46:58.019 [INFO]: REST API Adapter started successfully
+2026-06-25 13:46:58.067 [INFO]: Initializing REST API Adapter...
+2026-06-25 13:46:58.067 [INFO]: REST API Adapter: Kafka producer connected
+2026-06-25 13:46:58.067 [INFO]: REST API Adapter started successfully
+2026-06-25 13:46:58.399 [INFO]: Initializing Salesforce CRM Adapter...
+2026-06-25 13:46:58.399 [INFO]: Salesforce CRM Adapter: Kafka producer connected
+2026-06-25 13:46:58.399 [INFO]: Salesforce CRM Adapter started successfully
+2026-06-25 13:46:58.432 [INFO]: Initializing Salesforce CRM Adapter...
+2026-06-25 13:46:58.432 [INFO]: Salesforce CRM Adapter: Kafka producer connected
+2026-06-25 13:46:58.432 [INFO]: Salesforce CRM Adapter started successfully

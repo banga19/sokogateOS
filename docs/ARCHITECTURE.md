@@ -51,7 +51,7 @@ SokogateOS is an **AI Operating System** that makes companies legible to AI and 
 | **Payments**     | M-Pesa Daraja API, KRW payment adapter   |
 | **WhatsApp**     | WATI.io API (Business), Twilio           |
 | **Scraping**     | Apify                                    |
-| **Testing**      | Jest (476+ tests, 36 suites)             |
+| **Testing**      | Jest (500+ tests, 45 suites)             |
 
 ---
 
@@ -147,7 +147,7 @@ sokogateOS/
 │   │   ├── main.jsx, App.jsx, index.css
 │   │   └── pages/              # 10+ dashboard & page components
 │   └── ... (Vite config, Tailwind, PostCSS)
-├── tests/                      # 36 test suites, 476+ tests
+├── tests/                      # 45 test suites, 500+ tests
 │   ├── services/               # Service-level tests
 │   ├── middleware/              # Auth, RBAC tests
 │   ├── engine/                 # Self-improving loop tests
@@ -593,8 +593,10 @@ Every user interaction ──▶ Feedback stored ──▶ Self-Improving Loop
 | Admin service         | `tests/services/adminService.test.js`    | 9     |
 | Team service          | `tests/services/teamService.test.js`     | 4     |
 | RBAC middleware       | `tests/middleware/rbac.test.js`          | 11    |
+| ServiceRunner utils   | `tests/utils/serviceRunner.test.js`      | 31    |
 | Model tests           | `tests/*.model.test.js`                  | 60+   |
 | Route tests           | `tests/*.routes.test.js`                 | 40+   |
 | Service tests         | `tests/services/*.test.js`               | 80+   |
+| Ingestion adapter tests| `tests/ingestion/**/*.test.js`          | 27    |
 | Hermes/comm/base      | `tests/*.test.js`                        | 50+   |
-| **Total**             | **36 suites**                            | **476+**|
+| **Total**             | **45 suites**                            | **500+**|

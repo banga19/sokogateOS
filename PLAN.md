@@ -172,6 +172,24 @@ SokogateOS is a fully built autonomous AI agent engine with:
   - `tests/middleware/auth.test.js` — 17 tests (JWT verify, optional auth, RBAC, scoping)
   - Fixed: `tests/team.model.test.js`, `jest.config.js` (exclude `.worktrees/`)
   - **Result: 36 suites, 476 tests — all passing**
+- [x] Migrate ingestion adapters to ServiceRunner ✅
+  - Converted **25 `setInterval` calls → `serviceRunner.start()`** across 10 files:
+    - 9 ingestion adapters: `sapProductAdapter`, `shipbobLogisticsAdapter`, `supplierRiskAdapter`, `hubspotCrmAdapter`, `oracleProductAdapter`, `restApiAdapter`, `krwPaymentAdapter`, `flexportLogisticsAdapter`, `salesforceCrmAdapter`
+    - 1 document processor: `documentProcessingPipeline`
+  - Each adapter now gets backpressure, error isolation, graceful shutdown, and metrics tracking
+  - Updated 8 test files to mock `ServiceRunner` for synchronous handler execution
+  - **Result: All 27 ingestion adapter tests — passing**
+- [x] Add unit tests for ServiceRunner utility ✅
+  - `tests/utils/serviceRunner.test.js` — **31 tests** covering:
+    - `start()` — registration, handler invocation, duplicate prevention, `immediate` option
+    - `stop()` — cleanup, prevents future calls, missing service warning
+    - `dispose()` — stops all services, safe for empty/multiple calls
+    - `getStatus()` — empty state, run/error counts, duration tracking
+    - Backpressure — skips overlapping ticks, resumes after handler completes
+    - Error isolation — silent mode, interval survives errors, `running` flag reset
+    - Metrics — run count, lastRunAt, lastDurationMs across ticks
+    - Singleton & class — independent `new ServiceRunner()` instances
+  - **Result: 45 test suites, 500+ tests — all passing**
 - [ ] End-to-end testing of agent workflows
 - [ ] Performance optimization and resource tuning
 - [x] Security review and hardening ✅
@@ -196,7 +214,7 @@ SokogateOS is a fully built autonomous AI agent engine with:
     - Directory structure, agent hierarchy (ChatAgent→Specialized→Hermes→SIL)
     - Service layer (20+ services, 5 categories), API route map (18 groups)
     - Security stack, data flow diagrams, external integrations, frontend arch
-    - Testing architecture (36 suites, 476+ tests)
+    - Testing architecture (45 suites, 500+ tests)
   - `docs/DEPLOYMENT.md` — Production deployment guide:
     - Docker Compose stack, multi-stage Dockerfile, CI/CD pipeline (6 jobs)
     - Monitoring (Prometheus/Grafana/Sentry/PostHog), env vars, production checklist
