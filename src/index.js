@@ -273,6 +273,8 @@ const startServer = async () => {
       const apiRoutes = require('./api/v1/routes');
 
       app.use('/api/auth', authRoutes);
+      const authProviderRoutes = require('./routes/authProviders');
+      app.use('/api/auth/providers', authProviderRoutes);
       app.use('/api/v1', apiRoutes);
 
       // Phase 1 Routes: WhatsApp Commerce Co-pilot & Supplier Trust Network

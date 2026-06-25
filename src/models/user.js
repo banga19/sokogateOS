@@ -20,7 +20,7 @@ const userSchema = new Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: function() { return this.authProvider === 'local'; },
     minlength: 8,
     select: false // Never return password by default
   },
@@ -163,10 +163,29 @@ const userSchema = new Schema({
     version: { type: String, default: '1.0' }
   },
 
+  createdAt: { type: Date, default: Date.now },
+
   // Metadata
   createdBy: {
     type: Schema.Types.ObjectId,
     ref: 'User'
+  },
+
+  // OAuth provider links
+  authProvider: {
+    type: String,
+    enum: ['local', 'firebase', 'clerk'],
+    default: 'local'
+  },
+  firebaseUid: {
+    type: String,
+    index: true,
+    sparse: true
+  },
+  clerkUserId: {
+    type: String,
+    index: true,
+    sparse: true
   }
 }, {
   timestamps: true,
@@ -178,10 +197,12 @@ const userSchema = new Schema({
 userSchema.index({ companyId: 1, role: 1 });
 userSchema.index({ email: 1 });
 userSchema.index({ isActive: 1 });
+userSchema.index({ firebaseUid: 1 }, { sparse: true });
+userSchema.index({ clerkUserId: 1 }, { sparse: true });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
 
   try {
     const salt = await bcrypt.genSalt(12);

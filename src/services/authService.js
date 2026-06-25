@@ -513,5 +513,6 @@ module.exports = {
   getProfile,
   updateProfile,
   verifyAccessToken,
-  generateTokens
+  generateTokens,
+  sanitizeUser
 };
