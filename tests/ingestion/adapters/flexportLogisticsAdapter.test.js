@@ -17,17 +17,19 @@ jest.mock('../../../src/config/kafka', () => {
   };
 });
 
+// Mock serviceRunner to call the handler synchronously
+jest.mock('../../../src/utils/serviceRunner', () => ({
+  start: jest.fn((name, handler) => handler()),
+  dispose: jest.fn(),
+}));
+
 describe('Flexport Logistics Adapter', () => {
   beforeEach(() => {
-    // Mock timers
-    jest.useFakeTimers();
-
     // Clear all instances and calls to constructor and all methods:
     kafkaMock.initKafkaProducer.mockClear();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -47,11 +49,8 @@ describe('Flexport Logistics Adapter', () => {
       close: jest.fn()
     });
 
-    // Act
+    // Act — serviceRunner.start calls handler synchronously
     await flexportAdapter.startFlexportLogisticsAdapter();
-
-    // Fast-forward timers to trigger setInterval for inventory changes (20 seconds)
-    jest.advanceTimersByTime(20000);
 
     // Assert
     expect(sendMock).toHaveBeenCalled();
@@ -65,19 +64,14 @@ describe('Flexport Logistics Adapter', () => {
       close: jest.fn()
     });
 
-    // Act
+    // Act — serviceRunner.start calls handler synchronously
     await flexportAdapter.startFlexportLogisticsAdapter();
-
-    // Fast-forward timers to trigger setInterval for order created (25 seconds)
-    jest.advanceTimersByTime(25000);
 
     // Assert
     expect(sendMock).toHaveBeenCalled();
   });
 
   test('should generate valid inventory change structure', () => {
-    // We need to access the private function - alternative is to test through behavior
-    // For now, we'll verify the adapter starts correctly
     expect(typeof flexportAdapter.startFlexportLogisticsAdapter).toBe('function');
   });
 });

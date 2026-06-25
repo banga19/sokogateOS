@@ -3,6 +3,7 @@
 
 const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
+const serviceRunner = require('../../utils/serviceRunner');
 
 let producer = null;
 
@@ -68,7 +69,7 @@ async function startDocumentProcessingPipeline() {
     logger.info('Document Processing Pipeline: Kafka producer connected');
 
     // Simulate document processing every 15 seconds
-    setInterval(async () => {
+    serviceRunner.start('document-processing', async () => {
       try {
         // Generate mock document for processing
         const mockDocument = {
@@ -99,7 +100,7 @@ async function startDocumentProcessingPipeline() {
       } catch (processError) {
         logger.error('Document Processing Pipeline: Error processing document:', processError);
       }
-    }, 15000); // 15 seconds
+    }, 15000);
 
     logger.info('Document Processing Pipeline started successfully');
   } catch (error) {
@@ -110,17 +111,12 @@ async function startDocumentProcessingPipeline() {
 
 // Graceful shutdown
 function shutdown() {
+  serviceRunner.dispose();
   if (producer) {
     producer.close(() => {
       logger.info('Document Processing Pipeline: Kafka producer closed');
-      process.exit(0);
     });
-  } else {
-    process.exit(0);
   }
 }
-
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
 
 module.exports = { startDocumentProcessingPipeline };

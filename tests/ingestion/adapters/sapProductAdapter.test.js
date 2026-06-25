@@ -17,15 +17,16 @@ jest.mock('../../../src/config/kafka', () => {
   };
 });
 
+// Mock serviceRunner to call the handler synchronously (no microtask delay)
+jest.mock('../../../src/utils/serviceRunner', () => ({
+  start: jest.fn((name, handler) => handler()),
+  dispose: jest.fn(),
+}));
+
 describe('SAP Product Adapter', () => {
   let consoleLogSpy;
-  let setIntervalSpy;
-  let clearIntervalSpy;
 
   beforeEach(() => {
-    // Mock timers
-    jest.useFakeTimers();
-
     // Spy on console methods
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
@@ -34,7 +35,6 @@ describe('SAP Product Adapter', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -54,19 +54,14 @@ describe('SAP Product Adapter', () => {
       close: jest.fn()
     });
 
-    // Act
+    // Act — serviceRunner.start calls handler synchronously, so sendMock fires immediately
     await sapAdapter.startSapProductAdapter();
-
-    // Fast-forward timers to trigger setInterval
-    jest.advanceTimersByTime(10000);
 
     // Assert
     expect(sendMock).toHaveBeenCalled();
   });
 
   test('should generate valid product update structure', () => {
-    // We need to access the private function - alternative is to test through behavior
-    // For now, we'll verify the adapter starts correctly
     expect(typeof sapAdapter.startSapProductAdapter).toBe('function');
   });
 });

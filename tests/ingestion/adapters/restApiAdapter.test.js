@@ -17,17 +17,19 @@ jest.mock('../../../src/config/kafka', () => {
   };
 });
 
+// Mock serviceRunner to call the handler synchronously
+jest.mock('../../../src/utils/serviceRunner', () => ({
+  start: jest.fn((name, handler) => handler()),
+  dispose: jest.fn(),
+}));
+
 describe('REST API Adapter', () => {
   beforeEach(() => {
-    // Mock timers
-    jest.useFakeTimers();
-
     // Clear all instances and calls to constructor and all methods:
     kafkaMock.initKafkaProducer.mockClear();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -47,11 +49,8 @@ describe('REST API Adapter', () => {
       close: jest.fn()
     });
 
-    // Act
+    // Act — serviceRunner.start calls handler synchronously
     await restApiAdapter.startRestApiAdapter();
-
-    // Fast-forward timers to trigger setInterval for product catalog (30 seconds)
-    jest.advanceTimersByTime(30000);
 
     // Assert
     expect(sendMock).toHaveBeenCalled();
@@ -65,19 +64,14 @@ describe('REST API Adapter', () => {
       close: jest.fn()
     });
 
-    // Act
+    // Act — serviceRunner.start calls handler synchronously
     await restApiAdapter.startRestApiAdapter();
-
-    // Fast-forward timers to trigger setInterval for customer profile (45 seconds)
-    jest.advanceTimersByTime(45000);
 
     // Assert
     expect(sendMock).toHaveBeenCalled();
   });
 
   test('should generate valid product catalog structure', () => {
-    // We need to access the private function - alternative is to test through behavior
-    // For now, we'll verify the adapter starts correctly
     expect(typeof restApiAdapter.startRestApiAdapter).toBe('function');
   });
 });

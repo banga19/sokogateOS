@@ -3,6 +3,7 @@
 
 const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
+const serviceRunner = require('../../utils/serviceRunner');
 
 let producer = null;
 let kafkaConnected = false;
@@ -33,7 +34,7 @@ async function startSapProductAdapter() {
     logger.info('SAP Product Adapter: Kafka producer connected');
 
     // Send product updates every 10 seconds
-    setInterval(async () => {
+    serviceRunner.start('sap-product-updates', async () => {
       try {
         // Only try to send if Kafka is connected
         if (kafkaConnected && producer) {
@@ -45,47 +46,43 @@ async function startSapProductAdapter() {
           ], (err, data) => {
             if (err) {
               logger.error('SAP Product Adapter: Failed to send message:', err);
-              // Optionally, we could mark kafka as disconnected here
-              // kafkaConnected = false;
             } else {
               logger.debug(`SAP Product Adapter: Sent product update:`, productUpdate.productId);
             }
           });
         } else {
-          // Log to console or file instead of sending to Kafka
           const productUpdate = generateMockProductUpdate();
           logger.debug(`SAP Product Adapter: Would send product update (Kafka unavailable):`, productUpdate.productId);
         }
       } catch (sendError) {
         logger.error('SAP Product Adapter: Error in send interval:', sendError);
       }
-    }, 10000); // 10 seconds
+    }, 10000);
 
     logger.info('SAP Product Adapter started successfully');
   } catch (error) {
     logger.error('SAP Product Adapter: Failed to start Kakfa:', error);
     logger.info('SAP Product Adapter: Running in degraded mode (without Kafka)');
     // Start the interval anyway to simulate working
-    setInterval(async () => {
+    serviceRunner.start('sap-product-generate', async () => {
       try {
         const productUpdate = generateMockProductUpdate();
         logger.debug(`SAP Product Adapter: Generated product update (Kafka unavailable):`, productUpdate.productId);
       } catch (sendError) {
         logger.error('SAP Product Adapter: Error in generate interval:', sendError);
       }
-    }, 10000); // 10 seconds
+    }, 10000);
   }
 }
 
 // Graceful shutdown
 function shutdown() {
+  serviceRunner.dispose();
   if (producer) {
     producer.close(() => {
       logger.info('SAP Product Adapter: Kafka producer closed');
-      // Do not exit the process, just cleanup
     });
   }
-  // Do not exit the process
 }
 
 // Remove the process exit on SIGINT/SIGTERM to avoid exiting the whole application

@@ -3,6 +3,7 @@
 
 const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
+const serviceRunner = require('../../utils/serviceRunner');
 
 let producer = null;
 let kafkaConnected = false;
@@ -32,9 +33,8 @@ async function startSalesforceCrmAdapter() {
     logger.info('Salesforce CRM Adapter: Kafka producer connected');
 
     // Send customer feedback every 15 seconds
-    setInterval(async () => {
+    serviceRunner.start('salesforce-feedback-updates', async () => {
       try {
-        // Only try to send if Kafka is connected
         if (kafkaConnected && producer) {
           const feedback = generateMockCustomerFeedback();
           const payload = JSON.stringify(feedback);
@@ -44,47 +44,43 @@ async function startSalesforceCrmAdapter() {
           ], (err, data) => {
             if (err) {
               logger.error('Salesforce CRM Adapter: Failed to send message:', err);
-              // Optionally, we could mark kafka as disconnected here
-              // kafkaConnected = false;
             } else {
               logger.debug(`Salesforce CRM Adapter: Sent feedback:`, feedback.feedbackId);
             }
           });
         } else {
-          // Log to console or file instead of sending to Kafka
           const feedback = generateMockCustomerFeedback();
           logger.debug(`Salesforce CRM Adapter: Would send feedback (Kafka unavailable):`, feedback.feedbackId);
         }
       } catch (sendError) {
         logger.error('Salesforce CRM Adapter: Error in send interval:', sendError);
       }
-    }, 15000); // 15 seconds
+    }, 15000);
 
     logger.info('Salesforce CRM Adapter started successfully');
   } catch (error) {
     logger.error('Salesforce CRM Adapter: Failed to start Kakfa:', error);
     logger.info('Salesforce CRM Adapter: Running in degraded mode (without Kafka)');
     // Start the interval anyway to simulate working
-    setInterval(async () => {
+    serviceRunner.start('salesforce-feedback-generate', async () => {
       try {
         const feedback = generateMockCustomerFeedback();
         logger.debug(`Salesforce CRM Adapter: Generated feedback (Kafka unavailable):`, feedback.feedbackId);
       } catch (sendError) {
         logger.error('Salesforce CRM Adapter: Error in generate interval:', sendError);
       }
-    }, 15000); // 15 seconds
+    }, 15000);
   }
 }
 
 // Graceful shutdown
 function shutdown() {
+  serviceRunner.dispose();
   if (producer) {
     producer.close(() => {
       logger.info('Salesforce CRM Adapter: Kafka producer closed');
-      // Do not exit the process, just cleanup
     });
   }
-  // Do not exit the process
 }
 
 // Remove the process exit on SIGINT/SIGTERM to avoid exiting the whole application

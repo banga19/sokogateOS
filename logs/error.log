@@ -469,3 +469,391 @@ TypeError: Customization.findOne is not a function
     at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
     at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:04.521 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:04.883 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:04.946 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:05.052 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:05.132 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:05.194 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:32:06.709 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:03.996 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:04.659 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:04.915 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:04.966 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:05.040 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:05.101 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:33:05.148 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:08.138 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:09.798 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:10.193 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:10.221 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:10.273 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:10.354 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 17:59:10.451 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:09:06.519 [ERROR]: KRW Payment Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/krwPaymentAdapter.test.js:84:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 18:09:06.639 [ERROR]: Supplier Risk Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/supplierRiskAdapter.test.js:75:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 18:15:35.390 [ERROR]: Supplier Risk Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/supplierRiskAdapter.test.js:75:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 18:15:35.598 [ERROR]: KRW Payment Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/krwPaymentAdapter.test.js:84:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 18:15:39.020 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:15:39.519 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:15:39.792 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:15:39.851 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:15:39.894 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:15:39.977 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 18:15:40.024 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:28:58.786 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:00.612 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:00.858 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:00.905 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:00.956 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:01.008 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:01.088 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 20:29:02.235 [ERROR]: Supplier Risk Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/supplierRiskAdapter.test.js:75:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 20:29:02.520 [ERROR]: KRW Payment Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/krwPaymentAdapter.test.js:84:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 23:20:29.600 [ERROR]: Sourcing Service: Error handling product query received: Sourcing is not a constructor
+TypeError: Sourcing is not a constructor
+    at handleProductQueryReceived (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:424:29)
+    at Object.handleProductQueryReceived [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/sourcingService.js:165:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/sourcingService.test.js:118:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:33.872 [ERROR]: KRW Payment Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/krwPaymentAdapter.test.js:84:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)
+2026-06-25 23:20:47.812 [ERROR]: Customization Service: Error handling customization requested: Customization is not a constructor
+TypeError: Customization is not a constructor
+    at handleCustomizationRequested (/home/apop/DEV/sokogateOS/src/services/customizationService.js:251:27)
+    at Object.handleCustomizationRequested [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:66:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:125:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:47.959 [ERROR]: Customization Service: Error handling design approved: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:327:47)
+    at Object.handleDesignApproved [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:69:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:168:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:48.153 [ERROR]: Customization Service: Error handling specification updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:354:47)
+    at Object.handleSpecificationUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:72:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:215:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:48.215 [ERROR]: Customization Service: Error handling material selected: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:376:47)
+    at Object.handleMaterialSelected [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:75:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:260:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:48.251 [ERROR]: Customization Service: Error handling pricing updated: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:408:47)
+    at Object.handlePricingUpdated [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:78:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:306:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:48.286 [ERROR]: Customization Service: Error handling production ready: Customization.findOne is not a function
+TypeError: Customization.findOne is not a function
+    at findOne (/home/apop/DEV/sokogateOS/src/services/customizationService.js:442:47)
+    at Object.handleProductionReady [as messageCallback] (/home/apop/DEV/sokogateOS/src/services/customizationService.js:81:19)
+    at Object.messageCallback (/home/apop/DEV/sokogateOS/tests/services/customizationService.test.js:351:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-06-25 23:20:48.367 [ERROR]: Supplier Risk Adapter: Failed to start Kakfa: Kafka unavailable
+Error: Kafka unavailable
+    at Object.<anonymous> (/home/apop/DEV/sokogateOS/tests/ingestion/adapters/supplierRiskAdapter.test.js:75:55)
+    at Promise.then.completed (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _runTest (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/apop/DEV/sokogateOS/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/apop/DEV/sokogateOS/node_modules/jest-runner/build/testWorker.js:106:12)

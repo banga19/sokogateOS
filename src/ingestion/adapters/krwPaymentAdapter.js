@@ -3,6 +3,7 @@
 
 const { initKafkaProducer } = require('../../config/kafka');
 const logger = require('../../utils/logger');
+const serviceRunner = require('../../utils/serviceRunner');
 
 let producer = null;
 let kafkaConnected = false;
@@ -47,9 +48,8 @@ async function startKRWPaymentAdapter() {
     logger.info('KRW Payment Adapter: Kafka producer connected');
 
     // Send KRW payment events every 15 seconds
-    setInterval(async () => {
+    serviceRunner.start('krw-payment-updates', async () => {
       try {
-        // Only try to send if Kafka is connected
         if (kafkaConnected && producer) {
           const paymentEvent = generateMockKRWPayment();
           const payload = JSON.stringify(paymentEvent);
@@ -59,47 +59,43 @@ async function startKRWPaymentAdapter() {
           ], (err, data) => {
             if (err) {
               logger.error('KRW Payment Adapter: Failed to send payment event:', err);
-              // Optionally, we could mark kafka as disconnected here
-              // kafkaConnected = false;
             } else {
               logger.debug(`KRW Payment Adapter: Sent KRW payment event:`, paymentEvent.paymentId);
             }
           });
         } else {
-          // Log to console or file instead of sending to Kafka
           const paymentEvent = generateMockKRWPayment();
           logger.debug(`KRW Payment Adapter: Would send KRW payment event (Kafka unavailable):`, paymentEvent.paymentId);
         }
       } catch (sendError) {
         logger.error('KRW Payment Adapter: Error in send interval:', sendError);
       }
-    }, 15000); // 15 seconds
+    }, 15000);
 
     logger.info('KRW Payment Adapter started successfully');
   } catch (error) {
     logger.error('KRW Payment Adapter: Failed to start Kakfa:', error);
     logger.info('KRW Payment Adapter: Running in degraded mode (without Kafka)');
     // Start the interval anyway to simulate working
-    setInterval(async () => {
+    serviceRunner.start('krw-payment-generate', async () => {
       try {
         const paymentEvent = generateMockKRWPayment();
         logger.debug(`KRW Payment Adapter: Generated KRW payment event (Kafka unavailable):`, paymentEvent.paymentId);
       } catch (sendError) {
         logger.error('KRW Payment Adapter: Error in generate interval:', sendError);
       }
-    }, 15000); // 15 seconds
+    }, 15000);
   }
 }
 
 // Graceful shutdown
 function shutdown() {
+  serviceRunner.dispose();
   if (producer) {
     producer.close(() => {
       logger.info('KRW Payment Adapter: Kafka producer closed');
-      // Do not exit the process, just cleanup
     });
   }
-  // Do not exit the process
 }
 
 // Remove the process exit on SIGINT/SIGTERM to avoid exiting the whole application
