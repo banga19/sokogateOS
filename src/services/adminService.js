@@ -3,7 +3,19 @@ const Role = require('../models/role');
 const logger = require('../utils/logger');
 
 function hasPrototypeKey(obj) {
-  return obj && typeof obj === 'object' && ['__proto__', 'constructor', 'prototype'].some((k) => Object.prototype.hasOwnProperty.call(obj, k));
+  if (!obj || typeof obj !== 'object') return false;
+  // Check both own keys AND nested prototype keys recursively
+  // This prevents bypass attempts like {"__proto__": {"isAdmin": true}}
+  // where __proto__ is a direct key, not on the prototype chain
+  const blockedKeys = ['__proto__', 'constructor', 'prototype'];
+  for (const key of Object.keys(obj)) {
+    if (blockedKeys.includes(key)) return true;
+    // Deep check nested objects
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      if (hasPrototypeKey(obj[key])) return true;
+    }
+  }
+  return false;
 }
 
 const SYSTEM_ROLES = [

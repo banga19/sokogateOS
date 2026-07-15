@@ -15,6 +15,7 @@ const logger = require('../utils/logger');
 const apifyService = require('../services/apifyService');
 const composioService = require('../services/composioService');
 const toolRegistry = require('../services/toolRegistry');
+const { requireApiKey } = require('../middleware/apiKeyAuth');
 
 // ──────────────────────────────────────────────
 //  Check definitions
@@ -242,9 +243,11 @@ const CHECKS = [
 // ──────────────────────────────────────────────
 
 /**
- * GET /health — Config validation only (no live API calls)
+ * GET /health — Basic health check (public)
+ * Returns aggregate status only. No individual check details.
+ * When called with a valid x-api-key, returns per-check status too.
  */
-router.get('/', (_req, res) => {
+router.get('/', requireApiKey({ required: false }), (req, res) => {
   const checks = runChecks(false);
   const summary = summarize(checks);
 
@@ -253,14 +256,18 @@ router.get('/', (_req, res) => {
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || require('../../package.json').version,
     summary,
-    checks,
+    // Only return per-check details when API key is provided (authenticated request)
+    ...(req.authenticatedByApiKey ? { checks } : {}),
   });
 });
 
 /**
- * GET /health/live — Config + live API connectivity checks (more thorough)
+ * GET /health/live — Config + live API connectivity checks (API key required)
+ * Protected by API key because it makes live outbound API calls and reveals
+ * detailed configuration status of all integrated services (CWE-200: Exposure
+ * of Sensitive Information).
  */
-router.get('/live', async (_req, res) => {
+router.get('/live', requireApiKey({ required: true, passthrough: true }), async (req, res) => {
   const checks = await runLiveChecks();
   const summary = summarize(checks);
 
@@ -269,14 +276,19 @@ router.get('/live', async (_req, res) => {
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || require('../../package.json').version,
     summary,
-    checks,
+    checks: req.authenticatedByApiKey ? checks : undefined,
   });
 });
 
 /**
- * GET /health/checks — List all available checks
+ * GET /health/checks — List all available checks (API key required)
+ * Protected by API key because it reveals which env vars are used by each
+ * check, aiding reconnaissance (CWE-200).
+ * Uses required=true (no passthrough) — if EXTERNAL_API_KEY is configured,
+ * it must be provided. If not configured, returns 500 in production or
+ * allows in dev with a warning.
  */
-router.get('/checks', (_req, res) => {
+router.get('/checks', requireApiKey({ required: true }), (req, res) => {
   res.json({
     total: CHECKS.length,
     checks: CHECKS.map((c) => ({

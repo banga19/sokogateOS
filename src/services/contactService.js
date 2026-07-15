@@ -15,8 +15,8 @@ class ContactService {
     return c;
   }
 
-  async findById(contactId) {
-    const c = await Contact.findOne({ _id: contactId, isActive: true });
+  async findById(contactId, companyId) {
+    const c = await Contact.findOne({ _id: contactId, companyId, isActive: true });
     if (!c) throw new Error('Contact not found');
     return c;
   }
@@ -42,8 +42,8 @@ class ContactService {
     return c;
   }
 
-  async remove(contactId) {
-    const c = await Contact.findOneAndUpdate({ _id: contactId, isActive: true }, { isActive: false }, { new: true });
+  async remove(contactId, companyId) {
+    const c = await Contact.findOneAndUpdate({ _id: contactId, companyId, isActive: true }, { isActive: false }, { new: true });
     if (!c) throw new Error('Contact not found');
     logger.info(`Contact deleted: ${c._id}`);
     return { deleted: true };

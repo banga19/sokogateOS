@@ -46,14 +46,11 @@ async function verifyClerkApiToken(token) {
 // Sign in with Clerk token — find or create local user
 async function signInWithClerk(token) {
   try {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Clerk auth is not available in production. Use Firebase.');
-    }
-
     const verified = await verifyClerkApiToken(token);
-    const { sub, email_addresses, first_name, last_name, primary_email_address_id, phone_numbers } = verified;
+    const { sub, email_addresses, first_name, last_name, primary_email_address_id, phone_numbers } =
+      verified;
 
-    const email = email_addresses?.find(e => e.id === primary_email_address_id)?.email_address;
+    const email = email_addresses?.find((e) => e.id === primary_email_address_id)?.email_address;
     if (!email) {
       throw new Error('No email address found in Clerk profile');
     }
@@ -76,7 +73,7 @@ async function signInWithClerk(token) {
         role: 'procurement_manager',
         termsAccepted: false,
         clerkUserId: sub,
-        authProvider: 'clerk'
+        authProvider: 'clerk',
       });
 
       await user.save();
@@ -100,7 +97,7 @@ async function signInWithClerk(token) {
     return {
       user: sanitizeUser(user),
       tokens,
-      provider: 'clerk'
+      provider: 'clerk',
     };
   } catch (error) {
     logger.error('Clerk Auth: Sign in failed:', error);
@@ -132,5 +129,5 @@ module.exports = {
   verifyClerkToken,
   verifyClerkApiToken,
   signInWithClerk,
-  linkClerkUser
+  linkClerkUser,
 };

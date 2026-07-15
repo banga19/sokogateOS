@@ -76,7 +76,11 @@ router.get('/hs-codes', authenticate, async (req, res) => {
 // Get HS code detail
 router.get('/hs-codes/:code', authenticate, async (req, res) => {
   try {
-    const result = await getHSCodeDetail(req.params.code);
+    const code = req.params.code;
+    if (!/^\d{2,10}(\.\d{1,4})?$/.test(code)) {
+      return res.status(400).json({ success: false, error: 'Invalid HS code format' });
+    }
+    const result = await getHSCodeDetail(code);
 
     if (!result.success) {
       return res.status(404).json({ success: false, error: result.error });
@@ -263,6 +267,15 @@ router.post('/shipments/:shipmentId/documents/generate', authenticate, async (re
       });
     }
 
+    const shipment = await CustomsShipment.findOne({
+      shipmentId: req.params.shipmentId,
+      ...(req.user.role !== 'super_admin' ? { companyId: req.user.companyId } : {})
+    });
+
+    if (!shipment) {
+      return res.status(404).json({ success: false, error: 'Shipment not found' });
+    }
+
     const result = await generateDocument(req.params.shipmentId, documentType);
 
     if (!result.success) {
@@ -312,8 +325,16 @@ router.post('/shipments', authenticate, async (req, res) => {
       });
     }
 
+    const targetCompanyId = companyId || req.user.companyId;
+    if (req.user.role !== 'super_admin' && targetCompanyId.toString() !== req.user.companyId?.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
     const result = await createCustomsShipment({
-      companyId: companyId || req.user.companyId,
+      companyId: targetCompanyId,
       userId: req.user.id,
       hsCode, productDescription, productCategory, quantity, unit,
       totalWeightKg, totalVolumeM3, invoiceValue, freightCost, insuranceCost,
@@ -335,13 +356,17 @@ router.post('/shipments', authenticate, async (req, res) => {
 // Get customs shipment detail
 router.get('/shipments/:shipmentId', authenticate, async (req, res) => {
   try {
-    const result = await getCustomsShipment(req.params.shipmentId);
+    const shipment = await CustomsShipment.findOne({
+      shipmentId: req.params.shipmentId,
+      ...(req.user.role !== 'super_admin' ? { companyId: req.user.companyId } : {})
+    });
 
-    if (!result.success) {
-      return res.status(404).json({ success: false, error: result.error });
+    if (!shipment) {
+      return res.status(404).json({ success: false, error: 'Shipment not found' });
     }
 
-    res.json({ success: true, data: result.data });
+    const result = { success: true, data: shipment };
+    res.json(result);
   } catch (error) {
     logger.error('Customs Route: Get shipment error:', error.message);
     res.status(500).json({ success: false, error: error.message });
@@ -394,7 +419,10 @@ router.put('/shipments/:shipmentId/status', authenticate, async (req, res) => {
       });
     }
 
-    const shipment = await CustomsShipment.findOne({ shipmentId: req.params.shipmentId });
+    const shipment = await CustomsShipment.findOne({
+      shipmentId: req.params.shipmentId,
+      ...(req.user.role !== 'super_admin' ? { companyId: req.user.companyId } : {})
+    });
     if (!shipment) {
       return res.status(404).json({ success: false, error: 'Shipment not found' });
     }

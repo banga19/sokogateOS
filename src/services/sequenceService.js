@@ -23,9 +23,10 @@ async function update(id, companyId, body) {
   return { id, companyId, ...body };
 }
 
-async function remove(id) {
-  logger.debug('sequenceService.remove called', { id });
-  return { id, deleted: true };
+async function remove(id, companyId) {
+  logger.debug('sequenceService.remove called', { id, companyId });
+  // In full implementation: Sequence.findOneAndUpdate({ _id: id, companyId }, { isActive: false })
+  return { id, companyId, deleted: true };
 }
 
 module.exports = { list, create, findById, update, remove };

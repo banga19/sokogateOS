@@ -41,6 +41,9 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
+      - name: Validate .env.example self-consistency
+        run: node scripts/validate-env.js --self --strict
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15

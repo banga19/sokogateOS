@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
+const { validateTwilioSignature } = require('../middleware/twilioSignature');
 
 const {
   handleIncomingMessage,
@@ -21,8 +22,9 @@ const WhatsAppMessage = require('../models/whatsAppMessage');
 // ============ TWILIO WEBHOOK ============
 // Receives incoming WhatsApp messages from Twilio
 // This endpoint is called by Twilio when a customer sends a message to our WhatsApp number
+// SECURITY: Validates X-Twilio-Signature to prevent spoofed webhook requests
 
-router.post('/webhook', async (req, res) => {
+router.post('/webhook', validateTwilioSignature(), async (req, res) => {
   try {
     const {
       From,         // The sender's WhatsApp number: "whatsapp:+254XXXXXXXXX"
@@ -67,7 +69,7 @@ router.post('/webhook', async (req, res) => {
 // ============ MESSAGE STATUS CALLBACK ============
 // Called by Twilio when message delivery status changes
 
-router.post('/status', async (req, res) => {
+router.post('/status', validateTwilioSignature(), async (req, res) => {
   try {
     const {
       MessageSid,

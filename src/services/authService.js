@@ -17,12 +17,11 @@ const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRY || '7d';
 function requireSecret(name) {
   const val = process.env[name];
   if (!val) {
-    if (NODE_ENV === 'production') {
-      throw new Error(`FATAL: ${name} environment variable is required in production`);
-    }
-    // Development fallback — warn but allow startup
-    logger.warn(`${name} environment variable not set. Using dev-only fallback. DO NOT USE IN PRODUCTION.`);
-    return `dev-only-${name}-fallback-do-not-use-in-production`;
+    throw new Error(`FATAL: ${name} environment variable is required`);
+  }
+  // Validate minimum entropy — prevent weak/guessable secrets
+  if (val.length < 32) {
+    throw new Error(`FATAL: ${name} must be at least 32 characters long`);
   }
   return val;
 }
@@ -55,12 +54,18 @@ async function register(userData) {
     }
 
     // Create user
+    const SELF_SIGNUP_ALLOWED_ROLES = ['procurement_manager', 'logistics_coordinator', 'sales_team', 'executive', 'finance'];
+    const requestedRole = role || 'procurement_manager';
+    if (!SELF_SIGNUP_ALLOWED_ROLES.includes(requestedRole)) {
+      throw Object.assign(new Error('Invalid role for self-registration'), { statusCode: 400 });
+    }
+
     const user = new User({
       name,
       email,
       password, // Will be hashed by pre-save hook
       companyId,
-      role: role || 'procurement_manager',
+      role: requestedRole,
       phone,
       termsAccepted: true,
       termsAcceptedAt: new Date(),
@@ -334,10 +339,12 @@ async function requestPasswordReset(email) {
 
     logger.info(`Auth Service: Password reset requested for: ${user.email}`);
 
+    logger.info(`Auth Service: Password reset token generated for ${user.email}`);
+    // Never return the raw reset token in any environment — prevents token leak
+    // The reset link should be sent via email instead
+
     return {
-      message: 'If the email exists, a reset link has been sent.',
-      // Only return the reset token in development mode — prevents token leak in production
-      ...(process.env.NODE_ENV !== 'production' && { resetToken }),
+      message: 'If the email exists, a reset link has been sent.'
     };
   } catch (error) {
     logger.error('Auth Service: Password reset request failed:', error);

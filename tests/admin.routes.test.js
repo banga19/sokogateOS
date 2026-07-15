@@ -5,13 +5,19 @@ const request = require('supertest');
 const express = require('express');
 
 jest.mock('../src/services/adminService');
-jest.mock('../src/middleware/auth');
+jest.mock('../src/middleware/auth', () => ({
+  authenticate: jest.fn(() => (req, res, next) => next()),
+  optionalAuth: jest.fn(() => (req, res, next) => next()),
+  authorize: jest.fn(() => (req, res, next) => next()),
+  scopeToCompany: jest.fn(() => (req, res, next) => next()),
+  requirePermission: jest.fn(() => (req, res, next) => next()),
+}));
 jest.mock('../src/middleware/rbac', () => ({
   rbacAuthorize: jest.fn(() => (req, res, next) => next())
 }));
 
 const adminService = require('../src/services/adminService');
-const { authenticate } = require('../src/middleware/auth');
+const { authenticate, authorize } = require('../src/middleware/auth');
 const { rbacAuthorize } = require('../src/middleware/rbac');
 const adminRoutes = require('../src/routes/admin');
 

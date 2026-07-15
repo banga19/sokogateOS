@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireApiKey } = require('../middleware/apiKeyAuth');
 
 // ──────────────────────────────────────────────
 //  Helpers
@@ -32,15 +33,20 @@ const asyncHandler = (fn) => (req, res, next) => {
 };
 
 // ──────────────────────────────────────────────
-//  Tool Listing & Discovery (public)
+//  Tool Listing & Discovery (API key or JWT required)
 // ──────────────────────────────────────────────
+
+// Protect all public listing/discovery routes with API key authentication.
+// JWT-authenticated requests (req.user present) are allowed through automatically.
+// In dev mode without EXTERNAL_API_KEY, requests pass through with a warning.
+router.use(requireApiKey({ required: true, passthrough: true }));
 
 /**
  * @route GET /api/tools
  * @description List all available tools with optional filtering.
  * @query {string} [category] - Filter by category (sourcing, logistics, compliance, etc.)
  * @query {string} [provider] - Filter by provider (local, apify, composio)
- * @access Public
+ * @access API Key or Authenticated
  */
 router.get('/', asyncHandler(async (req, res) => {
   const registry = getToolRegistry();
@@ -68,7 +74,7 @@ router.get('/', asyncHandler(async (req, res) => {
 /**
  * @route GET /api/tools/categories
  * @description Get all tool categories with tool counts.
- * @access Public
+ * @access API Key or Authenticated
  */
 router.get('/categories', asyncHandler(async (req, res) => {
   const registry = getToolRegistry();
@@ -102,7 +108,7 @@ router.get('/categories', asyncHandler(async (req, res) => {
  * @route GET /api/tools/for-agent/:agentType
  * @description Get tools available for a specific agent type.
  * @param {string} agentType - Agent type (sourcing, logistics, compliance, etc.)
- * @access Public
+ * @access API Key or Authenticated
  */
 router.get('/for-agent/:agentType', asyncHandler(async (req, res) => {
   const registry = getToolRegistry();
@@ -129,7 +135,7 @@ router.get('/for-agent/:agentType', asyncHandler(async (req, res) => {
 /**
  * @route GET /api/tools/status
  * @description Get tool registry and Composio service status.
- * @access Public
+ * @access API Key or Authenticated
  */
 router.get('/status', asyncHandler(async (req, res) => {
   const registry = getToolRegistry();
@@ -208,7 +214,7 @@ router.delete('/connections/:connectionId', authenticate, asyncHandler(async (re
  * @description Get a specific tool definition by name. Must come after all
  * fixed-path routes to avoid conflicts with /categories, /status, /connections.
  * @param {string} toolName - Tool identifier (e.g., 'hs_classify', 'supplier_search')
- * @access Public
+ * @access API Key or Authenticated
  */
 router.get('/:toolName', asyncHandler(async (req, res) => {
   const registry = getToolRegistry();

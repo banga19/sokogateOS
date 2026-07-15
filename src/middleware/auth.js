@@ -1,13 +1,15 @@
 // Authentication & Authorization Middleware for sokogateOS
-// Provides JWT verification, role-based access control, and company scoping
+// Provides JWT verification, Clerk token verification, role-based access control, and company scoping
 
 const { verifyAccessToken } = require('../services/authService');
+const { verifyClerkApiToken } = require('../services/clerkAuthService');
 const User = require('../models/user');
 const logger = require('../utils/logger');
 
 /**
- * Middleware: Authenticate JWT token
+ * Middleware: Authenticate JWT token or Clerk token
  * Extracts and verifies the Bearer token from Authorization header
+ * Supports both custom JWT tokens and Clerk session tokens
  * Attaches decoded user to request.user
  */
 async function authenticate(req, res, next) {
@@ -21,16 +23,53 @@ async function authenticate(req, res, next) {
       });
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyAccessToken(token);
+    const token = authHeader.split(' ' '.split(' ')[1];
+
+    // First, try to verify as a custom JWT token
+    let decoded;
+    let isClerkToken = false;
+
+    try {
+      decoded = verifyAccessToken(token);
+    } catch (jwtError) {
+      // If JWT verification fails, try Clerk token verification
+      try {
+        const clerkVerified = await verifyClerkApiToken(token);
+        decoded = {
+          id: clerkVerified.sub, // Clerk user ID
+          email: clerkVerified.email_addresses?.find(e => e.id === clerkVerified.primary_email_address_id)?.email_address,
+          role: 'procurement_manager', // Default role for Clerk users - can be customized based on Clerk metadata
+          clerkUserId: clerkVerified.sub,
+          authProvider: 'clerk',
+          tokenVersion: 0, // Clerk tokens don't have versioning in our system
+          iat: Math.floor(Date.now() / 1000) // Current timestamp for compatibility
+        };
+        isClerkToken = true;
+      } catch (clerkError) {
+        // Both verifications failed
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required. Please provide a valid access token.'
+        });
+      }
+    }
 
     // Check if user still exists and is active
     const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: 'User no longer exists.'
-      });
+      // For Clerk tokens, we might need to create or link the user
+      if (isClerkToken) {
+        // This case should be handled by the Clerk sign-in endpoint
+        return res.status(401).json({
+          success: false,
+          error: 'User not found. Please sign in through Clerk authentication first.'
+        });
+      } else {
+        return res.status(401).json({
+          success: false,
+          error: 'User no longer exists.'
+        });
+      }
     }
 
     if (!user.isActive) {
@@ -40,21 +79,24 @@ async function authenticate(req, res, next) {
       });
     }
 
-    // Check if password was changed after token was issued
-    if (user.isPasswordChangedAfter(decoded.iat)) {
-      return res.status(401).json({
-        success: false,
-        error: 'Token is no longer valid. Please login again.'
-      });
-    }
+    // For JWT tokens, check additional security measures
+    if (!isClerkToken) {
+      // Check if password was changed after token was issued
+      if (user.isPasswordChangedAfter(decoded.iat)) {
+        return res.status(401).json({
+          success: false,
+          error: 'Token is no longer valid. Please login again.'
+        });
+      }
 
-    // Check token version — invalidates tokens after logout
-    const currentVersion = user.tokenVersion || 0;
-    if (decoded.tokenVersion !== undefined && decoded.tokenVersion < currentVersion) {
-      return res.status(401).json({
-        success: false,
-        error: 'Token has been revoked. Please login again.'
-      });
+      // Check token version — invalidates tokens after logout
+      const currentVersion = user.tokenVersion || 0;
+      if (decoded.tokenVersion !== undefined && decoded.tokenVersion < currentVersion) {
+        return res.status(401).json({
+          success: false,
+          error: 'Token has been revoked. Please login again.'
+        });
+      }
     }
 
     // Attach user info to request
@@ -65,7 +107,8 @@ async function authenticate(req, res, next) {
       companyId: user.companyId,
       termsAccepted: user.termsAccepted,
       termsAcceptedAt: user.termsAcceptedAt,
-      termsVersion: user.termsVersion
+      termsVersion: user.termsVersion,
+      ...(isClerkToken && { clerkUserId: decoded.clerkUserId, authProvider: 'clerk' })
     };
 
     // Redirect to terms acceptance if terms not accepted (except for auth routes and terms acceptance page itself)

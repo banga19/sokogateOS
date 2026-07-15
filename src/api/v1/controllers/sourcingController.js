@@ -112,7 +112,14 @@ async function getCompanySourcingRequests(req, res) {
     const limit = parseInt(req.query.limit) || 20;
     const status = req.query.status;
 
-    const query = { companyId };
+    if (req.user.role !== 'super_admin' && companyId !== req.user.companyId?.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
+    const query = { companyId: new (require('mongoose').Schema.Types.ObjectId)(companyId) };
     if (status) query['workflow.status'] = status;
 
     const total = await Sourcing.countDocuments(query);

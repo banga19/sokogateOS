@@ -134,6 +134,23 @@ See `.env.example` for the full list. Critical production keys:
 - **Cloudflare** — `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_ACCOUNT_ID`
 - **WATI.io** — `WATI_API_KEY` (WhatsApp Business)
 
+### 4.5 API Key Authentication (Machine-to-Machine)
+
+External services (health checks, CI/CD, monitoring) can authenticate via API key instead of JWT.
+
+| Variable | Description | Example |
+|----------|-------------|--------|
+| `EXTERNAL_API_KEY` | Single shared API key (legacy, simpler setup) | `a1b2c3...` (min 32 chars) |
+| `EXTERNAL_API_KEYS` | Comma-separated list for multi-key support | `key-for-ci,key-for-monitoring` |
+
+Both can be used together — keys from both sources are merged and any match succeeds.
+Protected endpoints:
+- `GET /health` — public summary; with valid key returns per-check details
+- `GET /health/live` — live checks (passthrough in dev)
+- `GET /health/checks` — all check definitions (strict — requires key in any env)
+- `GET /api/tools` — tool listing (passthrough in dev)
+- `GET /api/admin/security/api-keys` — key metadata (requires JWT super_admin)
+
 ### 4.3 Feature Flags
 
 ```env
@@ -344,6 +361,7 @@ Each worktree in `.worktrees/` can be deployed independently via merge to master
 
 ### ☐ Security
 - [ ] `JWT_SECRET` and `JWT_REFRESH_SECRET` set to unique 64+ char random values
+- [ ] `EXTERNAL_API_KEY` or `EXTERNAL_API_KEYS` set (min 32 chars each) for machine-to-machine endpoints
 - [ ] `BCRYPT_ROUNDS` set to 12 (or higher for additional security)
 - [ ] `FRONTEND_URL` set to explicit production URL (CORS locked down)
 - [ ] `NODE_ENV=production` (disables dev-only behavior, forces strict mode)
@@ -367,6 +385,7 @@ Each worktree in `.worktrees/` can be deployed independently via merge to master
 
 ### ☐ External Services
 - [ ] All API keys provisioned and rotated from defaults
+- [ ] `EXTERNAL_API_KEY` / `EXTERNAL_API_KEYS` provisioned for CI/CD, monitoring, and health-check services
 - [ ] Twilio WhatsApp number configured and approved
 - [ ] M-Pesa environment set to `production` (not `sandbox`)
 - [ ] OpenAI API key with sufficient quota

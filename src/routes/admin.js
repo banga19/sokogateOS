@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const adminService = require('../services/adminService');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { rbacAuthorize } = require('../middleware/rbac');
+const { getApiKeyMetadata } = require('../middleware/apiKeyAuth');
 
 router.use(authenticate);
 
@@ -15,7 +16,7 @@ router.get('/roles', rbacAuthorize('teams', 'manageMembers'), async (req, res) =
   }
 });
 
-router.post('/roles/seed', async (_req, res) => {
+router.post('/roles/seed', authenticate, authorize('super_admin'), async (_req, res) => {
   try {
     const roles = await adminService.ensureSystemRoles();
     res.json({ success: true, data: roles });
@@ -100,6 +101,22 @@ router.get('/health', async (_req, res) => {
   try {
     const health = await adminService.health();
     res.json({ success: true, data: health });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @route GET /api/admin/security/api-keys
+ * @description Get metadata about configured API keys (never exposes full secrets).
+ * Returns prefix, SHA-256 hash, source env var, length, and strength indicator
+ * for each configured key. Requires super_admin access.
+ * @access Super Admin
+ */
+router.get('/security/api-keys', authorize('super_admin'), async (_req, res) => {
+  try {
+    const metadata = getApiKeyMetadata();
+    res.json({ success: true, data: metadata });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

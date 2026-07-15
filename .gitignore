@@ -12,3 +12,4 @@ dist/
 *.pid
 .agentdb.rvf.lock
 .worktrees
+.vercel

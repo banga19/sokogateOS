@@ -374,7 +374,8 @@ describe('AuthService', () => {
       const result = await authService.requestPasswordReset('test@example.com');
 
       expect(result).toHaveProperty('message');
-      expect(result).toHaveProperty('resetToken');
+      // resetToken is no longer returned in the response (security fix)
+      expect(result).not.toHaveProperty('resetToken');
       expect(mockUser.passwordResetToken).toBeDefined();
       expect(mockUser.passwordResetExpires).toBeDefined();
     });
@@ -385,7 +386,6 @@ describe('AuthService', () => {
       const result = await authService.requestPasswordReset('nonexistent@example.com');
 
       expect(result.message).toBe('If the email exists, a reset link has been sent.');
-      expect(result.resetToken).toBeUndefined();
     });
   });
 

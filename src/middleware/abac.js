@@ -146,8 +146,11 @@ function abacAuthorize(options = {}) {
         return next();
       }
 
-      // Build ABAC request context
       // Build ABAC request context — explicitly pick attributes, never spread raw headers
+      // SECURITY: companyId is taken from URL params ONLY, never from body/query params
+      // to prevent company spoofing attacks (CWE-285: Improper Authorization)
+      const trustedCompanyId = req.params.companyId || null;
+
       const abacRequest = {
         subject: {
           id: req.user.id,
@@ -160,9 +163,7 @@ function abacAuthorize(options = {}) {
         },
         resource: {
           id: req.params.id || null,
-          companyId: req.params.companyId ||
-                   (req.body && req.body.companyId) ||
-                   (req.query && req.query.companyId) || null
+          companyId: trustedCompanyId
         },
         action: action,
         environment: {

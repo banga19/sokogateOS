@@ -17,13 +17,13 @@ router.post('/', rbac('enrollments', 'write'), async (req, res) => {
     ]);
     if (!contact || !sequence) throw new Error('Contact or sequence not found.');
 
-    const existing = await Enrollment.findOne({ contactId, sequenceId, companyId: req.companyId });
+    const existing = await Enrollment.findOne({ contactId, sequenceId, companyId: req.user.companyId });
     if (existing) throw new Error('Contact already enrolled in this sequence.');
 
     const enrollment = await Enrollment.create({
       contactId,
       sequenceId,
-      companyId: req.companyId,
+      companyId: req.user.companyId,
       ownerId: req.user._id,
       contactSnapshot: {
         firstName: contact.firstName,
@@ -42,7 +42,7 @@ router.post('/', rbac('enrollments', 'write'), async (req, res) => {
 router.get('/', rbac('enrollments', 'read'), async (req, res) => {
   try {
     const q = {
-      companyId: req.companyId,
+      companyId: req.user.companyId,
       ...(req.query.status ? { status: req.query.status } : {}),
     };
     const list = await Enrollment.find(q)
@@ -57,7 +57,7 @@ router.get('/', rbac('enrollments', 'read'), async (req, res) => {
 
 router.patch('/:id/step', rbac('enrollments', 'write'), async (req, res) => {
   try {
-    const e = await Enrollment.findOne({ _id: req.params.id, companyId: req.companyId });
+    const e = await Enrollment.findOne({ _id: req.params.id, companyId: req.user.companyId });
     if (!e) throw new Error('Enrollment not found.');
     const { step, status } = req.body;
     if (step != null) {
@@ -79,7 +79,7 @@ router.patch('/:id/step', rbac('enrollments', 'write'), async (req, res) => {
 
 router.delete('/:id', rbac('enrollments', 'delete'), async (req, res) => {
   try {
-    const e = await Enrollment.findOne({ _id: req.params.id, companyId: req.companyId });
+    const e = await Enrollment.findOne({ _id: req.params.id, companyId: req.user.companyId });
     if (!e) throw new Error('Enrollment not found.');
     e.status = 'paused';
     await e.save();

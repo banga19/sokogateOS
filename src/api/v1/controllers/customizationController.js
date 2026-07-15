@@ -25,6 +25,13 @@ async function getCustomizationRequest(req, res) {
       });
     }
 
+    if (req.user.role !== 'super_admin' && customization.companyId.toString() !== req.user.companyId?.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: customization
@@ -156,7 +163,10 @@ async function updateCustomizationRequestStatus(req, res) {
     if (designApproval !== undefined) update['designFiles'] = designApproval;
 
     const customization = await Customization.findOneAndUpdate(
-      { requestId },
+      {
+        requestId,
+        ...(req.user.role !== 'super_admin' ? { companyId: req.user.companyId } : {})
+      },
       { $set: update },
       { new: true }
     );

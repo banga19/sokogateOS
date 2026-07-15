@@ -51,14 +51,14 @@ async function getCompanyERS(req, res) {
     }
 
     // Super admin can view any company's ERS
-    // Company admin can view their own company's ERS
-    // Others need specific permission (simplified for now)
-    if (req.user.role !== 'super_admin' &&
-        req.user.role !== 'company_admin' &&
-        req.user.companyId.toString() !== req.params.companyId) {
-      // Check if user has explicit permission (simplified)
-      const hasPermission = req.user.permissions?.admin?.manageUsers === true;
-      if (!hasPermission) {
+    // Company admin can only view their own company's ERS
+    // Others need explicit permission
+    if (req.user.role !== 'super_admin') {
+      if (req.user.role === 'company_admin' && req.user.companyId.toString() === req.params.companyId) {
+        // allowed
+      } else if (req.user.permissions?.admin?.manageUsers === true && req.user.companyId.toString() === req.params.companyId) {
+        // allowed
+      } else {
         return res.status(403).json({
           success: false,
           error: 'Insufficient permissions to view this company\'s ERS'

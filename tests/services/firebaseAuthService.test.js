@@ -10,8 +10,8 @@ describe('FirebaseAuthService', () => {
     delete process.env.FIREBASE_PROJECT_ID;
     delete process.env.FIREBASE_CLIENT_EMAIL;
     delete process.env.FIREBASE_PRIVATE_KEY;
-    process.env.JWT_SECRET = 'test-jwt-secret';
-    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
+    process.env.JWT_SECRET = 'test-jwt-secret-that-is-at-least-32-chars!!';
+    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-that-is-32-chars!';
     jest.resetModules();
   });
 

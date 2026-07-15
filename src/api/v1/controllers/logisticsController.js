@@ -25,7 +25,13 @@ async function getShipment(req, res) {
       });
     }
 
-    // Calculate delay risk
+    if (req.user.role !== 'super_admin' && shipment.companyId._id.toString() !== req.user.companyId?.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
     const delayRisk = shipment.calculateDelayRisk();
 
     res.status(200).json({
@@ -105,7 +111,14 @@ async function getCompanyShipments(req, res) {
     const limit = parseInt(req.query.limit) || 20;
     const status = req.query.status;
 
-    const query = { companyId };
+    if (req.user.role !== 'super_admin' && companyId !== req.user.companyId?.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
+    const query = { companyId: new (require('mongoose').Schema.Types.ObjectId)(companyId) };
     if (status) query.status = status;
 
     const total = await Logistics.countDocuments(query);
@@ -152,7 +165,6 @@ async function updateShipmentStatus(req, res) {
       updatedAt: new Date()
     };
 
-    // Update timestamp for the new status
     const timestampMap = {
       'picked_up': 'timestamps.pickedUp',
       'in_transit': 'timestamps.inTransit',
@@ -165,23 +177,10 @@ async function updateShipmentStatus(req, res) {
     if (trackingNumber) update.trackingNumber = trackingNumber;
     if (location) update.currentLocation = location;
 
-    // Add status change event
-    const shipment = await Logistics.findOneAndUpdate(
-      { shipmentId },
-      {
-        $set: update,
-        $push: {
-          events: {
-            timestamp: new Date(),
-            type: 'status_change',
-            description: `Shipment status updated to ${status}`,
-            location: location || {},
-            carrierUpdate: false
-          }
-        }
-      },
-      { new: true }
-    );
+    const shipment = await Logistics.findOne({
+      shipmentId,
+      ...(req.user.role !== 'super_admin' ? { companyId: req.user.companyId } : {})
+    });
 
     if (!shipment) {
       return res.status(404).json({
@@ -189,6 +188,24 @@ async function updateShipmentStatus(req, res) {
         error: 'Shipment not found'
       });
     }
+
+    shipment.status = status;
+    shipment.timestamps.updated = new Date();
+    if (timestampMap[status]) {
+      shipment.timestamps[timestampMap[status].split('.')[1]] = new Date();
+    }
+    if (trackingNumber) shipment.trackingNumber = trackingNumber;
+    if (location) shipment.currentLocation = location;
+
+    shipment.events.push({
+      timestamp: new Date(),
+      type: 'status_change',
+      description: `Shipment status updated to ${status}`,
+      location: location || {},
+      carrierUpdate: false
+    });
+
+    await shipment.save();
 
     res.status(200).json({
       success: true,
@@ -215,7 +232,8 @@ async function trackShipment(req, res) {
         { shipmentId },
         { trackingNumber: shipmentId },
         { _id: shipmentId.match(/^[0-9a-fA-F]{24}$/) ? shipmentId : null }
-      ].filter(Boolean)
+      ].filter(Boolean),
+      ...(req.user.role !== 'super_admin' ? { companyId: req.user.companyId } : {})
     });
 
     if (!shipment) {

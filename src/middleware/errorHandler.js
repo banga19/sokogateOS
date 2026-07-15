@@ -51,18 +51,21 @@ function globalErrorHandler(err, req, res, _next) {
   const statusCode = err.statusCode || err.status || 500;
 
   // Build the response payload
+  // SECURITY: Never leak internal error details to clients in production
+  // In development/test, we still limit exposure to operational errors only
   const body = {
     success: false,
     error: err.isOperational ? err.message : 'Internal server error',
   };
 
   // Attach validation details when present (e.g. Joi errors)
-  if (err.details) {
+  // Only for operational errors — never leak internals
+  if (err.isOperational && err.details) {
     body.details = err.details;
   }
 
-  // In development, include the stack trace for easier debugging
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  // Include stack trace ONLY in development mode, never in production or test
+  if (process.env.NODE_ENV === 'development') {
     body.stack = err.stack;
   }
 

@@ -19,7 +19,7 @@ module.exports = {
   },
 
   auth: {
-    jwtSecret: () => { const v = process.env.JWT_SECRET; if (!v) throw new Error('JWT_SECRET must be set'); return v; },
+    jwtSecret: () => { const v = process.env.JWT_SECRET; if (!v) throw new Error('JWT_SECRET must be set'); if (v.length < 32) throw new Error('JWT_SECRET must be at least 32 characters'); return v; },
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),

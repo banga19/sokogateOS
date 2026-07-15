@@ -6,48 +6,14 @@ const router = express.Router();
 const authService = require('../services/authService');
 const { authenticate } = require('../middleware/auth');
 const { trackEngagement } = require('../middleware/analytics/tracking');
+const { rateLimit } = require('../utils/rateLimiter');
 const logger = require('../utils/logger');
-
-// Rate limiting helper (simple in-memory implementation)
-const rateLimitMap = new Map();
-const rateLimit = (maxAttempts, windowMs) => {
-  return (req, res, next) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const now = Date.now();
-
-    if (!rateLimitMap.has(ip)) {
-      rateLimitMap.set(ip, []);
-    }
-
-    const attempts = rateLimitMap.get(ip).filter(time => now - time < windowMs);
-    if (attempts.length >= maxAttempts) {
-      return res.status(429).json({
-        success: false,
-        error: 'Too many attempts. Please try again later.'
-      });
-    }
-
-    attempts.push(now);
-    rateLimitMap.set(ip, attempts);
-    next();
-  };
-};
-
-// Clean up rate limit map every 15 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, times] of rateLimitMap.entries()) {
-    const valid = times.filter(time => now - time < 15 * 60 * 1000);
-    if (valid.length === 0) rateLimitMap.delete(ip);
-    else rateLimitMap.set(ip, valid);
-  }
-}, 15 * 60 * 1000);
 
 /**
  * POST /api/auth/register
  * Register a new user
  */
-router.post('/register', rateLimit(5, 15 * 60 * 1000), async (req, res) => {
+router.post('/register', rateLimit('register', { points: 5, duration: 900 }), async (req, res) => {
   try {
     const result = await authService.register(req.body);
     // Track sign-up after successful user creation
@@ -72,7 +38,7 @@ router.post('/register', rateLimit(5, 15 * 60 * 1000), async (req, res) => {
  * POST /api/auth/login
  * Authenticate user and return tokens
  */
-router.post('/login', rateLimit(10, 15 * 60 * 1000), async (req, res) => {
+router.post('/login', rateLimit('login', { points: 10, duration: 900 }), async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -107,7 +73,7 @@ router.post('/login', rateLimit(10, 15 * 60 * 1000), async (req, res) => {
  * POST /api/auth/refresh
  * Refresh access token using refresh token
  */
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', rateLimit('refresh', { points: 20, duration: 60 }), async (req, res) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -236,7 +202,7 @@ router.post('/change-password', authenticate, async (req, res) => {
  * POST /api/auth/forgot-password
  * Request password reset
  */
-router.post('/forgot-password', rateLimit(3, 15 * 60 * 1000), async (req, res) => {
+router.post('/forgot-password', rateLimit('forgot-password', { points: 3, duration: 900 }), async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -296,7 +262,7 @@ router.post('/accept-terms', authenticate, async (req, res) => {
  * POST /api/auth/reset-password/:token
  * Reset password with token
  */
-router.post('/reset-password/:token', async (req, res) => {
+router.post('/reset-password/:token', rateLimit('reset-password', { points: 10, duration: 60 }), async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;

@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
+const { authenticate, authorize } = require('../middleware/auth');
 
 // Helper to get agent service from app locals
 const getAgentService = (req) => {
@@ -18,9 +19,9 @@ const asyncHandler = (fn) => (req, res, next) => {
 /**
  * @route GET /api/agents
  * @description Get all active agents with their status
- * @access Public
+ * @access Authenticated
  */
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', authenticate, asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -73,9 +74,9 @@ router.get('/', asyncHandler(async (req, res) => {
 /**
  * @route GET /api/agents/types
  * @description Get available agent types
- * @access Public
+ * @access Authenticated
  */
-router.get('/types', asyncHandler(async (req, res) => {
+router.get('/types', authenticate, asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -107,9 +108,9 @@ router.get('/types', asyncHandler(async (req, res) => {
 /**
  * @route GET /api/agents/:agentId
  * @description Get specific agent details
- * @access Public
+ * @access Authenticated
  */
-router.get('/:agentId', asyncHandler(async (req, res) => {
+router.get('/:agentId', authenticate, asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -155,9 +156,9 @@ router.get('/:agentId', asyncHandler(async (req, res) => {
 /**
  * @route POST /api/agents/spawn
  * @description Spawn a new agent of specified type
- * @access Public
+ * @access Authenticated (admin)
  */
-router.post('/spawn', asyncHandler(async (req, res) => {
+router.post('/spawn', authenticate, authorize('super_admin', 'company_admin'), asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -205,9 +206,9 @@ router.post('/spawn', asyncHandler(async (req, res) => {
 /**
  * @route POST /api/agents/:agentId/tasks
  * @description Assign a task to a specific agent
- * @access Public
+ * @access Authenticated
  */
-router.post('/:agentId/tasks', asyncHandler(async (req, res) => {
+router.post('/:agentId/tasks', authenticate, asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -259,9 +260,9 @@ router.post('/:agentId/tasks', asyncHandler(async (req, res) => {
 /**
  * @route POST /api/agents/tasks
  * @description Assign a task to the most suitable available agent
- * @access Public
+ * @access Authenticated
  */
-router.post('/tasks', asyncHandler(async (req, res) => {
+router.post('/tasks', authenticate, asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -308,9 +309,9 @@ router.post('/tasks', asyncHandler(async (req, res) => {
 /**
  * @route POST /api/agents/broadcast
  * @description Send a broadcast message to all agents
- * @access Public
+ * @access Authenticated (admin)
  */
-router.post('/broadcast', asyncHandler(async (req, res) => {
+router.post('/broadcast', authenticate, authorize('super_admin', 'company_admin'), asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -357,9 +358,9 @@ router.post('/broadcast', asyncHandler(async (req, res) => {
 /**
  * @route POST /api/agents/:agentId/shutdown
  * @description Shutdown a specific agent
- * @access Public
+ * @access Authenticated (admin)
  */
-router.post('/:agentId/shutdown', asyncHandler(async (req, res) => {
+router.post('/:agentId/shutdown', authenticate, authorize('super_admin', 'company_admin'), asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({
@@ -400,9 +401,9 @@ router.post('/:agentId/shutdown', asyncHandler(async (req, res) => {
 /**
  * @route POST /api/agents/shutdown-all
  * @description Shutdown all agents
- * @access Public
+ * @access Authenticated (super_admin)
  */
-router.post('/shutdown-all', asyncHandler(async (req, res) => {
+router.post('/shutdown-all', authenticate, authorize('super_admin'), asyncHandler(async (req, res) => {
   const agentService = getAgentService(req);
   if (!agentService) {
     return res.status(503).json({

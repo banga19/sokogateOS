@@ -36,11 +36,12 @@ async function update(id, companyId, body) {
 }
 
 /**
- * Remove an account
+ * Remove an account (soft delete, scoped to company)
  */
-async function remove(id) {
-  logger.debug('accountService.remove called', { id });
-  return { id, deleted: true };
+async function remove(id, companyId) {
+  logger.debug('accountService.remove called', { id, companyId });
+  // In full implementation: Account.findOneAndUpdate({ _id: id, companyId }, { isActive: false })
+  return { id, companyId, deleted: true };
 }
 
 module.exports = { list, create, findById, update, remove };

@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import middleware
-const { authenticate, scopeToCompany } = require('../../../middleware/auth');
+const { authenticate, scopeToCompany, authorize } = require('../../../middleware/auth');
 const { abacAuthorize } = require('../../../middleware/abac');
 const { validate, validators, sanitize } = require('../../../middleware/validation');
 
@@ -161,7 +161,7 @@ router.get(
 const qme = require('../../../qme/wrapper');
 const Feedback = require('../../../models/feedback');
 
-router.post('/qme/run/:taskName', authenticate, async (req, res) => {
+router.post('/qme/run/:taskName', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const result = await qme.runTask(req.params.taskName, req.body);
     res.json({ success: true, data: result });
@@ -170,7 +170,7 @@ router.post('/qme/run/:taskName', authenticate, async (req, res) => {
   }
 });
 
-router.get('/qme/tasks', authenticate, async (req, res) => {
+router.get('/qme/tasks', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const tasks = await qme.listTasks({ filter: req.query.filter, limit: parseInt(req.query.limit) || 20 });
     res.json({ success: true, data: tasks });
@@ -179,7 +179,7 @@ router.get('/qme/tasks', authenticate, async (req, res) => {
   }
 });
 
-router.get('/qme/task/:taskId', authenticate, async (req, res) => {
+router.get('/qme/task/:taskId', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const task = await qme.getTask(req.params.taskId);
     res.json({ success: true, data: task });
@@ -192,7 +192,7 @@ router.get('/qme/task/:taskId', authenticate, async (req, res) => {
 const langchainOrchestrator = require('../../../services/langchainOrchestrator');
 
 // Get workflow status
-router.get('/qme/workflow/status', authenticate, async (req, res) => {
+router.get('/qme/workflow/status', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const status = langchainOrchestrator.getWorkflowStatus();
     res.json({ success: true, data: status });
@@ -202,7 +202,7 @@ router.get('/qme/workflow/status', authenticate, async (req, res) => {
 });
 
 // Get workflow state for a specific task
-router.get('/qme/workflow/:taskId', authenticate, async (req, res) => {
+router.get('/qme/workflow/:taskId', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const workflow = langchainOrchestrator.getWorkflow(req.params.taskId);
     res.json({ success: true, data: workflow });
@@ -212,7 +212,7 @@ router.get('/qme/workflow/:taskId', authenticate, async (req, res) => {
 });
 
 // Get next suggested action based on RAG context
-router.get('/qme/workflow/:taskId/suggestions', authenticate, async (req, res) => {
+router.get('/qme/workflow/:taskId/suggestions', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const suggestions = await langchainOrchestrator.getNextSuggestedAction(req.params.taskId);
     res.json({ success: true, data: { suggestions } });
@@ -222,7 +222,7 @@ router.get('/qme/workflow/:taskId/suggestions', authenticate, async (req, res) =
 });
 
 // Run task with LangChain orchestration
-router.post('/qme/orchestrate/:taskName', authenticate, async (req, res) => {
+router.post('/qme/orchestrate/:taskName', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const result = await langchainOrchestrator.runTaskWithRAG(req.params.taskName, req.body);
     res.json({ success: true, data: result });
@@ -232,7 +232,7 @@ router.post('/qme/orchestrate/:taskName', authenticate, async (req, res) => {
 });
 
 // Get task context from RAG
-router.get('/qme/context/:query', authenticate, async (req, res) => {
+router.get('/qme/context/:query', authenticate, authorize('super_admin', 'company_admin', 'procurement_manager'), async (req, res) => {
   try {
     const context = await langchainOrchestrator.getTaskContext(req.params.query);
     res.json({ success: true, data: context });
@@ -246,8 +246,15 @@ router.get('/qme/context/:query', authenticate, async (req, res) => {
 
 router.post('/feedback', authenticate, abacAuthorize({ action: 'create', domain: 'analytics' }), async (req, res) => {
   try {
+    const allowedFields = ['target', 'type', 'explicit', 'implicit', 'context', 'metadata', 'rating', 'comments'];
+    const sanitized = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        sanitized[field] = req.body[field];
+      }
+    }
     const feedback = new Feedback({
-      ...req.body,
+      ...sanitized,
       companyId: req.user.companyId,
       userId: req.user.id
     });
