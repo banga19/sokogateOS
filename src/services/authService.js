@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/user');
 const Feedback = require('../models/feedback');
-const { HermesAgent } = require('../services/hermes/hermesAgent');
 const logger = require('../utils/logger');
 
 // Token configuration — NO hardcoded fallbacks for security secrets
@@ -14,20 +13,26 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || '15m';
 const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRY || '7d';
 
-function requireSecret(name) {
-  const val = process.env[name];
-  if (!val) {
-    throw new Error(`FATAL: ${name} environment variable is required`);
-  }
-  // Validate minimum entropy — prevent weak/guessable secrets
-  if (val.length < 32) {
-    throw new Error(`FATAL: ${name} must be at least 32 characters long`);
-  }
-  return val;
-}
+// Lazy-eval secrets — avoids FATAL at module-load time in test environments
+// where setupFiles must run before any module is required.
+let _jwtSecret, _jwtRefreshSecret, _secretsInitAttempted;
 
-const JWT_SECRET = requireSecret('JWT_SECRET');
-const JWT_REFRESH_SECRET = requireSecret('JWT_REFRESH_SECRET');
+function _getSecrets() {
+  if (_secretsInitAttempted) {
+    return { JWT_SECRET: _jwtSecret, JWT_REFRESH_SECRET: _jwtRefreshSecret };
+  }
+  _secretsInitAttempted = true;
+  const val = (n) => process.env[n];
+  if (!val('JWT_SECRET') || val('JWT_SECRET').length < 32) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required (min 32 chars)');
+  }
+  if (!val('JWT_REFRESH_SECRET') || val('JWT_REFRESH_SECRET').length < 32) {
+    throw new Error('FATAL: JWT_REFRESH_SECRET environment variable is required (min 32 chars)');
+  }
+  _jwtSecret = val('JWT_SECRET');
+  _jwtRefreshSecret = val('JWT_REFRESH_SECRET');
+  return { JWT_SECRET: _jwtSecret, JWT_REFRESH_SECRET: _jwtRefreshSecret };
+}
 
 // Register a new user
 async function register(userData) {
@@ -225,7 +230,7 @@ async function login(email, password) {
 async function refreshToken(refreshTokenValue) {
   try {
     // Verify refresh token
-    const decoded = jwt.verify(refreshTokenValue, JWT_REFRESH_SECRET, { algorithms: ['HS256'] });
+    const decoded = jwt.verify(refreshTokenValue, _getSecrets().JWT_REFRESH_SECRET, { algorithms: ['HS256'] });
 
     // Find user
     const user = await User.findById(decoded.id);
@@ -457,6 +462,7 @@ async function acceptTerms(userId, mandatedVersion = '1.0') {
 function generateTokens(user) {
   const tokenVersion = user.tokenVersion || 0;
 
+  const secrets = _getSecrets();
   const payload = {
     id: user._id,
     email: user.email,
@@ -465,14 +471,14 @@ function generateTokens(user) {
     tokenVersion
   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, {
+  const accessToken = jwt.sign(payload, secrets.JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
     algorithm: 'HS256'
   });
 
   const refreshToken = jwt.sign(
     { id: user._id, tokenVersion },
-    JWT_REFRESH_SECRET,
+    secrets.JWT_REFRESH_SECRET,
     { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: 'HS256' }
   );
 
@@ -486,7 +492,7 @@ function generateTokens(user) {
 // Verify and decode access token (also checks token version)
 function verifyAccessToken(token) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+    const decoded = jwt.verify(token, _getSecrets().JWT_SECRET, { algorithms: ['HS256'] });
     // tokenVersion check is done in the middleware via DB lookup
     return decoded;
   } catch (error) {

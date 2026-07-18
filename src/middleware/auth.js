@@ -23,7 +23,7 @@ async function authenticate(req, res, next) {
       });
     }
 
-    const token = authHeader.split(' ' '.split(' ')[1];
+    const token = authHeader.split(' ')[1];
 
     // First, try to verify as a custom JWT token
     let decoded;

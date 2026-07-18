@@ -7,18 +7,13 @@ module.exports = {
   rootDir: '.',
 
   // Only run tests from the main tests/ directory, not from .worktrees/
-  testMatch: [
-    '<rootDir>/tests/**/*.test.js',
-    '<rootDir>/tests/**/*.test.jsx',
-  ],
+  testMatch: ['<rootDir>/tests/**/*.test.js', '<rootDir>/tests/**/*.test.jsx'],
 
   // Explicitly ignore worktree directories
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/\\.worktrees/',
-    '/dist/',
-    '/coverage/',
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/\\.worktrees/', '/dist/', '/coverage/'],
+
+  // Load env vars from .env.development before any modules
+  setupFiles: ['<rootDir>/tests/setup.js'],
 
   // Module resolution
   moduleDirectories: ['node_modules', 'src'],
