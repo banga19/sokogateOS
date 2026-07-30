@@ -56,6 +56,16 @@ app.use(
     dnsPrefetchControl: { allow: false },
   })
 );
+// Webhook routes MUST come before body-parsing middleware because:
+//  - Stripe webhooks need the raw body for signature verification
+//  - express.raw() on the route-level cannot re-read a stream already consumed by express.json()
+try {
+  const billingRoutes = require('./routes/billing');
+  app.use('/api/billing', billingRoutes);
+} catch (err) {
+  logger.error('src/app.js: Failed to load billing routes:', err.message);
+}
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
@@ -163,13 +173,6 @@ try {
   app.use('/api/enrollments', enrollmentsRoutes);
 } catch (err) {
   logger.error('src/app.js: Failed to load CRM routes:', err.message);
-}
-
-try {
-  const billingRoutes = require('./routes/billing');
-  app.use('/api/billing', billingRoutes);
-} catch (err) {
-  logger.error('src/app.js: Failed to load billing routes:', err.message);
 }
 
 try {

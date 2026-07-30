@@ -30,6 +30,14 @@ const { startCustomsEngineService } = require('./services/customsEngineService')
 // Payment Adapters
 const { startKRWPaymentAdapter } = require('./ingestion/adapters/krwPaymentAdapter');
 
+// Third-party integrations (env-gated, safe to require even when not configured)
+const { neonService } = require('./services/neonService');
+const { stripeService } = require('./services/stripeService');
+const { r2Service } = require('./services/r2Service');
+const { pineconeService } = require('./services/pineconeService');
+const { isConfigured: isRedisConfigured } = require('./config/redis');
+const { isConfigured: isQStashConfigured } = require('./services/qstashService');
+
 // Sentry
 const { SentryService } = require('./services/error/sentryService');
 
@@ -149,6 +157,35 @@ const startServer = async () => {
     // Set up Sentry Express integration lazily (avoids circular dependency)
     SentryService.setupExpressIntegration(app);
 
+// Initialize third-party integrations (env-gated — safe no-ops when not configured)
+await neonService.initialize();
+logger.info(`Neon: ${neonService.isConfigured() ? 'ready' : 'not configured'}`);
+
+if (stripeService.enabled) {
+  logger.info('Stripe: payment service ready');
+}
+
+logger.info(`R2: ${r2Service.isEnabled() ? 'ready' : 'not configured (CLOUDFLARE_R2_* vars missing)'}`);
+
+try {
+  await pineconeService.initialize();
+} catch (err) {
+  logger.warn(`Pinecone: init skipped (${err.message})`);
+}
+logger.info(`Cache: Redis/Upstash ${isRedisConfigured() ? 'connected' : 'in-memory fallback'}; QStash ${isQStashConfigured() ? 'ready' : 'not configured'}`);
+
+
+// PostHog analytics (env-gated)
+try {
+  const posthogClient = require("./utils/posthogClient");
+  if (posthogClient.isConfigured()) {
+    logger.info("PostHog: analytics enabled");
+  } else {
+    logger.info("PostHog: not configured (POSTHOG_API_KEY missing)");
+  }
+} catch (err) {
+  logger.warn(`PostHog: init skipped (${err.message})`);
+}
     // Start server
     app.listen(PORT, () => {
       logger.info(`SokogateOS: Server running on port ${PORT}`);

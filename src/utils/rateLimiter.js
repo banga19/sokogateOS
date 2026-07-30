@@ -1,75 +1,30 @@
 // Distributed Rate Limiter for sokogateOS
-// Uses Redis when available (via rate-limiter-flexible's RateLimiterRedis),
+// Uses the shared Redis client from src/config/redis (Upstash REST or ioredis),
 // falls back to in-memory RateLimiterMemory when Redis is unavailable.
 //
-// Provides factory functions that create rate limiter middleware for any route,
-// sharing the same Redis backend so rate limits are enforced consistently
-// across all server instances (horizontal scaling).
+// Centralising the Redis client means:
+//  - health checks, rate limits, and any other Redis consumer all share one connection
+//  - Upstash REST and ioredis are selected in one place (redis.js)
+//  - graceful shutdown happens in one place
 
-const { RateLimiterMemory } = require('rate-limiter-flexible');
+const { RateLimiterMemory, RateLimiterRedis } = require('rate-limiter-flexible');
 const logger = require('./logger');
+const { getRedisClient, isConfigured, shutdown: redisShutdown } = require('../config/redis');
 
 // ── Module-level state ──────────────────────────────────────────────────
-let redisClient = null;
-let redisAvailable = false;
-let initializationAttempted = false;
+let pooledRedisAvailable = false;
 
 // ── Rate limiter instances (lazily created) ─────────────────────────────
 // Keyed by a unique name so we can have multiple limiters with different
 // points/duration settings while sharing the same Redis backend.
 const limiterCache = new Map();
 
-/**
- * Attempt to create a Redis connection. Called once at startup.
- * If Redis is unreachable, we silently fall back to in-memory limiters.
- */
-function initializeRedis() {
-  if (initializationAttempted) return;
-  initializationAttempted = true;
-
-  const redisUrl = process.env.REDIS_URL;
-  if (!redisUrl) {
-    logger.info('RateLimiter: REDIS_URL not set — using in-memory rate limiting');
-    return;
-  }
-
-  try {
-    const Redis = require('ioredis');
-    redisClient = new Redis(redisUrl, {
-      enableOfflineQueue: false,    // Don't queue commands when disconnected
-      lazyConnect: true,            // Connect on first command
-      maxRetriesPerRequest: 1,      // Fail fast rather than retrying
-      retryStrategy: () => null,    // Don't auto-reconnect — use memory fallback
-    });
-
-    // Check connectivity
-    redisClient.on('connect', () => {
-      redisAvailable = true;
-      logger.info('RateLimiter: Redis connected — using distributed rate limiting');
-    });
-
-    redisClient.on('error', (err) => {
-      if (redisAvailable) {
-        logger.warn('RateLimiter: Redis connection lost — falling back to in-memory', err.message);
-        redisAvailable = false;
-      }
-    });
-
-    redisClient.on('close', () => {
-      if (redisAvailable) {
-        logger.warn('RateLimiter: Redis connection closed — falling back to in-memory');
-        redisAvailable = false;
-      }
-    });
-  } catch (err) {
-    logger.warn(`RateLimiter: Failed to initialize Redis (${err.message}) — using in-memory`);
-    redisClient = null;
-  }
-}
+// Eager init so isConfigured() is accurate on first call.
+pooledRedisAvailable = isConfigured();
 
 /**
  * Create (or retrieve from cache) a rate limiter instance with the given config.
- * Returns a RateLimiterRedis if Redis is available, RateLimiterMemory otherwise.
+ * Returns a RateLimiterRedis when Redis is available, RateLimiterMemory otherwise.
  *
  * @param {string} name - Unique name for this limiter (e.g., 'auth', 'api', 'login')
  * @param {Object} options
@@ -85,13 +40,10 @@ function getLimiter(name, { points, duration, blockDuration = 0 }) {
     return limiterCache.get(cacheKey);
   }
 
-  // Initialize Redis on first call (safe to call multiple times)
-  initializeRedis();
-
+  const redisClient = pooledRedisAvailable ? getRedisClient() : null;
   let limiter;
 
-  if (redisAvailable && redisClient) {
-    const { RateLimiterRedis } = require('rate-limiter-flexible');
+  if (redisClient) {
     limiter = new RateLimiterRedis({
       storeClient: redisClient,
       keyPrefix: `rl:${name}`,
@@ -114,7 +66,7 @@ function getLimiter(name, { points, duration, blockDuration = 0 }) {
       duration,
       blockDuration,
     });
-    logger.debug(`RateLimiter: Created Memory limiter "${name}" (${points} req/${duration}s)`);
+    logger.debug(`RateLimiter: Created Memory limiter "${name}" (${points} req/${duration}s) — Redis unavailable`);
   }
 
   limiterCache.set(cacheKey, limiter);
@@ -128,8 +80,7 @@ function getLimiter(name, { points, duration, blockDuration = 0 }) {
  * @param {Object} options - Same as getLimiter options
  * @returns {Function} Express middleware
  *
- * Usage:
- *   router.post('/login', rateLimit('login', { points: 10, duration: 60, blockDuration: 120 }), handler)
+ * Usage: router.post('/login', rateLimit('login', { points: 10, duration: 60, blockDuration: 120 }), handler)
  */
 function rateLimit(name, options = {}) {
   const {
@@ -178,27 +129,16 @@ function rateLimit(name, options = {}) {
 }
 
 /**
- * Graceful shutdown — close Redis connection.
+ * Graceful shutdown — delegates to the centralised Redis shutdown.
  */
 async function shutdown() {
-  if (redisClient) {
-    try {
-      await redisClient.quit();
-      logger.info('RateLimiter: Redis connection closed');
-    } catch (err) {
-      logger.warn('RateLimiter: Error closing Redis:', err.message);
-    }
-    redisClient = null;
-    redisAvailable = false;
-  }
+  await redisShutdown();
+  logger.info('RateLimiter: Shutdown delegated to redis config');
+  limiterCache.clear();
 }
-
-// Initialize Redis eagerly at module load
-initializeRedis();
 
 module.exports = {
   rateLimit,
   getLimiter,
-  initializeRedis,
   shutdown,
 };

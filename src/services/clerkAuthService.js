@@ -45,6 +45,10 @@ async function verifyClerkApiToken(token) {
 
 // Sign in with Clerk token — find or create local user
 async function signInWithClerk(token) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Clerk auth is not available in production. Use Firebase.');
+  }
+
   try {
     const verified = await verifyClerkApiToken(token);
     const { sub, email_addresses, first_name, last_name, primary_email_address_id, phone_numbers } =

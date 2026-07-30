@@ -1,0 +1,78 @@
+# Coderabbit configuration for sokogateOS
+# Node (CommonJS) / Express / React backend + frontend monorepo
+# Review profile: production + security focused.
+
+reviews:
+  auto_init: true
+  on: [pull_request]
+  skip_drafts: true
+  skip_dependency_updates: true
+
+paths:
+  include:
+    - 'src/**'
+    - 'frontend/src/**'
+    - 'tests/**'
+    - '__tests__/**'
+    - 'api/**'
+    - 'scripts/**'
+  exclude:
+    - 'node_modules/**'
+    - 'dist/**'
+    - 'build/**'
+    - 'coverage/**'
+    - '.claude-flow/**'
+    - '.claude/**'
+    - 'graphify-out/**'
+    - '.swarm/**'
+    - 'package-lock.json'
+    - 'pnpm-lock.yaml'
+    - 'yarn.lock'
+    - '.env'
+    - '.env.*'
+    - '*.md'
+    - '*.markdown'
+    - '*.txt'
+    - '*.log'
+    - '.gitignore'
+    - 'README.md'
+    - 'LICENSE'
+    - 'ruvector.db'
+    - '*.db'
+    - '.vscode/**'
+    - '.idea/**'
+
+profile:
+  name: production-security
+  security:
+    enabled: true
+    level: high
+  quality:
+    enabled: true
+    level: medium
+  performance:
+    enabled: true
+    level: low
+
+integrations:
+  scripts:
+    test: npm test
+    lint: npm run lint
+    build: npm run build
+
+notifications:
+  on_failure: true
+  on_success: false
+  pull_request_comment: true
+  verbose: false
+
+thresholds:
+  fail_on: [critical, high]
+  warn_on: [medium, low]
+
+cache:
+  enabled: true
+  paths:
+    - node_modules
+    - .cache
+    - .vite
