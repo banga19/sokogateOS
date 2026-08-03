@@ -43,19 +43,19 @@ const { SentryService } = require('./services/error/sentryService');
 
 const PORT = process.env.PORT || 3000;
 
-// Initialize services using serverless-friendly lazy loader
-const startServer = async () => {
+// Initialize services - this runs when the module loads (good for Vercel cold starts)
+async function initializeServices() {
   try {
-    logger.info('SokogateOS: Starting server...');
+    logger.info('SokogateOS: Initializing services...');
 
     // Import and initialize serverless service loader
     const {
-      initializeServices,
+      initializeServices: initServerlessServices,
       attachServicesToApp,
     } = require('./services/serverlessServiceLoader');
 
     // Initialize all services (will cached for subsequent requests in Vercel)
-    await initializeServices();
+    await initServerlessServices();
 
     // Attach initialized services to app.locals for use in route handlers
     app.use(attachServicesToApp(app));
@@ -68,142 +68,74 @@ const startServer = async () => {
     logger.info('SokogateOS: Agent service initialized');
     app.locals.agentService = agentService;
 
-    // Start all background services
-    logger.info('SokogateOS: Starting background services...');
-    const { startSapProductAdapter } = require('./ingestion/adapters/sapProductAdapter');
-    const { startSalesforceCrmAdapter } = require('./ingestion/adapters/salesforceCrmAdapter');
-    const { startOracleProductAdapter } = require('./ingestion/adapters/oracleProductAdapter');
-    const { startHubspotCrmAdapter } = require('./ingestion/adapters/hubspotCrmAdapter');
-    const {
-      startFlexportLogisticsAdapter,
-    } = require('./ingestion/adapters/flexportLogisticsAdapter');
-    const {
-      startShipBobLogisticsAdapter,
-    } = require('./ingestion/adapters/shipbobLogisticsAdapter');
-    const { startRestApiAdapter } = require('./ingestion/adapters/restApiAdapter');
-    const {
-      startDocumentProcessingPipeline,
-    } = require('./ingestion/processors/documentProcessingPipeline');
-    const { startAiIntelligenceService } = require('./services/aiIntelligenceService');
-    const { startWorkflowAutomationService } = require('./services/workflowAutomationService');
-    const { startCustomizationService } = require('./services/customizationService');
-    const { startLogisticsService } = require('./services/logisticsService');
-    const { startSourcingService } = require('./services/sourcingService');
+    // Initialize third-party integrations (env-gated — safe no-ops when not configured)
+    await neonService.initialize();
+    logger.info(`Neon: ${neonService.isConfigured() ? 'ready' : 'not configured'}`);
 
-    // ===== START BACKGROUND SERVICES =====
-    // NOTE: In Vercel serverless environment, we don't start long-running background processes
-    // These should be handled via webhooks, API triggers, or Vercel Cron Jobs
-    /*
-    // Phase 1 Services
-    const serviceStarts = [
-      startSapProductAdapter(),
-      startSalesforceCrmAdapter(),
-      startOracleProductAdapter(),
-      startHubspotCrmAdapter(),
-      startFlexportLogisticsAdapter(),
-      startShipBobLogisticsAdapter(),
-      startRestApiAdapter(),
-      startKRWPaymentAdapter(),
-      startDocumentProcessingPipeline(),
-      startAiIntelligenceService(),
-      startWorkflowAutomationService(),
-      startCustomizationService(),
-      startLogisticsService(),
-      startSourcingService(),
-      // Phase 1: WhatsApp Commerce Co-pilot (WATI.io), Supplier Trust Network, M-Pesa
-      watiService.initialize(),
-      startSupplierTrustService(),
-      startMpesaService(),
-      // Phase 2: Cross-Border Customs Engine
-      startCustomsEngineService(),
-    ];
-
-    // Start all services and log individual successes/failures
-    // Wrap with Promise.resolve() to handle functions that return non-Promise values
-    for (const maybePromise of serviceStarts) {
-      Promise.resolve(maybePromise)
-        .then(() => {
-          // Service started successfully
-        })
-        .catch((err) => {
-          logger.error('SokogateOS: Service failed to start:', err.message);
-        });
+    if (stripeService.enabled) {
+      logger.info('Stripe: payment service ready');
     }
-    */
 
-    // ===== START SELF-IMPROVING LOOP ENGINE =====
-    // NOTE: In Vercel, this should be handled via Vercel Cron Jobs
-    // For now, we'll comment out the automatic start
-    /*
+    logger.info(`R2: ${r2Service.isEnabled() ? 'ready' : 'not configured (CLOUDFLARE_R2_* vars missing)'}`);
+
     try {
-      selfImprovingLoop
-        .startLoopEngine({
-          intervalMs: 5 * 60 * 1000,
-          batchSize: 100,
-        })
-        .then(() => {
-          logger.info(
-            `SokogateOS: Self-Improving Loop started - processing feedback every 5 minutes`
-          );
-        })
-        .catch((err) => {
-          logger.error('SokogateOS: Failed to start Self-Improving Loop:', err.message);
-        });
-    } catch (loopError) {
-      logger.error('SokogateOS: Failed to start Self-Improving Loop engine:', loopError.message);
+      await pineconeService.initialize();
+    } catch (err) {
+      logger.warn(`Pinecone: init skipped (${err.message})`);
     }
-    */
+    logger.info(`Cache: Redis/Upstash ${isRedisConfigured() ? 'connected' : 'in-memory fallback'}; QStash ${isQStashConfigured() ? 'ready' : 'not configured'}`);
 
-    // Set up Sentry Express integration lazily (avoids circular dependency)
-    SentryService.setupExpressIntegration(app);
+    // PostHog analytics (env-gated)
+    try {
+      const posthogClient = require("./utils/posthogClient");
+      if (posthogClient.isConfigured()) {
+        logger.info("PostHog: analytics enabled");
+      } else {
+        logger.info("PostHog: not configured (POSTHOG_API_KEY missing)");
+      }
+    } catch (err) {
+      logger.warn(`PostHog: init skipped (${err.message})`);
+    }
 
-// Initialize third-party integrations (env-gated — safe no-ops when not configured)
-await neonService.initialize();
-logger.info(`Neon: ${neonService.isConfigured() ? 'ready' : 'not configured'}`);
-
-if (stripeService.enabled) {
-  logger.info('Stripe: payment service ready');
-}
-
-logger.info(`R2: ${r2Service.isEnabled() ? 'ready' : 'not configured (CLOUDFLARE_R2_* vars missing)'}`);
-
-try {
-  await pineconeService.initialize();
-} catch (err) {
-  logger.warn(`Pinecone: init skipped (${err.message})`);
-}
-logger.info(`Cache: Redis/Upstash ${isRedisConfigured() ? 'connected' : 'in-memory fallback'}; QStash ${isQStashConfigured() ? 'ready' : 'not configured'}`);
-
-
-// PostHog analytics (env-gated)
-try {
-  const posthogClient = require("./utils/posthogClient");
-  if (posthogClient.isConfigured()) {
-    logger.info("PostHog: analytics enabled");
-  } else {
-    logger.info("PostHog: not configured (POSTHOG_API_KEY missing)");
-  }
-} catch (err) {
-  logger.warn(`PostHog: init skipped (${err.message})`);
-}
-    // Start server
-    app.listen(PORT, () => {
-      logger.info(`SokogateOS: Server running on port ${PORT}`);
-      logger.info(`SokogateOS: Health check at http://localhost:${PORT}/health`);
-      logger.info(`SokogateOS: Auth API at http://localhost:${PORT}/api/auth`);
-      logger.info(`SokogateOS: REST API at http://localhost:${PORT}/api/v1`);
-      logger.info(`SokogateOS: WhatsApp Service at http://localhost:${PORT}/api/whatsapp`);
-      logger.info(`SokogateOS: Supplier Trust Network at http://localhost:${PORT}/api/trust`);
-      logger.info(`SokogateOS: Customs Engine at http://localhost:${PORT}/api/customs`);
-      logger.info(`SokogateOS: Health check at /health`);
-    });
+    logger.info('SokogateOS: All services initialized successfully');
   } catch (error) {
-    logger.error('SokogateOS: Failed to start server:', error);
+    logger.error('SokogateOS: Failed to initialize services:', error);
     logger.error('Error stack:', error.stack);
-    process.exit(1);
+    // Don't exit in Vercel environment - let the app start and handle errors in routes
+    // process.exit(1); // Commented out for Vercel compatibility
   }
-};
+}
 
-startServer();
+// Initialize services immediately (for Vercel cold starts)
+initializeServices().catch(err => {
+  console.error('Failed to initialize services:', err);
+});
 
+// For Vercel: export the app so Vercel can handle HTTP requests
+// For local development: you can still run `node src/index.js` to start the server
+if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test') {
+  // Only start the server if we're NOT in Vercel environment and NOT in test mode
+  const startServer = async () => {
+    try {
+      await app.listen(PORT, () => {
+        logger.info(`SokogateOS: Server running on port ${PORT}`);
+        logger.info(`SokogateOS: Health check at http://localhost:${PORT}/health`);
+        logger.info(`SokogateOS: Auth API at http://localhost:${PORT}/api/auth`);
+        logger.info(`SokogateOS: REST API at http://localhost:${PORT}/api/v1`);
+        logger.info(`SokogateOS: WhatsApp Service at http://localhost:${PORT}/api/whatsapp`);
+        logger.info(`SokogateOS: Supplier Trust Network at http://localhost:${PORT}/api/trust`);
+        logger.info(`SokogateOS: Customs Engine at http://localhost:${PORT}/api/customs`);
+        logger.info(`SokogateOS: Health check at /health`);
+      });
+    } catch (error) {
+      logger.error('SokogateOS: Failed to start server:', error);
+      logger.error('Error stack:', error.stack);
+      process.exit(1);
+    }
+  };
+
+  startServer();
+}
+
+// Export the app for Vercel (and for testing)
 module.exports = app;

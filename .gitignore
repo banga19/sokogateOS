@@ -13,3 +13,4 @@ dist/
 .agentdb.rvf.lock
 .worktrees
 .vercel
+.env*

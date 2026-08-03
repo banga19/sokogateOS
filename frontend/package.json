@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "cp public/favicon.svg dist/favicon.svg && cp public/favicon.ico dist/favicon.ico",
+    "postbuild": "cp public/favicon.svg dist/favicon.svg || true && cp public/favicon.ico dist/favicon.ico || true",
     "preview": "vite preview"
   },
   "dependencies": {
